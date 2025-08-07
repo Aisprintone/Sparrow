@@ -23,8 +23,11 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
   useEffect(() => {
     // Fetch live market data from API
     const loadMarketData = async () => {
-      console.log('[MARKET DATA] Starting to load market data...')
+      console.log('[DASHBOARD] 🚀 Starting market data load')
+      console.log('[DASHBOARD] API endpoint: /api/market-data')
+      
       try {
+        const startTime = performance.now()
         const response = await fetch('/api/market-data', {
           method: 'GET',
           headers: {
@@ -33,29 +36,35 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
           signal: AbortSignal.timeout(5000) // 5 second timeout
         })
         
-        console.log('[MARKET DATA] Response status:', response.status)
+        const loadTime = performance.now() - startTime
+        console.log('[DASHBOARD] ⏱️ Market data API response time:', loadTime.toFixed(2), 'ms')
+        console.log('[DASHBOARD] Response status:', response.status)
         
         if (response.ok) {
           const result = await response.json()
-          console.log('[MARKET DATA] API response:', result)
+          console.log('[DASHBOARD] ✅ Market data loaded successfully')
+          console.log('[DASHBOARD] Data source:', result.meta?.dataSource || 'Unknown')
+          console.log('[DASHBOARD] Symbols count:', result.data?.length || 0)
           
           if (result.success && result.data && result.data.length > 0) {
             setMarketData(result.data)
-            console.log(`[MARKET DATA] Loaded ${result.data.length} symbols from ${result.meta.dataSource}`)
+            console.log(`[DASHBOARD] 📊 Market data updated with ${result.data.length} symbols`)
           } else {
-            console.error('[MARKET DATA] API returned empty or invalid data:', result)
+            console.error('[DASHBOARD] ❌ API returned empty or invalid data:', result)
             throw new Error('API returned empty data')
           }
         } else {
-          console.error('[MARKET DATA] API error status:', response.status)
+          console.error('[DASHBOARD] ❌ API error status:', response.status)
           throw new Error(`API error: ${response.status}`)
         }
         
         setLoading(false)
+        console.log('[DASHBOARD] ✅ Market data loading completed')
       } catch (error) {
-        console.error("[MARKET DATA] Error loading market data:", error)
+        console.error("[DASHBOARD] ❌ Error loading market data:", error)
         
         // Fallback to mock data if API fails
+        console.log('[DASHBOARD] 🔄 Using fallback market data')
         const fallbackData: MarketData[] = [
           {
             symbol: "^GSPC",
@@ -80,9 +89,9 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
           }
         ]
         
-        console.log('[MARKET DATA] Using fallback data')
         setMarketData(fallbackData)
         setLoading(false)
+        console.log('[DASHBOARD] ✅ Fallback data loaded')
       }
     }
 
@@ -91,7 +100,7 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
 
   // Monitor market data state changes
   useEffect(() => {
-    console.log('[MARKET DATA] State changed - loading:', loading, 'data length:', marketData.length)
+    console.log('[DASHBOARD] 📊 Market data state updated - loading:', loading, 'data length:', marketData.length)
   }, [loading, marketData])
 
   const formatCurrency = (value: number) => {
@@ -109,26 +118,26 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
 
   return (
     <div className="flex h-[100dvh] flex-col">
-      <header className="p-4 text-white">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+      <header className="p-3 text-white">
+        <h1 className="text-xl font-bold">Dashboard</h1>
         <p className="text-white/80">Your financial overview</p>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 overflow-y-auto p-3 space-y-5">
         {/* Net Worth - Primary Focus */}
         <div>
           <GlassCard 
-            className="p-6 cursor-pointer hover:scale-[1.02] transition-all duration-200 bg-gradient-to-br from-blue-500/20 to-purple-500/20"
+            className="p-5 cursor-pointer hover:scale-[1.02] transition-all duration-200 bg-gradient-to-br from-blue-500/20 to-purple-500/20"
             onClick={() => setCurrentScreen("net-worth-detail")}
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <div>
-                <h2 className="text-3xl font-bold text-white">$125,450</h2>
+                <h2 className="text-2xl font-bold text-white">$125,450</h2>
                 <p className="text-white/60">Net Worth</p>
               </div>
               <div className="text-right">
                 <div className="flex items-center gap-2 text-green-400">
-                  <TrendingUp className="h-5 w-5" />
+                  <TrendingUp className="h-4 w-4" />
                   <div>
                     <p className="font-semibold">+$2,340</p>
                     <p className="text-sm text-white/60">+1.9% this month</p>
@@ -137,14 +146,14 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
               </div>
             </div>
             
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/10">
+            <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/10">
               <div className="text-center">
                 <p className="text-sm text-white/60">Assets</p>
-                <p className="text-lg font-semibold text-white">$145,200</p>
+                <p className="text-base font-semibold text-white">$145,200</p>
               </div>
               <div className="text-center">
                 <p className="text-sm text-white/60">Liabilities</p>
-                <p className="text-lg font-semibold text-white">$19,750</p>
+                <p className="text-base font-semibold text-white">$19,750</p>
               </div>
             </div>
           </GlassCard>
@@ -152,59 +161,59 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
 
         {/* Financial Health - Simplified and Useful */}
         <div>
-          <h2 className="text-lg font-semibold text-white mb-3">Financial Health</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <h2 className="text-base font-semibold text-white mb-2">Financial Health</h2>
+          <div className="grid grid-cols-2 gap-2">
             {/* Emergency Fund */}
-            <GlassCard className="p-4 bg-gradient-to-br from-green-500/20 to-emerald-500/20">
-              <div className="flex items-center gap-3">
+            <GlassCard className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20">
+              <div className="flex items-center gap-2">
                 <div className="p-2 bg-green-500/20 rounded-lg">
-                  <Shield className="h-5 w-5 text-green-400" />
+                  <Shield className="h-4 w-4 text-green-400" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-white/60">Emergency Fund</p>
-                  <p className="text-lg font-semibold text-white">$8,500</p>
+                  <p className="text-base font-semibold text-white">$8,500</p>
                   <p className="text-xs text-green-400">2.8 months coverage</p>
                 </div>
               </div>
             </GlassCard>
 
             {/* Debt-to-Income */}
-            <GlassCard className="p-4 bg-gradient-to-br from-yellow-500/20 to-orange-500/20">
-              <div className="flex items-center gap-3">
+            <GlassCard className="p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20">
+              <div className="flex items-center gap-2">
                 <div className="p-2 bg-yellow-500/20 rounded-lg">
-                  <CreditCard className="h-5 w-5 text-yellow-400" />
+                  <CreditCard className="h-4 w-4 text-yellow-400" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-white/60">Debt-to-Income</p>
-                  <p className="text-lg font-semibold text-white">18%</p>
+                  <p className="text-base font-semibold text-white">18%</p>
                   <p className="text-xs text-green-400">Excellent</p>
                 </div>
               </div>
             </GlassCard>
 
             {/* Savings Rate */}
-            <GlassCard className="p-4 bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
-              <div className="flex items-center gap-3">
+            <GlassCard className="p-3 bg-gradient-to-br from-blue-500/20 to-cyan-500/20">
+              <div className="flex items-center gap-2">
                 <div className="p-2 bg-blue-500/20 rounded-lg">
-                  <PiggyBank className="h-5 w-5 text-blue-400" />
+                  <PiggyBank className="h-4 w-4 text-blue-400" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-white/60">Savings Rate</p>
-                  <p className="text-lg font-semibold text-white">25%</p>
+                  <p className="text-base font-semibold text-white">25%</p>
                   <p className="text-xs text-green-400">Above average</p>
                 </div>
               </div>
             </GlassCard>
 
             {/* Investment Growth */}
-            <GlassCard className="p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20">
-              <div className="flex items-center gap-3">
+            <GlassCard className="p-3 bg-gradient-to-br from-purple-500/20 to-pink-500/20">
+              <div className="flex items-center gap-2">
                 <div className="p-2 bg-purple-500/20 rounded-lg">
-                  <BarChart3 className="h-5 w-5 text-purple-400" />
+                  <BarChart3 className="h-4 w-4 text-purple-400" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-white/60">Investment Growth</p>
-                  <p className="text-lg font-semibold text-white">12.4%</p>
+                  <p className="text-base font-semibold text-white">12.4%</p>
                   <p className="text-xs text-green-400">YTD return</p>
                 </div>
               </div>
@@ -214,18 +223,18 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
 
         {/* Market Overview - Simplified */}
         <div>
-          <h2 className="text-lg font-semibold text-white mb-3">Market Overview</h2>
+          <h2 className="text-base font-semibold text-white mb-2">Market Overview</h2>
           <GlassCard 
-            className="p-4 cursor-pointer hover:scale-[1.02] transition-all duration-200"
+            className="p-3 cursor-pointer hover:scale-[1.02] transition-all duration-200"
             onClick={() => setCurrentScreen("market-data")}
           >
             {loading ? (
-              <div className="text-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-400 mx-auto mb-2"></div>
+              <div className="text-center py-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400 mx-auto mb-2"></div>
                 <div className="text-white/60 text-sm">Loading market data...</div>
               </div>
             ) : marketData.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {marketData.map((market) => (
                   <div key={market.symbol} className="flex items-center justify-between">
                     <div>
@@ -251,11 +260,11 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-4">
+              <div className="text-center py-3">
                 <div className="text-white/60 text-sm">No market data available</div>
               </div>
             )}
-            <div className="mt-3 pt-3 border-t border-white/10">
+            <div className="mt-2 pt-2 border-t border-white/10">
               <p className="text-xs text-white/60 text-center">Tap for detailed market analysis</p>
             </div>
           </GlassCard>
@@ -263,24 +272,24 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-lg font-semibold text-white mb-3">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <h2 className="text-base font-semibold text-white mb-2">Quick Actions</h2>
+          <div className="grid grid-cols-2 gap-2">
             <Button 
               onClick={() => setCurrentScreen("ai-actions")}
-              className="h-16 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+              className="h-14 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
             >
               <div className="text-center">
-                <Zap className="h-6 w-6 mx-auto mb-1" />
+                <Zap className="h-5 w-5 mx-auto mb-1" />
                 <span className="text-sm">AI Actions</span>
               </div>
             </Button>
             
             <Button 
               onClick={() => setCurrentScreen("goals")}
-              className="h-16 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
+              className="h-14 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
             >
               <div className="text-center">
-                <Target className="h-6 w-6 mx-auto mb-1" />
+                <Target className="h-5 w-5 mx-auto mb-1" />
                 <span className="text-sm">Goals</span>
               </div>
             </Button>
@@ -289,10 +298,10 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
 
         {/* Recent Activity */}
         <div>
-          <h2 className="text-lg font-semibold text-white mb-3">Recent Activity</h2>
+          <h2 className="text-base font-semibold text-white mb-2">Recent Activity</h2>
           <div className="space-y-2">
-            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
+              <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                 <div>
                   <p className="text-white text-sm">Salary deposited</p>
@@ -302,8 +311,8 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
               <span className="text-green-400 text-sm">+$4,500</span>
             </div>
             
-            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
+              <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                 <div>
                   <p className="text-white text-sm">Investment contribution</p>
@@ -313,8 +322,8 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
               <span className="text-blue-400 text-sm">+$500</span>
             </div>
             
-            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
+              <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-red-400 rounded-full"></div>
                 <div>
                   <p className="text-white text-sm">Student loan payment</p>

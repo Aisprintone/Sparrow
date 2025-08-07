@@ -108,7 +108,7 @@ const getCurrentDay = () => {
   const now = new Date()
   return {
     dayOfMonth: now.getDate(),
-    dayOfYear: Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)),
+    dayOfYear: Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24)),
     monthName: now.toLocaleString("default", { month: "long" }),
     date: now.getDate(),
   }
@@ -281,10 +281,9 @@ export default function SpendTrackingScreen({ demographic, monthlySpending }: Ap
     }
   }, [spendingData, isAllMonthsView, yearComparison, monthComparison, currentDay])
 
-  // Transform CSV data into expense categories with performance optimization
-  const { recurringExpenses, nonRecurringExpenses } = useMemo(() => {
-    if (!spendingData) {
-      // Return minimal fallback during loading
+  // Transform spending data with intelligent categorization
+  const transformedSpendingData = useMemo(() => {
+    if (!spendingData || !spendingData.categories) {
       return {
         recurringExpenses: { total: 0, categories: [] },
         nonRecurringExpenses: { total: 0, categories: [] }
@@ -317,11 +316,11 @@ export default function SpendTrackingScreen({ demographic, monthlySpending }: Ap
 
     return {
       recurringExpenses: {
-        total: spendingData.recurringTotal,
+        total: spendingData.recurringTotal || 0,
         categories: recurring
       },
       nonRecurringExpenses: {
-        total: spendingData.nonRecurringTotal,
+        total: spendingData.nonRecurringTotal || 0,
         categories: nonRecurring
       }
     }
@@ -353,7 +352,7 @@ export default function SpendTrackingScreen({ demographic, monthlySpending }: Ap
 
   const itemVariants = {
     hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { type: "spring", damping: 20 } },
+    visible: { y: 0, opacity: 1, transition: { type: "spring" as const, damping: 20 } },
   }
 
   const renderCategoryRow = (category: any) => {
@@ -606,7 +605,7 @@ export default function SpendTrackingScreen({ demographic, monthlySpending }: Ap
           )}
 
           {/* Recurring Expenses */}
-          {recurringExpenses.categories.length > 0 && (
+          {transformedSpendingData.recurringExpenses.categories.length > 0 && (
             <motion.div variants={itemVariants}>
               <GlassCard className="bg-gray-800/50">
                 <div className="flex items-center justify-between mb-4">
@@ -614,15 +613,15 @@ export default function SpendTrackingScreen({ demographic, monthlySpending }: Ap
                     <Repeat className="h-4 w-4 text-blue-400" />
                     Recurring Expenses
                   </h2>
-                  <p className="text-lg font-semibold text-white">${recurringExpenses.total.toLocaleString()}</p>
+                  <p className="text-lg font-semibold text-white">${transformedSpendingData.recurringExpenses.total.toLocaleString()}</p>
                 </div>
-                <div className="space-y-0">{recurringExpenses.categories.map(renderCategoryRow)}</div>
+                <div className="space-y-0">{transformedSpendingData.recurringExpenses.categories.map(renderCategoryRow)}</div>
               </GlassCard>
             </motion.div>
           )}
 
           {/* Non-recurring Expenses */}
-          {nonRecurringExpenses.categories.length > 0 && (
+          {transformedSpendingData.nonRecurringExpenses.categories.length > 0 && (
             <motion.div variants={itemVariants}>
               <GlassCard className="bg-gray-800/50">
                 <div className="flex items-center justify-between mb-4">
@@ -630,9 +629,9 @@ export default function SpendTrackingScreen({ demographic, monthlySpending }: Ap
                     <CreditCard className="h-4 w-4 text-purple-400" />
                     Non-recurring Expenses
                   </h2>
-                  <p className="text-lg font-semibold text-white">${nonRecurringExpenses.total.toLocaleString()}</p>
+                  <p className="text-lg font-semibold text-white">${transformedSpendingData.nonRecurringExpenses.total.toLocaleString()}</p>
                 </div>
-                <div className="space-y-0">{nonRecurringExpenses.categories.map(renderCategoryRow)}</div>
+                <div className="space-y-0">{transformedSpendingData.nonRecurringExpenses.categories.map(renderCategoryRow)}</div>
               </GlassCard>
             </motion.div>
           )}

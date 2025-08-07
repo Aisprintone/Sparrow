@@ -1,7 +1,7 @@
 export interface Goal {
   id: number
   title: string
-  type: "safety" | "home" | "experience"
+  type: "safety" | "home" | "experience" | "retirement" | "debt" | "investment" | "education" | "business"
   target: number
   current: number
   deadline: string
@@ -9,6 +9,27 @@ export interface Goal {
   color: string
   monthlyContribution: number
   milestones: { name: string; target: number }[]
+  // Enhanced properties for simulation integration
+  simulationTags?: string[]
+  priority?: "high" | "medium" | "low"
+  status?: "active" | "paused" | "completed" | "cancelled"
+  createdAt?: string
+  updatedAt?: string
+  userId?: number
+  // AI integration properties
+  aiInsights?: {
+    lastUpdated: string
+    recommendations: string[]
+    riskAssessment: string
+    optimizationOpportunities: string[]
+  }
+  // Simulation impact tracking
+  simulationImpact?: {
+    scenarioName: string
+    impactOnGoal: number // percentage
+    newTargetDate?: string
+    adjustedMonthlyContribution?: number
+  }[]
 }
 
 export interface Simulation {
@@ -22,7 +43,81 @@ export interface Simulation {
 export interface AutomationAction {
   title: string
   description: string
-  steps: { name: string; status: "completed" | "in_progress" | "pending" }[]
+  steps: WorkflowStep[]
+  potentialSaving?: number
+  type?: "optimization" | "simulation"
+  rationale?: string
+  status?: "suggested" | "in-process" | "completed"
+  progress?: number
+  workflowStatus?: "running" | "paused" | "completed" | "failed"
+  currentStep?: string
+  estimatedCompletion?: string
+  executionId?: string
+  // Enhanced properties for better workflow tracking
+  scenario?: string
+  profile?: string
+  impact?: {
+    immediateSavings?: number
+    annualProjection?: number
+    riskReduction?: number
+    goalProgress?: number
+    timeToComplete?: string
+  }
+  metadata?: {
+    category: "optimize" | "protect" | "grow" | "emergency"
+    difficulty: "easy" | "medium" | "hard"
+    confidence: number // 0-100
+    dependencies: string[]
+    prerequisites: string[]
+  }
+}
+
+export interface WorkflowStep {
+  id: string
+  name: string
+  description: string
+  status: "completed" | "in_progress" | "pending" | "failed" | "waiting_user"
+  duration: number // in seconds
+  estimatedTime: string
+  agent?: string
+  agentType?: "automated" | "semi-automated" | "manual"
+  userActionRequired?: {
+    type: "confirm" | "input" | "choice"
+    message: string
+    options?: string[]
+    timeout?: number
+    critical?: boolean
+  }
+  impact?: {
+    savings?: number
+    riskReduction?: number
+    goalProgress?: number
+    timeSaved?: number
+  }
+  details?: string
+  technicalDetails?: {
+    apiCalls?: string[]
+    externalServices?: string[]
+    dataProcessed?: string[]
+    validations?: string[]
+  }
+  progress?: {
+    current: number // 0-100
+    message: string
+    timestamp: string
+    duration: number
+  }
+  errors?: {
+    message: string
+    code: string
+    retryCount: number
+    maxRetries: number
+  }[]
+  rollback?: {
+    available: boolean
+    steps: string[]
+    impact: string
+  }
 }
 
 export interface ResultCard {
@@ -86,11 +181,26 @@ export const goals: Goal[] = [
     icon: "Shield",
     color: "green",
     monthlyContribution: 400,
+    priority: "high",
+    status: "active",
+    simulationTags: ["emergency_fund", "safety_net"],
     milestones: [
       { name: "3-month expenses", target: 7500 },
       { name: "6-month expenses", target: 15000 },
       { name: "Fully funded", target: 15000 },
     ],
+    aiInsights: {
+      lastUpdated: "2024-01-15",
+      recommendations: [
+        "Consider high-yield savings account for better returns",
+        "Automate monthly transfers to ensure consistency"
+      ],
+      riskAssessment: "Low risk, high priority for financial stability",
+      optimizationOpportunities: [
+        "Increase contribution by $100/month to reach target 3 months earlier",
+        "Use windfall income to accelerate progress"
+      ]
+    }
   },
   {
     id: 2,
@@ -102,12 +212,213 @@ export const goals: Goal[] = [
     icon: "Plane",
     color: "blue",
     monthlyContribution: 285,
+    priority: "medium",
+    status: "active",
+    simulationTags: ["travel", "experience"],
     milestones: [
       { name: "Flights Booked", target: 1500 },
       { name: "Accommodation Paid", target: 2500 },
       { name: "Ready to Go!", target: 3000 },
     ],
+    aiInsights: {
+      lastUpdated: "2024-01-15",
+      recommendations: [
+        "Consider travel rewards credit card for additional savings",
+        "Book flights 6-8 months in advance for best prices"
+      ],
+      riskAssessment: "Medium risk - dependent on stable income",
+      optimizationOpportunities: [
+        "Use side hustle income to accelerate savings",
+        "Consider travel insurance for protection"
+      ]
+    }
   },
+  {
+    id: 3,
+    title: "Home Down Payment",
+    type: "home",
+    target: 50000,
+    current: 12000,
+    deadline: "Dec 2027",
+    icon: "Home",
+    color: "purple",
+    monthlyContribution: 800,
+    priority: "high",
+    status: "active",
+    simulationTags: ["home_purchase", "housing"],
+    milestones: [
+      { name: "10% saved", target: 5000 },
+      { name: "20% saved", target: 10000 },
+      { name: "Ready to buy", target: 50000 },
+    ],
+    aiInsights: {
+      lastUpdated: "2024-01-15",
+      recommendations: [
+        "Run home purchase simulation to optimize timing",
+        "Consider different down payment scenarios"
+      ],
+      riskAssessment: "High impact on long-term wealth building",
+      optimizationOpportunities: [
+        "Increase monthly contribution by $200 to buy 6 months earlier",
+        "Consider FHA loan for lower down payment requirement"
+      ]
+    }
+  },
+  {
+    id: 4,
+    title: "Student Loan Payoff",
+    type: "debt",
+    target: 25000,
+    current: 25000,
+    deadline: "Dec 2026",
+    icon: "GraduationCap",
+    color: "red",
+    monthlyContribution: 500,
+    priority: "high",
+    status: "active",
+    simulationTags: ["debt_avalanche", "student_loan"],
+    milestones: [
+      { name: "25% paid off", target: 18750 },
+      { name: "50% paid off", target: 12500 },
+      { name: "Debt free!", target: 0 },
+    ],
+    aiInsights: {
+      lastUpdated: "2024-01-15",
+      recommendations: [
+        "Run debt avalanche simulation to optimize payoff strategy",
+        "Consider refinancing for lower interest rates"
+      ],
+      riskAssessment: "High priority - reduces monthly obligations",
+      optimizationOpportunities: [
+        "Use debt avalanche method to save $2,400 in interest",
+        "Apply windfall income to highest interest loans first"
+      ]
+    }
+  },
+  {
+    id: 5,
+    title: "Retirement Fund",
+    type: "retirement",
+    target: 1000000,
+    current: 87000,
+    deadline: "Dec 2045",
+    icon: "TrendingUp",
+    color: "orange",
+    monthlyContribution: 1200,
+    priority: "high",
+    status: "active",
+    simulationTags: ["retirement", "401k_max"],
+    milestones: [
+      { name: "100k milestone", target: 100000 },
+      { name: "500k milestone", target: 500000 },
+      { name: "Millionaire!", target: 1000000 },
+    ],
+    aiInsights: {
+      lastUpdated: "2024-01-15",
+      recommendations: [
+        "Run 401k maximization simulation",
+        "Consider Roth vs Traditional IRA strategy"
+      ],
+      riskAssessment: "Critical for long-term financial security",
+      optimizationOpportunities: [
+        "Increase 401k contribution by 1% annually",
+        "Consider side hustle income for additional retirement savings"
+      ]
+    }
+  },
+  {
+    id: 6,
+    title: "Start Business Fund",
+    type: "business",
+    target: 15000,
+    current: 3000,
+    deadline: "Dec 2025",
+    icon: "Briefcase",
+    color: "indigo",
+    monthlyContribution: 400,
+    priority: "medium",
+    status: "active",
+    simulationTags: ["business", "side_income"],
+    milestones: [
+      { name: "Business plan", target: 5000 },
+      { name: "Legal setup", target: 10000 },
+      { name: "Launch ready", target: 15000 },
+    ],
+    aiInsights: {
+      lastUpdated: "2024-01-15",
+      recommendations: [
+        "Run side income simulation to accelerate funding",
+        "Consider business credit options"
+      ],
+      riskAssessment: "Medium risk - requires market validation",
+      optimizationOpportunities: [
+        "Use side hustle to double monthly contribution",
+        "Consider crowdfunding for additional capital"
+      ]
+    }
+  },
+  {
+    id: 7,
+    title: "Investment Portfolio",
+    type: "investment",
+    target: 50000,
+    current: 15000,
+    deadline: "Dec 2028",
+    icon: "BarChart3",
+    color: "teal",
+    monthlyContribution: 600,
+    priority: "medium",
+    status: "active",
+    simulationTags: ["investment", "portfolio"],
+    milestones: [
+      { name: "25k milestone", target: 25000 },
+      { name: "40k milestone", target: 40000 },
+      { name: "Target reached", target: 50000 },
+    ],
+    aiInsights: {
+      lastUpdated: "2024-01-15",
+      recommendations: [
+        "Diversify across different asset classes",
+        "Consider automated investing for consistency"
+      ],
+      riskAssessment: "Medium risk with potential for high returns",
+      optimizationOpportunities: [
+        "Increase monthly contribution by $200 for faster growth",
+        "Consider tax-loss harvesting strategies"
+      ]
+    }
+  },
+  {
+    id: 8,
+    title: "Grad School Fund",
+    type: "education",
+    target: 30000,
+    current: 8000,
+    deadline: "Dec 2026",
+    icon: "BookOpen",
+    color: "cyan",
+    monthlyContribution: 500,
+    priority: "medium",
+    status: "active",
+    simulationTags: ["education", "investment"],
+    milestones: [
+      { name: "Application fees", target: 15000 },
+      { name: "First semester", target: 25000 },
+      { name: "Fully funded", target: 30000 },
+    ],
+    aiInsights: {
+      lastUpdated: "2024-01-15",
+      recommendations: [
+        "Research scholarship and grant opportunities",
+        "Consider employer tuition reimbursement"
+      ],
+      riskAssessment: "High ROI potential but requires career planning",
+      optimizationOpportunities: [
+        "Apply for scholarships to reduce target amount",
+        "Consider part-time program to reduce costs"
+      ]
+    }
+  }
 ]
 
 export const simulations: Simulation[] = [
@@ -181,18 +492,60 @@ export const simulationResults: ResultCard[] = [
         title: "Smart 401k Maximizer",
         description: "Gradually increase contributions by 1% quarterly",
         steps: [
-          { name: "Contribution increased", status: "completed" },
-          { name: "Next increase Q3 2025", status: "in_progress" },
-          { name: "Auto-adjust for raises", status: "pending" },
+          { 
+            id: "step-1",
+            name: "Contribution increased", 
+            description: "Increased 401k contribution by 1%",
+            status: "completed",
+            duration: 300,
+            estimatedTime: "5 minutes"
+          },
+          { 
+            id: "step-2",
+            name: "Next increase Q3 2025", 
+            description: "Schedule next contribution increase",
+            status: "in_progress",
+            duration: 600,
+            estimatedTime: "10 minutes"
+          },
+          { 
+            id: "step-3",
+            name: "Auto-adjust for raises", 
+            description: "Set up automatic adjustment for salary increases",
+            status: "pending",
+            duration: 900,
+            estimatedTime: "15 minutes"
+          },
         ],
       },
       {
         title: "Emergency Fund Builder",
         description: "Auto-save $300/mo until 6-month target",
         steps: [
-          { name: "High-yield account opened", status: "completed" },
-          { name: "Weekly transfers active", status: "in_progress" },
-          { name: "Pause at $15k target", status: "pending" },
+          { 
+            id: "step-4",
+            name: "High-yield account opened", 
+            description: "Opened high-yield savings account",
+            status: "completed",
+            duration: 1200,
+            estimatedTime: "20 minutes"
+          },
+          { 
+            id: "step-5",
+            name: "Weekly transfers active", 
+            description: "Set up automatic weekly transfers",
+            status: "in_progress",
+            duration: 300,
+            estimatedTime: "5 minutes"
+          },
+          { 
+            id: "step-6",
+            name: "Pause at $15k target", 
+            description: "Configure automatic pause at target amount",
+            status: "pending",
+            duration: 600,
+            estimatedTime: "10 minutes"
+          },
         ],
       },
     ],

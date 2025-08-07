@@ -1,12 +1,23 @@
 "use client"
 
+import { useState } from "react"
 import type { AppState } from "@/hooks/use-app-state"
-import { ChevronLeft, CheckCircle, ArrowRight } from "lucide-react"
+import { ChevronLeft, CheckCircle, ArrowRight, Loader2 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import GlassCard from "@/components/ui/glass-card"
+import { aiActionsService } from "@/lib/api/ai-actions-service"
 
-export default function ActionDetailScreen({ selectedAction, setCurrentScreen }: AppState) {
+export default function ActionDetailScreen({ 
+  selectedAction, 
+  setCurrentScreen, 
+  setAiActions,
+  aiActions,
+  demographic 
+}: AppState) {
+  const [isStartingAutomation, setIsStartingAutomation] = useState(false)
+  const [automationStarted, setAutomationStarted] = useState(false)
+
   if (!selectedAction) {
     return (
       <div className="flex h-[100dvh] items-center justify-center text-white">
@@ -14,6 +25,52 @@ export default function ActionDetailScreen({ selectedAction, setCurrentScreen }:
         <Button onClick={() => setCurrentScreen("ai-actions")}>Go Back</Button>
       </div>
     )
+  }
+
+  const handleStartAutomation = async () => {
+    if (!selectedAction) return
+
+    setIsStartingAutomation(true)
+    
+    try {
+      // Start the theatrical workflow
+      const result = await aiActionsService.startAIAction(
+        selectedAction.id, 
+        "demo-user", 
+        { demographic }
+      )
+      
+      console.log('Automation started:', result)
+      
+      // Update the action to show it's in progress
+      const updatedActions = aiActions.map(action => {
+        if (action.id === selectedAction.id) {
+          return {
+            ...action,
+            status: 'in-process' as const,
+            progress: 0,
+            workflowStatus: 'running' as const,
+            currentStep: 'Initializing...',
+            estimatedCompletion: new Date(Date.now() + 120000).toISOString(), // 2 minutes from now
+            executionId: result.execution_id // Store the execution ID for tracking
+          }
+        }
+        return action
+      })
+      
+      setAiActions(updatedActions)
+      setAutomationStarted(true)
+      
+      // Navigate back to AI actions screen after a short delay
+      setTimeout(() => {
+        setCurrentScreen("ai-actions")
+      }, 2000)
+      
+    } catch (error) {
+      console.error('Failed to start automation:', error)
+    } finally {
+      setIsStartingAutomation(false)
+    }
   }
 
   return (
@@ -107,13 +164,45 @@ export default function ActionDetailScreen({ selectedAction, setCurrentScreen }:
           <Button
             size="lg"
             className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            onClick={handleStartAutomation}
+            disabled={isStartingAutomation || automationStarted}
           >
-            Automate This Action
+            {isStartingAutomation ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Starting Automation...
+              </>
+            ) : automationStarted ? (
+              <>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Automation Started!
+              </>
+            ) : (
+              "Automate This Action"
+            )}
           </Button>
-          <Button size="lg" variant="outline" className="flex-1 border-white/20 hover:bg-white/10 bg-transparent">
+          <Button 
+            size="lg" 
+            variant="outline" 
+            className="flex-1 border-white/20 hover:bg-white/10 bg-transparent"
+            disabled={isStartingAutomation}
+          >
             I'll Do It Myself
           </Button>
         </motion.div>
+
+        {/* Success Message */}
+        {automationStarted && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-4"
+          >
+            <p className="text-green-400 text-sm">
+              ✅ Automation started! Check the "In Process" tab to track progress.
+            </p>
+          </motion.div>
+        )}
       </div>
     </div>
   )

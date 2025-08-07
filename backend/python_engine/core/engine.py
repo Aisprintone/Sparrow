@@ -4,6 +4,7 @@ Implements SOLID principles with clean architecture.
 """
 
 import time
+import logging
 from typing import Dict, Any, Optional, Protocol
 from abc import ABC, abstractmethod
 import numpy as np
@@ -11,6 +12,9 @@ from scipy import stats
 
 from .config import SimulationConfig
 from .models import ProfileData, ScenarioResult
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
 class RandomGenerator(Protocol):
@@ -145,39 +149,59 @@ class MonteCarloEngine:
         Raises:
             ValueError: If profile data is insufficient for scenario
         """
+        scenario_name = scenario.__class__.__name__
+        logger.info(f"🚀 MONTE CARLO SIMULATION: {scenario_name}")
+        logger.info(f"👤 Profile: {profile.demographic}, Age: {getattr(profile, 'age', 'N/A')}")
+        
         start_time = time.time()
         
         # Validate data sufficiency
+        logger.info(f"🔍 VALIDATING PROFILE DATA: {scenario_name}")
         if not scenario.validate_profile_data(profile):
+            required_fields = scenario.get_required_data_fields()
+            logger.error(f"❌ PROFILE VALIDATION FAILED: Missing fields {required_fields}")
             raise ValueError(
-                f"Profile missing required data for {scenario.__class__.__name__}. "
-                f"Required fields: {scenario.get_required_data_fields()}"
+                f"Profile missing required data for {scenario_name}. "
+                f"Required fields: {required_fields}"
             )
+        logger.info(f"✅ PROFILE VALIDATION PASSED")
         
         # Set iteration count
         iterations = iterations or self.config.DEFAULT_ITERATIONS
+        logger.info(f"📊 SIMULATION PARAMS: {iterations} iterations")
         
         # Generate random factors for all iterations (vectorized for performance)
+        logger.info(f"🎲 GENERATING RANDOM FACTORS: {iterations} samples")
+        random_start = time.time()
         random_factors = self._generate_random_factors(profile, iterations)
+        random_time = time.time() - random_start
+        logger.info(f"✅ RANDOM FACTORS GENERATED: {random_time:.3f}s")
         
         # Calculate outcomes using scenario logic
+        logger.info(f"🧮 CALCULATING OUTCOMES: {scenario_name}")
+        calc_start = time.time()
         outcomes = scenario.calculate_outcome(profile, random_factors)
+        calc_time = time.time() - calc_start
+        logger.info(f"✅ OUTCOMES CALCULATED: {calc_time:.3f}s")
         
         # Ensure outcomes is numpy array
         if not isinstance(outcomes, np.ndarray):
             outcomes = np.array(outcomes)
         
         # Calculate success probability
+        logger.info(f"📈 ANALYZING SUCCESS CRITERIA")
         success_criteria = scenario.get_success_criteria()
         success_array = success_criteria(outcomes)
         probability_success = float(np.mean(success_array))
+        logger.info(f"✅ SUCCESS RATE: {probability_success:.2%}")
         
         # Statistical analysis
         processing_time_ms = (time.time() - start_time) * 1000
+        logger.info(f"⏱️ TOTAL PROCESSING TIME: {processing_time_ms:.2f}ms")
         
         return self._analyze_results(
             outcomes=outcomes,
-            scenario_name=scenario.__class__.__name__,
+            scenario_name=scenario_name,
             iterations=iterations,
             probability_success=probability_success,
             processing_time_ms=processing_time_ms

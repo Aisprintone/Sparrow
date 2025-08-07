@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
 
-const goalDetailStyles = {
+const goalDetailStyles: Record<string, any> = {
   green: {
     headerBg: "bg-gradient-to-b from-green-600 to-green-500",
     headerText: "text-green-100",
@@ -23,6 +23,48 @@ const goalDetailStyles = {
     statText: "text-blue-600",
     boostButton: "bg-blue-50 text-blue-700 hover:bg-blue-100",
   },
+  purple: {
+    headerBg: "bg-gradient-to-b from-purple-600 to-purple-500",
+    headerText: "text-purple-100",
+    progressGradient: "[&>*]:bg-gradient-to-r [&>*]:from-purple-500 [&>*]:to-purple-400",
+    statText: "text-purple-600",
+    boostButton: "bg-purple-50 text-purple-700 hover:bg-purple-100",
+  },
+  red: {
+    headerBg: "bg-gradient-to-b from-red-600 to-red-500",
+    headerText: "text-red-100",
+    progressGradient: "[&>*]:bg-gradient-to-r [&>*]:from-red-500 [&>*]:to-red-400",
+    statText: "text-red-600",
+    boostButton: "bg-red-50 text-red-700 hover:bg-red-100",
+  },
+  orange: {
+    headerBg: "bg-gradient-to-b from-orange-600 to-orange-500",
+    headerText: "text-orange-100",
+    progressGradient: "[&>*]:bg-gradient-to-r [&>*]:from-orange-500 [&>*]:to-orange-400",
+    statText: "text-orange-600",
+    boostButton: "bg-orange-50 text-orange-700 hover:bg-orange-100",
+  },
+  indigo: {
+    headerBg: "bg-gradient-to-b from-indigo-600 to-indigo-500",
+    headerText: "text-indigo-100",
+    progressGradient: "[&>*]:bg-gradient-to-r [&>*]:from-indigo-500 [&>*]:to-indigo-400",
+    statText: "text-indigo-600",
+    boostButton: "bg-indigo-50 text-indigo-700 hover:bg-indigo-100",
+  },
+  teal: {
+    headerBg: "bg-gradient-to-b from-teal-600 to-teal-500",
+    headerText: "text-teal-100",
+    progressGradient: "[&>*]:bg-gradient-to-r [&>*]:from-teal-500 [&>*]:to-teal-400",
+    statText: "text-teal-600",
+    boostButton: "bg-teal-50 text-teal-700 hover:bg-teal-100",
+  },
+  cyan: {
+    headerBg: "bg-gradient-to-b from-cyan-600 to-cyan-500",
+    headerText: "text-cyan-100",
+    progressGradient: "[&>*]:bg-gradient-to-r [&>*]:from-cyan-500 [&>*]:to-cyan-400",
+    statText: "text-cyan-600",
+    boostButton: "bg-cyan-50 text-cyan-700 hover:bg-cyan-100",
+  }
 }
 
 export default function GoalDetailScreen({ selectedGoal, setCurrentScreen }: AppState) {

@@ -16,6 +16,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from workflows.workflow_engine import WorkflowEngine
 from workflows.workflow_registry import WorkflowRegistry
+from core.cache_manager import cache_manager
 
 logger = logging.getLogger(__name__)
 

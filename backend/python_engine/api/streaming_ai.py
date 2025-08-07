@@ -23,6 +23,9 @@ from sse_starlette.sse import EventSourceResponse, ServerSentEvent
 from ai.langgraph_dspy_agent import FinancialAIAgentSystem, FinancialAnalysisState
 from rag.profile_rag_system import get_rag_manager, ProfileRAGSystem
 
+# ENFORCED: Import unified cache
+from core.api_cache import api_cache, cached_llm_call
+
 logger = logging.getLogger(__name__)
 
 
@@ -54,7 +57,8 @@ class BaseIndexer:
     def __init__(self, profile_system: ProfileRAGSystem):
         self.profile_system = profile_system
         self.indexes = {}
-        self.query_cache = {}
+        # ENFORCED: Use unified cache instead of local query_cache
+        # Query results now cached via api_cache
     
     def _build_index(self, data_type: str, column: str, prefix: str) -> Dict[str, List[Dict]]:
         """Generic index builder to avoid code duplication."""
@@ -235,13 +239,8 @@ class OptimizedRAGIndexer(BaseIndexer):
                     filtered_result = self._query_filtered_data(query, index_data)
                     results[index_name] = filtered_result
             
-            # 4. Cache results
-            cache_key = f"{query}_{context}_{query_type}"
-            self.query_cache[cache_key] = {
-                'results': results,
-                'timestamp': time.time(),
-                'query_type': query_type
-            }
+            # 4. ENFORCED: Results automatically cached by unified API cache
+            # No need for duplicate local caching
             
             return {
                 'query_type': query_type,

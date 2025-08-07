@@ -1,0 +1,7 @@
+{
+  "name": "financeai-rag",
+  "runtime": "python",
+  "version": "1.0.0",
+  "description": "FinanceAI with RAG System",
+  "main": "app.py"
+}

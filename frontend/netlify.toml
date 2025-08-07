@@ -4,7 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  BACKEND_URL = "https://sparrow-backend.your-subdomain.workers.dev"
+  BACKEND_URL = "https://feeble-bite-production.up.railway.app"
 
 [[edge_functions]]
   function = "cache"
@@ -39,7 +39,13 @@
 [[headers]]
   for = "/api/market-data/*"
   [headers.values]
-    Cache-Control = "public, max-age=300, s-maxage=3600"
+    Cache-Control = "public, max-age=300, s-maxage=1800"
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://feeble-bite-production.up.railway.app;"
 
 # Redirects for SPA
 [[redirects]]

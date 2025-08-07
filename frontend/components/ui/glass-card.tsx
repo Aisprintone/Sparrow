@@ -13,7 +13,7 @@ export default function GlassCard({ children, className, ...props }: GlassCardPr
   return (
     <motion.div
       className={cn(
-        "relative rounded-3xl border border-white/20 bg-gradient-to-br from-white/10 to-white/5 p-6 shadow-2xl backdrop-blur-xl",
+        "relative rounded-3xl border border-white/20 bg-gradient-to-br from-white/10 to-white/5 p-5 shadow-2xl backdrop-blur-xl",
         className,
       )}
       {...props}

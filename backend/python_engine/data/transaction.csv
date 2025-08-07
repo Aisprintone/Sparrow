@@ -1,5 +1,1023 @@
-transaction_id,customer_id,amount,category,date,description
-1001,1,-150.0,groceries,2024-01-15,Whole Foods
-1002,1,3000.0,salary,2024-01-01,Monthly Salary
-2001,2,-200.0,gas,2024-01-10,Shell Station
-3001,3,-50.0,coffee,2024-01-05,Starbucks
+transaction_id,account_id,timestamp,amount,description,category_id,is_debit,is_bill,is_subscription,due_date,account_type
+5001,101,2025-08-01 09:00:00,4499.91,August Salary Direct Deposit,5,False,False,False,,checking
+5002,303,2025-08-02 12:30:00,-155.23,Whole Foods Market,1,True,False,False,,credit_card
+5003,102,2025-08-03 08:00:00,-1999.63,Transfer to House Down‑Payment Goal,8,True,False,False,,savings
+6001,301,2025-08-01 09:05:00,2800.23,Salary Direct Deposit,5,False,False,False,,checking
+6002,301,2025-08-01 11:00:00,-150.16,Student Loan Payment,6,True,True,False,,checking
+6003,305,2025-08-01 13:00:00,-13.02,Spotify Subscription,7,True,False,True,,credit_card
+6004,101,2024-08-01 09:00:00,4499.56,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6005,101,2024-08-03 08:00:00,-2500.06,Monthly Mortgage Payment,18,True,True,False,,checking
+6006,101,2024-08-05 08:00:00,-2000.42,Transfer to Savings,8,True,False,False,,checking
+6007,102,2024-08-05 08:01:00,1999.9,Transfer from Checking,8,False,False,False,,savings
+6008,101,2024-08-10 11:00:00,-200.25,Utilities Payment,2,True,True,False,,checking
+6009,303,2024-08-12 06:00:00,-12.67,Spotify Subscription,7,True,False,True,,credit_card
+6010,102,2024-08-28 23:00:00,39.91,Monthly Interest,11,False,False,False,,savings
+6011,303,2024-08-07 18:00:00,-157.02,Grocery Store,1,True,False,False,,credit_card
+6012,303,2024-08-07 20:00:00,-82.2,Dinner Out,3,True,False,False,,credit_card
+6013,303,2024-08-07 17:00:00,-45.47,Gas Station,10,True,False,False,,credit_card
+6014,303,2024-08-14 18:00:00,-153.2,Grocery Store,1,True,False,False,,credit_card
+6015,303,2024-08-14 20:00:00,-71.21,Dinner Out,3,True,False,False,,credit_card
+6016,303,2024-08-14 17:00:00,-39.8,Gas Station,10,True,False,False,,credit_card
+6017,303,2024-08-21 18:00:00,-145.23,Grocery Store,1,True,False,False,,credit_card
+6018,303,2024-08-21 20:00:00,-68.79,Dinner Out,3,True,False,False,,credit_card
+6019,303,2024-08-21 17:00:00,-35.26,Gas Station,10,True,False,False,,credit_card
+6020,303,2024-08-28 18:00:00,-176.96,Grocery Store,1,True,False,False,,credit_card
+6021,303,2024-08-28 20:00:00,-40.41,Dinner Out,3,True,False,False,,credit_card
+6022,303,2024-08-28 17:00:00,-37.63,Gas Station,10,True,False,False,,credit_card
+6023,101,2024-09-01 09:00:00,4499.55,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6024,101,2024-09-03 08:00:00,-2500.35,Monthly Mortgage Payment,18,True,True,False,,checking
+6025,101,2024-09-05 08:00:00,-1999.91,Transfer to Savings,8,True,False,False,,checking
+6026,102,2024-09-05 08:01:00,1999.91,Transfer from Checking,8,False,False,False,,savings
+6027,101,2024-09-10 11:00:00,-199.57,Utilities Payment,2,True,True,False,,checking
+6028,303,2024-09-12 06:00:00,-13.14,Spotify Subscription,7,True,False,True,,credit_card
+6029,102,2024-09-28 23:00:00,39.51,Monthly Interest,11,False,False,False,,savings
+6030,303,2024-09-07 18:00:00,-133.77,Grocery Store,1,True,False,False,,credit_card
+6031,303,2024-09-07 20:00:00,-72.31,Dinner Out,3,True,False,False,,credit_card
+6032,303,2024-09-07 17:00:00,-36.81,Gas Station,10,True,False,False,,credit_card
+6033,303,2024-09-14 18:00:00,-163.55,Grocery Store,1,True,False,False,,credit_card
+6034,303,2024-09-14 20:00:00,-84.67,Dinner Out,3,True,False,False,,credit_card
+6035,303,2024-09-14 17:00:00,-44.49,Gas Station,10,True,False,False,,credit_card
+6036,303,2024-09-21 18:00:00,-185.49,Grocery Store,1,True,False,False,,credit_card
+6037,303,2024-09-21 20:00:00,-52.54,Dinner Out,3,True,False,False,,credit_card
+6038,303,2024-09-21 17:00:00,-52.37,Gas Station,10,True,False,False,,credit_card
+6039,303,2024-09-28 18:00:00,-135.52,Grocery Store,1,True,False,False,,credit_card
+6040,303,2024-09-28 20:00:00,-81.07,Dinner Out,3,True,False,False,,credit_card
+6041,303,2024-09-28 17:00:00,-37.91,Gas Station,10,True,False,False,,credit_card
+6042,101,2024-10-01 09:00:00,4500.48,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6043,101,2024-10-03 08:00:00,-2500.24,Monthly Mortgage Payment,18,True,True,False,,checking
+6044,101,2024-10-05 08:00:00,-2000.07,Transfer to Savings,8,True,False,False,,checking
+6045,102,2024-10-05 08:01:00,1999.85,Transfer from Checking,8,False,False,False,,savings
+6046,101,2024-10-10 11:00:00,-199.91,Utilities Payment,2,True,True,False,,checking
+6047,303,2024-10-12 06:00:00,-12.83,Spotify Subscription,7,True,False,True,,credit_card
+6048,102,2024-10-28 23:00:00,39.53,Monthly Interest,11,False,False,False,,savings
+6049,303,2024-10-07 18:00:00,-152.89,Grocery Store,1,True,False,False,,credit_card
+6050,303,2024-10-07 20:00:00,-48.59,Dinner Out,3,True,False,False,,credit_card
+6051,303,2024-10-07 17:00:00,-48.74,Gas Station,10,True,False,False,,credit_card
+6052,303,2024-10-14 18:00:00,-141.02,Grocery Store,1,True,False,False,,credit_card
+6053,303,2024-10-14 20:00:00,-82.14,Dinner Out,3,True,False,False,,credit_card
+6054,303,2024-10-14 17:00:00,-37.09,Gas Station,10,True,False,False,,credit_card
+6055,303,2024-10-21 18:00:00,-216.67,Grocery Store,1,True,False,False,,credit_card
+6056,303,2024-10-21 20:00:00,-65.71,Dinner Out,3,True,False,False,,credit_card
+6057,303,2024-10-21 17:00:00,-47.0,Gas Station,10,True,False,False,,credit_card
+6058,303,2024-10-28 18:00:00,-214.53,Grocery Store,1,True,False,False,,credit_card
+6059,303,2024-10-28 20:00:00,-61.18,Dinner Out,3,True,False,False,,credit_card
+6060,303,2024-10-28 17:00:00,-40.84,Gas Station,10,True,False,False,,credit_card
+6061,101,2024-11-01 09:00:00,4499.85,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6062,101,2024-11-03 08:00:00,-2499.8,Monthly Mortgage Payment,18,True,True,False,,checking
+6063,101,2024-11-05 08:00:00,-1999.82,Transfer to Savings,8,True,False,False,,checking
+6064,102,2024-11-05 08:01:00,2000.29,Transfer from Checking,8,False,False,False,,savings
+6065,101,2024-11-10 11:00:00,-199.83,Utilities Payment,2,True,True,False,,checking
+6066,303,2024-11-12 06:00:00,-12.86,Spotify Subscription,7,True,False,True,,credit_card
+6067,102,2024-11-28 23:00:00,39.59,Monthly Interest,11,False,False,False,,savings
+6068,303,2024-11-07 18:00:00,-184.17,Grocery Store,1,True,False,False,,credit_card
+6069,303,2024-11-07 20:00:00,-72.02,Dinner Out,3,True,False,False,,credit_card
+6070,303,2024-11-07 17:00:00,-50.52,Gas Station,10,True,False,False,,credit_card
+6071,303,2024-11-14 18:00:00,-214.83,Grocery Store,1,True,False,False,,credit_card
+6072,303,2024-11-14 20:00:00,-78.71,Dinner Out,3,True,False,False,,credit_card
+6073,303,2024-11-14 17:00:00,-55.03,Gas Station,10,True,False,False,,credit_card
+6074,303,2024-11-21 18:00:00,-136.99,Grocery Store,1,True,False,False,,credit_card
+6075,303,2024-11-21 20:00:00,-78.82,Dinner Out,3,True,False,False,,credit_card
+6076,303,2024-11-21 17:00:00,-46.98,Gas Station,10,True,False,False,,credit_card
+6077,303,2024-11-28 18:00:00,-212.94,Grocery Store,1,True,False,False,,credit_card
+6078,303,2024-11-28 20:00:00,-82.72,Dinner Out,3,True,False,False,,credit_card
+6079,303,2024-11-28 17:00:00,-41.13,Gas Station,10,True,False,False,,credit_card
+6080,101,2024-12-01 09:00:00,4499.53,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6081,101,2024-12-03 08:00:00,-2499.72,Monthly Mortgage Payment,18,True,True,False,,checking
+6082,101,2024-12-05 08:00:00,-1999.72,Transfer to Savings,8,True,False,False,,checking
+6083,102,2024-12-05 08:01:00,1999.75,Transfer from Checking,8,False,False,False,,savings
+6084,101,2024-12-10 11:00:00,-199.68,Utilities Payment,2,True,True,False,,checking
+6085,303,2024-12-12 06:00:00,-13.33,Spotify Subscription,7,True,False,True,,credit_card
+6086,102,2024-12-28 23:00:00,40.13,Monthly Interest,11,False,False,False,,savings
+6087,303,2024-12-07 18:00:00,-124.08,Grocery Store,1,True,False,False,,credit_card
+6088,303,2024-12-07 20:00:00,-78.52,Dinner Out,3,True,False,False,,credit_card
+6089,303,2024-12-07 17:00:00,-53.78,Gas Station,10,True,False,False,,credit_card
+6090,303,2024-12-14 18:00:00,-186.51,Grocery Store,1,True,False,False,,credit_card
+6091,303,2024-12-14 20:00:00,-65.43,Dinner Out,3,True,False,False,,credit_card
+6092,303,2024-12-14 17:00:00,-52.33,Gas Station,10,True,False,False,,credit_card
+6093,303,2024-12-21 18:00:00,-196.76,Grocery Store,1,True,False,False,,credit_card
+6094,303,2024-12-21 20:00:00,-51.5,Dinner Out,3,True,False,False,,credit_card
+6095,303,2024-12-21 17:00:00,-35.39,Gas Station,10,True,False,False,,credit_card
+6096,303,2024-12-28 18:00:00,-155.83,Grocery Store,1,True,False,False,,credit_card
+6097,303,2024-12-28 20:00:00,-73.17,Dinner Out,3,True,False,False,,credit_card
+6098,303,2024-12-28 17:00:00,-35.92,Gas Station,10,True,False,False,,credit_card
+6099,101,2025-01-01 09:00:00,4499.69,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6100,101,2025-01-03 08:00:00,-2500.04,Monthly Mortgage Payment,18,True,True,False,,checking
+6101,101,2025-01-05 08:00:00,-2000.41,Transfer to Savings,8,True,False,False,,checking
+6102,102,2025-01-05 08:01:00,2000.18,Transfer from Checking,8,False,False,False,,savings
+6103,101,2025-01-10 11:00:00,-200.42,Utilities Payment,2,True,True,False,,checking
+6104,303,2025-01-12 06:00:00,-13.25,Spotify Subscription,7,True,False,True,,credit_card
+6105,102,2025-01-28 23:00:00,40.42,Monthly Interest,11,False,False,False,,savings
+6106,303,2025-01-07 18:00:00,-175.61,Grocery Store,1,True,False,False,,credit_card
+6107,303,2025-01-07 20:00:00,-65.51,Dinner Out,3,True,False,False,,credit_card
+6108,303,2025-01-07 17:00:00,-38.63,Gas Station,10,True,False,False,,credit_card
+6109,303,2025-01-14 18:00:00,-166.36,Grocery Store,1,True,False,False,,credit_card
+6110,303,2025-01-14 20:00:00,-42.15,Dinner Out,3,True,False,False,,credit_card
+6111,303,2025-01-14 17:00:00,-41.32,Gas Station,10,True,False,False,,credit_card
+6112,303,2025-01-21 18:00:00,-137.26,Grocery Store,1,True,False,False,,credit_card
+6113,303,2025-01-21 20:00:00,-85.85,Dinner Out,3,True,False,False,,credit_card
+6114,303,2025-01-21 17:00:00,-47.18,Gas Station,10,True,False,False,,credit_card
+6115,303,2025-01-28 18:00:00,-164.36,Grocery Store,1,True,False,False,,credit_card
+6116,303,2025-01-28 20:00:00,-74.54,Dinner Out,3,True,False,False,,credit_card
+6117,303,2025-01-28 17:00:00,-49.9,Gas Station,10,True,False,False,,credit_card
+6118,101,2025-02-01 09:00:00,4500.2,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6119,101,2025-02-03 08:00:00,-2500.26,Monthly Mortgage Payment,18,True,True,False,,checking
+6120,101,2025-02-05 08:00:00,-2000.07,Transfer to Savings,8,True,False,False,,checking
+6121,102,2025-02-05 08:01:00,2000.23,Transfer from Checking,8,False,False,False,,savings
+6122,101,2025-02-10 11:00:00,-200.44,Utilities Payment,2,True,True,False,,checking
+6123,303,2025-02-12 06:00:00,-12.96,Spotify Subscription,7,True,False,True,,credit_card
+6124,102,2025-02-28 23:00:00,39.56,Monthly Interest,11,False,False,False,,savings
+6125,303,2025-02-07 18:00:00,-158.65,Grocery Store,1,True,False,False,,credit_card
+6126,303,2025-02-07 20:00:00,-44.2,Dinner Out,3,True,False,False,,credit_card
+6127,303,2025-02-07 17:00:00,-52.69,Gas Station,10,True,False,False,,credit_card
+6128,303,2025-02-14 18:00:00,-130.24,Grocery Store,1,True,False,False,,credit_card
+6129,303,2025-02-14 20:00:00,-55.81,Dinner Out,3,True,False,False,,credit_card
+6130,303,2025-02-14 17:00:00,-35.46,Gas Station,10,True,False,False,,credit_card
+6131,303,2025-02-21 18:00:00,-159.14,Grocery Store,1,True,False,False,,credit_card
+6132,303,2025-02-21 20:00:00,-48.78,Dinner Out,3,True,False,False,,credit_card
+6133,303,2025-02-21 17:00:00,-37.92,Gas Station,10,True,False,False,,credit_card
+6134,303,2025-02-28 18:00:00,-192.28,Grocery Store,1,True,False,False,,credit_card
+6135,303,2025-02-28 20:00:00,-42.94,Dinner Out,3,True,False,False,,credit_card
+6136,303,2025-02-28 17:00:00,-43.24,Gas Station,10,True,False,False,,credit_card
+6137,101,2025-03-01 09:00:00,4500.16,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6138,101,2025-03-03 08:00:00,-2499.52,Monthly Mortgage Payment,18,True,True,False,,checking
+6139,101,2025-03-05 08:00:00,-1999.77,Transfer to Savings,8,True,False,False,,checking
+6140,102,2025-03-05 08:01:00,2000.12,Transfer from Checking,8,False,False,False,,savings
+6141,101,2025-03-10 11:00:00,-199.78,Utilities Payment,2,True,True,False,,checking
+6142,303,2025-03-12 06:00:00,-13.44,Spotify Subscription,7,True,False,True,,credit_card
+6143,102,2025-03-28 23:00:00,39.89,Monthly Interest,11,False,False,False,,savings
+6144,303,2025-03-07 18:00:00,-193.14,Grocery Store,1,True,False,False,,credit_card
+6145,303,2025-03-07 20:00:00,-84.56,Dinner Out,3,True,False,False,,credit_card
+6146,303,2025-03-07 17:00:00,-39.63,Gas Station,10,True,False,False,,credit_card
+6147,303,2025-03-14 18:00:00,-144.07,Grocery Store,1,True,False,False,,credit_card
+6148,303,2025-03-14 20:00:00,-88.1,Dinner Out,3,True,False,False,,credit_card
+6149,303,2025-03-14 17:00:00,-49.33,Gas Station,10,True,False,False,,credit_card
+6150,303,2025-03-21 18:00:00,-211.28,Grocery Store,1,True,False,False,,credit_card
+6151,303,2025-03-21 20:00:00,-46.39,Dinner Out,3,True,False,False,,credit_card
+6152,303,2025-03-21 17:00:00,-48.54,Gas Station,10,True,False,False,,credit_card
+6153,303,2025-03-28 18:00:00,-140.61,Grocery Store,1,True,False,False,,credit_card
+6154,303,2025-03-28 20:00:00,-43.63,Dinner Out,3,True,False,False,,credit_card
+6155,303,2025-03-28 17:00:00,-50.73,Gas Station,10,True,False,False,,credit_card
+6156,101,2025-04-01 09:00:00,4500.48,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6157,101,2025-04-03 08:00:00,-2500.41,Monthly Mortgage Payment,18,True,True,False,,checking
+6158,101,2025-04-05 08:00:00,-1999.85,Transfer to Savings,8,True,False,False,,checking
+6159,102,2025-04-05 08:01:00,1999.71,Transfer from Checking,8,False,False,False,,savings
+6160,101,2025-04-10 11:00:00,-199.71,Utilities Payment,2,True,True,False,,checking
+6161,303,2025-04-12 06:00:00,-13.28,Spotify Subscription,7,True,False,True,,credit_card
+6162,102,2025-04-28 23:00:00,40.45,Monthly Interest,11,False,False,False,,savings
+6163,303,2025-04-07 18:00:00,-151.55,Grocery Store,1,True,False,False,,credit_card
+6164,303,2025-04-07 20:00:00,-64.45,Dinner Out,3,True,False,False,,credit_card
+6165,303,2025-04-07 17:00:00,-53.53,Gas Station,10,True,False,False,,credit_card
+6166,303,2025-04-14 18:00:00,-213.42,Grocery Store,1,True,False,False,,credit_card
+6167,303,2025-04-14 20:00:00,-71.02,Dinner Out,3,True,False,False,,credit_card
+6168,303,2025-04-14 17:00:00,-37.58,Gas Station,10,True,False,False,,credit_card
+6169,303,2025-04-21 18:00:00,-120.35,Grocery Store,1,True,False,False,,credit_card
+6170,303,2025-04-21 20:00:00,-66.94,Dinner Out,3,True,False,False,,credit_card
+6171,303,2025-04-21 17:00:00,-44.88,Gas Station,10,True,False,False,,credit_card
+6172,303,2025-04-28 18:00:00,-143.98,Grocery Store,1,True,False,False,,credit_card
+6173,303,2025-04-28 20:00:00,-53.52,Dinner Out,3,True,False,False,,credit_card
+6174,303,2025-04-28 17:00:00,-41.3,Gas Station,10,True,False,False,,credit_card
+6175,101,2025-05-01 09:00:00,4499.88,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6176,101,2025-05-03 08:00:00,-2499.94,Monthly Mortgage Payment,18,True,True,False,,checking
+6177,101,2025-05-05 08:00:00,-2000.32,Transfer to Savings,8,True,False,False,,checking
+6178,102,2025-05-05 08:01:00,1999.74,Transfer from Checking,8,False,False,False,,savings
+6179,101,2025-05-10 11:00:00,-199.64,Utilities Payment,2,True,True,False,,checking
+6180,303,2025-05-12 06:00:00,-13.05,Spotify Subscription,7,True,False,True,,credit_card
+6181,102,2025-05-28 23:00:00,39.91,Monthly Interest,11,False,False,False,,savings
+6182,303,2025-05-07 18:00:00,-180.21,Grocery Store,1,True,False,False,,credit_card
+6183,303,2025-05-07 20:00:00,-70.46,Dinner Out,3,True,False,False,,credit_card
+6184,303,2025-05-07 17:00:00,-47.98,Gas Station,10,True,False,False,,credit_card
+6185,303,2025-05-14 18:00:00,-204.13,Grocery Store,1,True,False,False,,credit_card
+6186,303,2025-05-14 20:00:00,-77.46,Dinner Out,3,True,False,False,,credit_card
+6187,303,2025-05-14 17:00:00,-40.34,Gas Station,10,True,False,False,,credit_card
+6188,303,2025-05-21 18:00:00,-184.75,Grocery Store,1,True,False,False,,credit_card
+6189,303,2025-05-21 20:00:00,-70.43,Dinner Out,3,True,False,False,,credit_card
+6190,303,2025-05-21 17:00:00,-52.98,Gas Station,10,True,False,False,,credit_card
+6191,303,2025-05-28 18:00:00,-132.36,Grocery Store,1,True,False,False,,credit_card
+6192,303,2025-05-28 20:00:00,-56.31,Dinner Out,3,True,False,False,,credit_card
+6193,303,2025-05-28 17:00:00,-50.39,Gas Station,10,True,False,False,,credit_card
+6194,101,2025-06-01 09:00:00,4500.36,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6195,101,2025-06-03 08:00:00,-2499.71,Monthly Mortgage Payment,18,True,True,False,,checking
+6196,101,2025-06-05 08:00:00,-1999.89,Transfer to Savings,8,True,False,False,,checking
+6197,102,2025-06-05 08:01:00,2000.12,Transfer from Checking,8,False,False,False,,savings
+6198,101,2025-06-10 11:00:00,-199.93,Utilities Payment,2,True,True,False,,checking
+6199,303,2025-06-12 06:00:00,-12.64,Spotify Subscription,7,True,False,True,,credit_card
+6200,102,2025-06-28 23:00:00,39.53,Monthly Interest,11,False,False,False,,savings
+6201,303,2025-06-07 18:00:00,-119.83,Grocery Store,1,True,False,False,,credit_card
+6202,303,2025-06-07 20:00:00,-65.08,Dinner Out,3,True,False,False,,credit_card
+6203,303,2025-06-07 17:00:00,-44.25,Gas Station,10,True,False,False,,credit_card
+6204,303,2025-06-14 18:00:00,-203.98,Grocery Store,1,True,False,False,,credit_card
+6205,303,2025-06-14 20:00:00,-44.55,Dinner Out,3,True,False,False,,credit_card
+6206,303,2025-06-14 17:00:00,-36.39,Gas Station,10,True,False,False,,credit_card
+6207,303,2025-06-21 18:00:00,-151.77,Grocery Store,1,True,False,False,,credit_card
+6208,303,2025-06-21 20:00:00,-80.84,Dinner Out,3,True,False,False,,credit_card
+6209,303,2025-06-21 17:00:00,-44.08,Gas Station,10,True,False,False,,credit_card
+6210,303,2025-06-28 18:00:00,-157.89,Grocery Store,1,True,False,False,,credit_card
+6211,303,2025-06-28 20:00:00,-80.6,Dinner Out,3,True,False,False,,credit_card
+6212,303,2025-06-28 17:00:00,-40.12,Gas Station,10,True,False,False,,credit_card
+6213,101,2025-07-01 09:00:00,4500.13,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6214,101,2025-07-03 08:00:00,-2499.83,Monthly Mortgage Payment,18,True,True,False,,checking
+6215,101,2025-07-05 08:00:00,-1999.93,Transfer to Savings,8,True,False,False,,checking
+6216,102,2025-07-05 08:01:00,1999.54,Transfer from Checking,8,False,False,False,,savings
+6217,101,2025-07-10 11:00:00,-199.82,Utilities Payment,2,True,True,False,,checking
+6218,303,2025-07-12 06:00:00,-12.76,Spotify Subscription,7,True,False,True,,credit_card
+6219,102,2025-07-28 23:00:00,40.3,Monthly Interest,11,False,False,False,,savings
+6220,303,2025-07-07 18:00:00,-192.48,Grocery Store,1,True,False,False,,credit_card
+6221,303,2025-07-07 20:00:00,-62.94,Dinner Out,3,True,False,False,,credit_card
+6222,303,2025-07-07 17:00:00,-50.68,Gas Station,10,True,False,False,,credit_card
+6223,303,2025-07-14 18:00:00,-211.86,Grocery Store,1,True,False,False,,credit_card
+6224,303,2025-07-14 20:00:00,-44.63,Dinner Out,3,True,False,False,,credit_card
+6225,303,2025-07-14 17:00:00,-54.82,Gas Station,10,True,False,False,,credit_card
+6226,303,2025-07-21 18:00:00,-157.12,Grocery Store,1,True,False,False,,credit_card
+6227,303,2025-07-21 20:00:00,-80.76,Dinner Out,3,True,False,False,,credit_card
+6228,303,2025-07-21 17:00:00,-50.57,Gas Station,10,True,False,False,,credit_card
+6229,303,2025-07-28 18:00:00,-137.69,Grocery Store,1,True,False,False,,credit_card
+6230,303,2025-07-28 20:00:00,-42.18,Dinner Out,3,True,False,False,,credit_card
+6231,303,2025-07-28 17:00:00,-38.65,Gas Station,10,True,False,False,,credit_card
+6232,301,2024-08-01 09:05:00,2799.55,Salary Direct Deposit,5,False,False,False,,checking
+6233,301,2024-08-02 08:00:00,-900.13,Monthly Rent Payment,9,True,True,False,,checking
+6234,301,2024-08-05 07:00:00,-149.6,Student Loan Payment,6,True,True,False,,checking
+6235,301,2024-08-06 08:00:00,-200.26,Transfer to Savings,8,True,False,False,,checking
+6236,302,2024-08-06 08:01:00,199.61,Transfer from Checking,8,False,False,False,,savings
+6237,305,2024-08-12 06:00:00,-13.2,Spotify Subscription,7,True,False,True,,credit_card
+6238,302,2024-08-28 23:00:00,1.69,Monthly Interest,11,False,False,False,,savings
+6239,305,2024-08-08 18:00:00,-91.7,Grocery Store,1,True,False,False,,credit_card
+6240,305,2024-08-08 20:00:00,-57.8,Dinner Out,3,True,False,False,,credit_card
+6241,305,2024-08-08 17:00:00,-42.07,Gas Station,10,True,False,False,,credit_card
+6242,305,2024-08-15 18:00:00,-85.62,Grocery Store,1,True,False,False,,credit_card
+6243,305,2024-08-15 20:00:00,-45.92,Dinner Out,3,True,False,False,,credit_card
+6244,305,2024-08-15 17:00:00,-36.32,Gas Station,10,True,False,False,,credit_card
+6245,305,2024-08-22 18:00:00,-87.99,Grocery Store,1,True,False,False,,credit_card
+6246,305,2024-08-22 20:00:00,-57.18,Dinner Out,3,True,False,False,,credit_card
+6247,305,2024-08-22 17:00:00,-40.42,Gas Station,10,True,False,False,,credit_card
+6248,301,2024-09-01 09:05:00,2800.02,Salary Direct Deposit,5,False,False,False,,checking
+6249,301,2024-09-02 08:00:00,-899.51,Monthly Rent Payment,9,True,True,False,,checking
+6250,301,2024-09-05 07:00:00,-149.88,Student Loan Payment,6,True,True,False,,checking
+6251,301,2024-09-06 08:00:00,-199.82,Transfer to Savings,8,True,False,False,,checking
+6252,302,2024-09-06 08:01:00,199.79,Transfer from Checking,8,False,False,False,,savings
+6253,305,2024-09-12 06:00:00,-13.41,Spotify Subscription,7,True,False,True,,credit_card
+6254,302,2024-09-28 23:00:00,1.67,Monthly Interest,11,False,False,False,,savings
+6255,305,2024-09-08 18:00:00,-85.51,Grocery Store,1,True,False,False,,credit_card
+6256,305,2024-09-08 20:00:00,-29.96,Dinner Out,3,True,False,False,,credit_card
+6257,305,2024-09-08 17:00:00,-25.89,Gas Station,10,True,False,False,,credit_card
+6258,305,2024-09-15 18:00:00,-65.31,Grocery Store,1,True,False,False,,credit_card
+6259,305,2024-09-15 20:00:00,-50.21,Dinner Out,3,True,False,False,,credit_card
+6260,305,2024-09-15 17:00:00,-35.45,Gas Station,10,True,False,False,,credit_card
+6261,305,2024-09-22 18:00:00,-81.54,Grocery Store,1,True,False,False,,credit_card
+6262,305,2024-09-22 20:00:00,-25.57,Dinner Out,3,True,False,False,,credit_card
+6263,305,2024-09-22 17:00:00,-43.22,Gas Station,10,True,False,False,,credit_card
+6264,301,2024-10-01 09:05:00,2799.65,Salary Direct Deposit,5,False,False,False,,checking
+6265,301,2024-10-02 08:00:00,-899.75,Monthly Rent Payment,9,True,True,False,,checking
+6266,301,2024-10-05 07:00:00,-150.41,Student Loan Payment,6,True,True,False,,checking
+6267,301,2024-10-06 08:00:00,-200.1,Transfer to Savings,8,True,False,False,,checking
+6268,302,2024-10-06 08:01:00,200.12,Transfer from Checking,8,False,False,False,,savings
+6269,305,2024-10-12 06:00:00,-13.14,Spotify Subscription,7,True,False,True,,credit_card
+6270,302,2024-10-28 23:00:00,1.49,Monthly Interest,11,False,False,False,,savings
+6271,305,2024-10-08 18:00:00,-65.18,Grocery Store,1,True,False,False,,credit_card
+6272,305,2024-10-08 20:00:00,-40.76,Dinner Out,3,True,False,False,,credit_card
+6273,305,2024-10-08 17:00:00,-31.4,Gas Station,10,True,False,False,,credit_card
+6274,305,2024-10-15 18:00:00,-98.01,Grocery Store,1,True,False,False,,credit_card
+6275,305,2024-10-15 20:00:00,-54.53,Dinner Out,3,True,False,False,,credit_card
+6276,305,2024-10-15 17:00:00,-41.62,Gas Station,10,True,False,False,,credit_card
+6277,305,2024-10-22 18:00:00,-68.04,Grocery Store,1,True,False,False,,credit_card
+6278,305,2024-10-22 20:00:00,-25.95,Dinner Out,3,True,False,False,,credit_card
+6279,305,2024-10-22 17:00:00,-32.49,Gas Station,10,True,False,False,,credit_card
+6280,301,2024-11-01 09:05:00,2800.37,Salary Direct Deposit,5,False,False,False,,checking
+6281,301,2024-11-02 08:00:00,-900.42,Monthly Rent Payment,9,True,True,False,,checking
+6282,301,2024-11-05 07:00:00,-149.73,Student Loan Payment,6,True,True,False,,checking
+6283,301,2024-11-06 08:00:00,-199.93,Transfer to Savings,8,True,False,False,,checking
+6284,302,2024-11-06 08:01:00,200.09,Transfer from Checking,8,False,False,False,,savings
+6285,305,2024-11-12 06:00:00,-12.72,Spotify Subscription,7,True,False,True,,credit_card
+6286,302,2024-11-28 23:00:00,1.86,Monthly Interest,11,False,False,False,,savings
+6287,305,2024-11-08 18:00:00,-62.3,Grocery Store,1,True,False,False,,credit_card
+6288,305,2024-11-08 20:00:00,-44.63,Dinner Out,3,True,False,False,,credit_card
+6289,305,2024-11-08 17:00:00,-40.63,Gas Station,10,True,False,False,,credit_card
+6290,305,2024-11-15 18:00:00,-60.74,Grocery Store,1,True,False,False,,credit_card
+6291,305,2024-11-15 20:00:00,-51.64,Dinner Out,3,True,False,False,,credit_card
+6292,305,2024-11-15 17:00:00,-37.87,Gas Station,10,True,False,False,,credit_card
+6293,305,2024-11-22 18:00:00,-87.19,Grocery Store,1,True,False,False,,credit_card
+6294,305,2024-11-22 20:00:00,-58.91,Dinner Out,3,True,False,False,,credit_card
+6295,305,2024-11-22 17:00:00,-34.33,Gas Station,10,True,False,False,,credit_card
+6296,301,2024-12-01 09:05:00,2800.01,Salary Direct Deposit,5,False,False,False,,checking
+6297,301,2024-12-02 08:00:00,-899.57,Monthly Rent Payment,9,True,True,False,,checking
+6298,301,2024-12-05 07:00:00,-149.65,Student Loan Payment,6,True,True,False,,checking
+6299,301,2024-12-06 08:00:00,-199.83,Transfer to Savings,8,True,False,False,,checking
+6300,302,2024-12-06 08:01:00,199.66,Transfer from Checking,8,False,False,False,,savings
+6301,305,2024-12-12 06:00:00,-12.82,Spotify Subscription,7,True,False,True,,credit_card
+6302,302,2024-12-28 23:00:00,1.11,Monthly Interest,11,False,False,False,,savings
+6303,305,2024-12-08 18:00:00,-70.57,Grocery Store,1,True,False,False,,credit_card
+6304,305,2024-12-08 20:00:00,-36.05,Dinner Out,3,True,False,False,,credit_card
+6305,305,2024-12-08 17:00:00,-38.97,Gas Station,10,True,False,False,,credit_card
+6306,305,2024-12-15 18:00:00,-76.26,Grocery Store,1,True,False,False,,credit_card
+6307,305,2024-12-15 20:00:00,-49.83,Dinner Out,3,True,False,False,,credit_card
+6308,305,2024-12-15 17:00:00,-40.2,Gas Station,10,True,False,False,,credit_card
+6309,305,2024-12-22 18:00:00,-82.92,Grocery Store,1,True,False,False,,credit_card
+6310,305,2024-12-22 20:00:00,-42.08,Dinner Out,3,True,False,False,,credit_card
+6311,305,2024-12-22 17:00:00,-39.23,Gas Station,10,True,False,False,,credit_card
+6312,301,2025-01-01 09:05:00,2800.05,Salary Direct Deposit,5,False,False,False,,checking
+6313,301,2025-01-02 08:00:00,-899.54,Monthly Rent Payment,9,True,True,False,,checking
+6314,301,2025-01-05 07:00:00,-150.06,Student Loan Payment,6,True,True,False,,checking
+6315,301,2025-01-06 08:00:00,-199.63,Transfer to Savings,8,True,False,False,,checking
+6316,302,2025-01-06 08:01:00,199.52,Transfer from Checking,8,False,False,False,,savings
+6317,305,2025-01-12 06:00:00,-12.63,Spotify Subscription,7,True,False,True,,credit_card
+6318,302,2025-01-28 23:00:00,1.55,Monthly Interest,11,False,False,False,,savings
+6319,305,2025-01-08 18:00:00,-87.11,Grocery Store,1,True,False,False,,credit_card
+6320,305,2025-01-08 20:00:00,-56.81,Dinner Out,3,True,False,False,,credit_card
+6321,305,2025-01-08 17:00:00,-36.27,Gas Station,10,True,False,False,,credit_card
+6322,305,2025-01-15 18:00:00,-71.76,Grocery Store,1,True,False,False,,credit_card
+6323,305,2025-01-15 20:00:00,-49.85,Dinner Out,3,True,False,False,,credit_card
+6324,305,2025-01-15 17:00:00,-33.16,Gas Station,10,True,False,False,,credit_card
+6325,305,2025-01-22 18:00:00,-68.47,Grocery Store,1,True,False,False,,credit_card
+6326,305,2025-01-22 20:00:00,-50.74,Dinner Out,3,True,False,False,,credit_card
+6327,305,2025-01-22 17:00:00,-29.69,Gas Station,10,True,False,False,,credit_card
+6328,301,2025-02-01 09:05:00,2800.36,Salary Direct Deposit,5,False,False,False,,checking
+6329,301,2025-02-02 08:00:00,-900.45,Monthly Rent Payment,9,True,True,False,,checking
+6330,301,2025-02-05 07:00:00,-150.11,Student Loan Payment,6,True,True,False,,checking
+6331,301,2025-02-06 08:00:00,-199.67,Transfer to Savings,8,True,False,False,,checking
+6332,302,2025-02-06 08:01:00,199.84,Transfer from Checking,8,False,False,False,,savings
+6333,305,2025-02-12 06:00:00,-12.74,Spotify Subscription,7,True,False,True,,credit_card
+6334,302,2025-02-28 23:00:00,1.32,Monthly Interest,11,False,False,False,,savings
+6335,305,2025-02-08 18:00:00,-74.85,Grocery Store,1,True,False,False,,credit_card
+6336,305,2025-02-08 20:00:00,-37.73,Dinner Out,3,True,False,False,,credit_card
+6337,305,2025-02-08 17:00:00,-31.1,Gas Station,10,True,False,False,,credit_card
+6338,305,2025-02-15 18:00:00,-68.46,Grocery Store,1,True,False,False,,credit_card
+6339,305,2025-02-15 20:00:00,-31.3,Dinner Out,3,True,False,False,,credit_card
+6340,305,2025-02-15 17:00:00,-33.16,Gas Station,10,True,False,False,,credit_card
+6341,305,2025-02-22 18:00:00,-76.15,Grocery Store,1,True,False,False,,credit_card
+6342,305,2025-02-22 20:00:00,-41.29,Dinner Out,3,True,False,False,,credit_card
+6343,305,2025-02-22 17:00:00,-27.57,Gas Station,10,True,False,False,,credit_card
+6344,301,2025-03-01 09:05:00,2800.34,Salary Direct Deposit,5,False,False,False,,checking
+6345,301,2025-03-02 08:00:00,-900.14,Monthly Rent Payment,9,True,True,False,,checking
+6346,301,2025-03-05 07:00:00,-149.59,Student Loan Payment,6,True,True,False,,checking
+6347,301,2025-03-06 08:00:00,-200.33,Transfer to Savings,8,True,False,False,,checking
+6348,302,2025-03-06 08:01:00,200.39,Transfer from Checking,8,False,False,False,,savings
+6349,305,2025-03-12 06:00:00,-13.05,Spotify Subscription,7,True,False,True,,credit_card
+6350,302,2025-03-28 23:00:00,1.81,Monthly Interest,11,False,False,False,,savings
+6351,305,2025-03-08 18:00:00,-68.91,Grocery Store,1,True,False,False,,credit_card
+6352,305,2025-03-08 20:00:00,-55.73,Dinner Out,3,True,False,False,,credit_card
+6353,305,2025-03-08 17:00:00,-42.05,Gas Station,10,True,False,False,,credit_card
+6354,305,2025-03-15 18:00:00,-92.57,Grocery Store,1,True,False,False,,credit_card
+6355,305,2025-03-15 20:00:00,-39.27,Dinner Out,3,True,False,False,,credit_card
+6356,305,2025-03-15 17:00:00,-39.69,Gas Station,10,True,False,False,,credit_card
+6357,305,2025-03-22 18:00:00,-95.24,Grocery Store,1,True,False,False,,credit_card
+6358,305,2025-03-22 20:00:00,-50.32,Dinner Out,3,True,False,False,,credit_card
+6359,305,2025-03-22 17:00:00,-37.34,Gas Station,10,True,False,False,,credit_card
+6360,301,2025-04-01 09:05:00,2800.29,Salary Direct Deposit,5,False,False,False,,checking
+6361,301,2025-04-02 08:00:00,-899.52,Monthly Rent Payment,9,True,True,False,,checking
+6362,301,2025-04-05 07:00:00,-149.61,Student Loan Payment,6,True,True,False,,checking
+6363,301,2025-04-06 08:00:00,-200.07,Transfer to Savings,8,True,False,False,,checking
+6364,302,2025-04-06 08:01:00,200.27,Transfer from Checking,8,False,False,False,,savings
+6365,305,2025-04-12 06:00:00,-13.29,Spotify Subscription,7,True,False,True,,credit_card
+6366,302,2025-04-28 23:00:00,1.88,Monthly Interest,11,False,False,False,,savings
+6367,305,2025-04-08 18:00:00,-96.07,Grocery Store,1,True,False,False,,credit_card
+6368,305,2025-04-08 20:00:00,-28.55,Dinner Out,3,True,False,False,,credit_card
+6369,305,2025-04-08 17:00:00,-25.87,Gas Station,10,True,False,False,,credit_card
+6370,305,2025-04-15 18:00:00,-87.92,Grocery Store,1,True,False,False,,credit_card
+6371,305,2025-04-15 20:00:00,-50.77,Dinner Out,3,True,False,False,,credit_card
+6372,305,2025-04-15 17:00:00,-25.88,Gas Station,10,True,False,False,,credit_card
+6373,305,2025-04-22 18:00:00,-73.66,Grocery Store,1,True,False,False,,credit_card
+6374,305,2025-04-22 20:00:00,-54.98,Dinner Out,3,True,False,False,,credit_card
+6375,305,2025-04-22 17:00:00,-28.61,Gas Station,10,True,False,False,,credit_card
+6376,301,2025-05-01 09:05:00,2799.72,Salary Direct Deposit,5,False,False,False,,checking
+6377,301,2025-05-02 08:00:00,-900.43,Monthly Rent Payment,9,True,True,False,,checking
+6378,301,2025-05-05 07:00:00,-149.77,Student Loan Payment,6,True,True,False,,checking
+6379,301,2025-05-06 08:00:00,-199.8,Transfer to Savings,8,True,False,False,,checking
+6380,302,2025-05-06 08:01:00,199.73,Transfer from Checking,8,False,False,False,,savings
+6381,305,2025-05-12 06:00:00,-13.03,Spotify Subscription,7,True,False,True,,credit_card
+6382,302,2025-05-28 23:00:00,1.67,Monthly Interest,11,False,False,False,,savings
+6383,305,2025-05-08 18:00:00,-82.48,Grocery Store,1,True,False,False,,credit_card
+6384,305,2025-05-08 20:00:00,-43.79,Dinner Out,3,True,False,False,,credit_card
+6385,305,2025-05-08 17:00:00,-41.21,Gas Station,10,True,False,False,,credit_card
+6386,305,2025-05-15 18:00:00,-94.33,Grocery Store,1,True,False,False,,credit_card
+6387,305,2025-05-15 20:00:00,-29.57,Dinner Out,3,True,False,False,,credit_card
+6388,305,2025-05-15 17:00:00,-31.21,Gas Station,10,True,False,False,,credit_card
+6389,305,2025-05-22 18:00:00,-71.32,Grocery Store,1,True,False,False,,credit_card
+6390,305,2025-05-22 20:00:00,-27.04,Dinner Out,3,True,False,False,,credit_card
+6391,305,2025-05-22 17:00:00,-39.29,Gas Station,10,True,False,False,,credit_card
+6392,301,2025-06-01 09:05:00,2800.33,Salary Direct Deposit,5,False,False,False,,checking
+6393,301,2025-06-02 08:00:00,-900.23,Monthly Rent Payment,9,True,True,False,,checking
+6394,301,2025-06-05 07:00:00,-150.32,Student Loan Payment,6,True,True,False,,checking
+6395,301,2025-06-06 08:00:00,-199.95,Transfer to Savings,8,True,False,False,,checking
+6396,302,2025-06-06 08:01:00,200.05,Transfer from Checking,8,False,False,False,,savings
+6397,305,2025-06-12 06:00:00,-12.99,Spotify Subscription,7,True,False,True,,credit_card
+6398,302,2025-06-28 23:00:00,1.85,Monthly Interest,11,False,False,False,,savings
+6399,305,2025-06-08 18:00:00,-80.88,Grocery Store,1,True,False,False,,credit_card
+6400,305,2025-06-08 20:00:00,-25.65,Dinner Out,3,True,False,False,,credit_card
+6401,305,2025-06-08 17:00:00,-28.32,Gas Station,10,True,False,False,,credit_card
+6402,305,2025-06-15 18:00:00,-66.4,Grocery Store,1,True,False,False,,credit_card
+6403,305,2025-06-15 20:00:00,-28.53,Dinner Out,3,True,False,False,,credit_card
+6404,305,2025-06-15 17:00:00,-38.87,Gas Station,10,True,False,False,,credit_card
+6405,305,2025-06-22 18:00:00,-97.91,Grocery Store,1,True,False,False,,credit_card
+6406,305,2025-06-22 20:00:00,-35.44,Dinner Out,3,True,False,False,,credit_card
+6407,305,2025-06-22 17:00:00,-30.79,Gas Station,10,True,False,False,,credit_card
+6408,301,2025-07-01 09:05:00,2800.26,Salary Direct Deposit,5,False,False,False,,checking
+6409,301,2025-07-02 08:00:00,-900.45,Monthly Rent Payment,9,True,True,False,,checking
+6410,301,2025-07-05 07:00:00,-150.23,Student Loan Payment,6,True,True,False,,checking
+6411,301,2025-07-06 08:00:00,-199.6,Transfer to Savings,8,True,False,False,,checking
+6412,302,2025-07-06 08:01:00,200.36,Transfer from Checking,8,False,False,False,,savings
+6413,305,2025-07-12 06:00:00,-12.62,Spotify Subscription,7,True,False,True,,credit_card
+6414,302,2025-07-28 23:00:00,1.9,Monthly Interest,11,False,False,False,,savings
+6415,305,2025-07-08 18:00:00,-60.29,Grocery Store,1,True,False,False,,credit_card
+6416,305,2025-07-08 20:00:00,-35.52,Dinner Out,3,True,False,False,,credit_card
+6417,305,2025-07-08 17:00:00,-30.17,Gas Station,10,True,False,False,,credit_card
+6418,305,2025-07-15 18:00:00,-86.18,Grocery Store,1,True,False,False,,credit_card
+6419,305,2025-07-15 20:00:00,-38.78,Dinner Out,3,True,False,False,,credit_card
+6420,305,2025-07-15 17:00:00,-41.37,Gas Station,10,True,False,False,,credit_card
+6421,305,2025-07-22 18:00:00,-87.63,Grocery Store,1,True,False,False,,credit_card
+6422,305,2025-07-22 20:00:00,-46.62,Dinner Out,3,True,False,False,,credit_card
+6423,305,2025-07-22 17:00:00,-38.62,Gas Station,10,True,False,False,,credit_card
+6424,303,2024-11-25 14:00:00,-1200.12,Holiday Shopping - Amazon,13,True,False,False,,credit_card
+6425,303,2024-12-15 13:30:00,-699.63,Holiday Shopping - Gifts,13,True,False,False,,credit_card
+6426,101,2025-03-08 10:00:00,2999.52,Federal Tax Refund,15,False,False,False,,checking
+6427,303,2025-07-10 11:00:00,-2499.83,Summer Vacation Airbnb,14,True,False,False,,credit_card
+6428,303,2025-06-21 10:00:00,-300.24,Wedding Gift,16,True,False,False,,credit_card
+6429,305,2024-12-15 15:00:00,-300.03,Holiday Shopping - BestBuy,13,True,False,False,,credit_card
+6430,301,2025-03-10 09:30:00,1200.05,Federal Tax Refund,15,False,False,False,,checking
+6431,305,2025-07-04 12:00:00,-800.05,Fourth of July Trip,14,True,False,False,,credit_card
+6432,305,2025-05-15 20:00:00,-149.62,Concert Ticket,16,True,False,False,,credit_card
+6438,101,2024-08-29 20:00:59,-1066.23,Credit Card Payment,17,True,True,False,,checking
+6439,303,2024-08-29 20:00:59,1066.17,Credit Card Payment,17,False,False,False,,credit_card
+6440,101,2024-09-28 20:00:59,-1092.13,Credit Card Payment,17,True,True,False,,checking
+6441,303,2024-09-28 20:00:59,1092.08,Credit Card Payment,17,False,False,False,,credit_card
+6442,101,2024-10-29 20:00:59,-1169.78,Credit Card Payment,17,True,True,False,,checking
+6443,303,2024-10-29 20:00:59,1169.59,Credit Card Payment,17,False,False,False,,credit_card
+6444,101,2024-11-28 20:00:59,-2468.41,Credit Card Payment,17,True,True,False,,checking
+6445,303,2024-11-28 20:00:59,2468.43,Credit Card Payment,17,False,False,False,,credit_card
+6446,101,2024-12-29 20:00:59,-1822.77,Credit Card Payment,17,True,True,False,,checking
+6447,303,2024-12-29 20:00:59,1823.41,Credit Card Payment,17,False,False,False,,credit_card
+6448,101,2025-01-29 20:00:59,-1101.47,Credit Card Payment,17,True,True,False,,checking
+6449,303,2025-01-29 20:00:59,1102.12,Credit Card Payment,17,False,False,False,,credit_card
+6450,101,2025-02-26 20:00:59,-1013.06,Credit Card Payment,17,True,True,False,,checking
+6451,303,2025-02-26 20:00:59,1013.58,Credit Card Payment,17,False,False,False,,credit_card
+6452,101,2025-03-29 20:00:59,-1153.71,Credit Card Payment,17,True,True,False,,checking
+6453,303,2025-03-29 20:00:59,1153.04,Credit Card Payment,17,False,False,False,,credit_card
+6454,101,2025-04-28 20:00:59,-1076.87,Credit Card Payment,17,True,True,False,,checking
+6455,303,2025-04-28 20:00:59,1077.0,Credit Card Payment,17,False,False,False,,credit_card
+6456,101,2025-05-29 20:00:59,-1180.5,Credit Card Payment,17,True,True,False,,checking
+6457,303,2025-05-29 20:00:59,1179.84,Credit Card Payment,17,False,False,False,,credit_card
+6458,101,2025-06-28 20:00:59,-1383.41,Credit Card Payment,17,True,True,False,,checking
+6459,303,2025-06-28 20:00:59,1383.61,Credit Card Payment,17,False,False,False,,credit_card
+6460,101,2025-07-29 20:00:59,-3635.55,Credit Card Payment,17,True,True,False,,checking
+6461,303,2025-07-29 20:00:59,3634.95,Credit Card Payment,17,False,False,False,,credit_card
+6462,101,2025-08-29 20:00:59,-155.23,Credit Card Payment,17,True,True,False,,checking
+6463,303,2025-08-29 20:00:59,155.23,Credit Card Payment,17,False,False,False,,credit_card
+6464,301,2024-08-29 20:00:59,-557.92,Credit Card Payment,17,True,True,False,,checking
+6465,305,2024-08-29 20:00:59,558.12,Credit Card Payment,17,False,False,False,,credit_card
+6466,301,2024-09-28 20:00:59,-454.16,Credit Card Payment,17,True,True,False,,checking
+6467,305,2024-09-28 20:00:59,454.3,Credit Card Payment,17,False,False,False,,credit_card
+6468,301,2024-10-29 20:00:59,-470.98,Credit Card Payment,17,True,True,False,,checking
+6469,305,2024-10-29 20:00:59,470.74,Credit Card Payment,17,False,False,False,,credit_card
+6470,301,2024-11-28 20:00:59,-490.51,Credit Card Payment,17,True,True,False,,checking
+6471,305,2024-11-28 20:00:59,490.71,Credit Card Payment,17,False,False,False,,credit_card
+6472,301,2024-12-29 20:00:59,-788.56,Credit Card Payment,17,True,True,False,,checking
+6473,305,2024-12-29 20:00:59,788.61,Credit Card Payment,17,False,False,False,,credit_card
+6474,301,2025-01-29 20:00:59,-495.87,Credit Card Payment,17,True,True,False,,checking
+6475,305,2025-01-29 20:00:59,495.84,Credit Card Payment,17,False,False,False,,credit_card
+6476,301,2025-02-26 20:00:59,-433.9,Credit Card Payment,17,True,True,False,,checking
+6477,305,2025-02-26 20:00:59,434.27,Credit Card Payment,17,False,False,False,,credit_card
+6478,301,2025-03-29 20:00:59,-533.81,Credit Card Payment,17,True,True,False,,checking
+6479,305,2025-03-29 20:00:59,533.81,Credit Card Payment,17,False,False,False,,credit_card
+6480,301,2025-04-28 20:00:59,-484.94,Credit Card Payment,17,True,True,False,,checking
+6481,305,2025-04-28 20:00:59,485.21,Credit Card Payment,17,False,False,False,,credit_card
+6482,301,2025-05-29 20:00:59,-622.23,Credit Card Payment,17,True,True,False,,checking
+6483,305,2025-05-29 20:00:59,622.2,Credit Card Payment,17,False,False,False,,credit_card
+6484,301,2025-06-28 20:00:59,-447.06,Credit Card Payment,17,True,True,False,,checking
+6485,305,2025-06-28 20:00:59,447.36,Credit Card Payment,17,False,False,False,,credit_card
+6486,301,2025-07-29 20:00:59,-1278.16,Credit Card Payment,17,True,True,False,,checking
+6487,305,2025-07-29 20:00:59,1278.16,Credit Card Payment,17,False,False,False,,credit_card
+6488,301,2025-08-29 20:00:59,-12.64,Credit Card Payment,17,True,True,False,,checking
+6489,305,2025-08-29 20:00:59,13.09,Credit Card Payment,17,False,False,False,,credit_card
+6490,201,2024-08-01 09:15:00,3499.72,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6491,201,2024-08-06 07:30:00,-300.36,Student Loan Payment,6,True,True,False,,checking
+6492,201,2024-08-07 09:00:00,-999.53,Household Contribution Transfer,8,True,False,False,,checking
+6493,101,2024-08-07 09:01:00,1000.17,Household Contribution Received,8,False,False,False,,checking
+6494,304,2024-08-12 06:00:00,-13.15,Spotify Subscription,7,True,False,True,,credit_card
+6495,304,2024-08-08 18:00:00,-79.83,Grocery Store,1,True,False,False,,credit_card
+6496,304,2024-08-08 20:00:00,-34.76,Dinner Out,3,True,False,False,,credit_card
+6497,304,2024-08-08 17:00:00,-22.22,Gas Station,10,True,False,False,,credit_card
+6498,304,2024-08-15 18:00:00,-79.94,Grocery Store,1,True,False,False,,credit_card
+6499,304,2024-08-15 20:00:00,-34.9,Dinner Out,3,True,False,False,,credit_card
+6500,304,2024-08-15 17:00:00,-21.97,Gas Station,10,True,False,False,,credit_card
+6501,304,2024-08-22 18:00:00,-79.87,Grocery Store,1,True,False,False,,credit_card
+6502,304,2024-08-22 20:00:00,-35.46,Dinner Out,3,True,False,False,,credit_card
+6503,304,2024-08-22 17:00:00,-22.0,Gas Station,10,True,False,False,,credit_card
+6504,201,2024-08-27 20:00:00,-423.71,Credit Card Payment,17,True,True,False,,checking
+6505,304,2024-08-27 20:00:00,424.38,Credit Card Payment,17,False,False,False,,credit_card
+6506,201,2024-09-01 09:15:00,3499.87,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6507,201,2024-09-06 07:30:00,-300.48,Student Loan Payment,6,True,True,False,,checking
+6508,201,2024-09-07 09:00:00,-999.83,Household Contribution Transfer,8,True,False,False,,checking
+6509,101,2024-09-07 09:01:00,1000.4,Household Contribution Received,8,False,False,False,,checking
+6510,304,2024-09-12 06:00:00,-12.62,Spotify Subscription,7,True,False,True,,credit_card
+6511,304,2024-09-08 18:00:00,-79.83,Grocery Store,1,True,False,False,,credit_card
+6512,304,2024-09-08 20:00:00,-35.25,Dinner Out,3,True,False,False,,credit_card
+6513,304,2024-09-08 17:00:00,-22.36,Gas Station,10,True,False,False,,credit_card
+6514,304,2024-09-15 18:00:00,-79.81,Grocery Store,1,True,False,False,,credit_card
+6515,304,2024-09-15 20:00:00,-35.48,Dinner Out,3,True,False,False,,credit_card
+6516,304,2024-09-15 17:00:00,-21.85,Gas Station,10,True,False,False,,credit_card
+6517,304,2024-09-22 18:00:00,-79.86,Grocery Store,1,True,False,False,,credit_card
+6518,304,2024-09-22 20:00:00,-34.82,Dinner Out,3,True,False,False,,credit_card
+6519,304,2024-09-22 17:00:00,-22.31,Gas Station,10,True,False,False,,credit_card
+6520,201,2024-09-27 20:00:00,-423.92,Credit Card Payment,17,True,True,False,,checking
+6521,304,2024-09-27 20:00:00,424.23,Credit Card Payment,17,False,False,False,,credit_card
+6522,201,2024-10-01 09:15:00,3499.69,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6523,201,2024-10-06 07:30:00,-299.92,Student Loan Payment,6,True,True,False,,checking
+6524,201,2024-10-07 09:00:00,-1000.22,Household Contribution Transfer,8,True,False,False,,checking
+6525,101,2024-10-07 09:01:00,1000.15,Household Contribution Received,8,False,False,False,,checking
+6526,304,2024-10-12 06:00:00,-13.36,Spotify Subscription,7,True,False,True,,credit_card
+6527,304,2024-10-08 18:00:00,-80.39,Grocery Store,1,True,False,False,,credit_card
+6528,304,2024-10-08 20:00:00,-35.31,Dinner Out,3,True,False,False,,credit_card
+6529,304,2024-10-08 17:00:00,-22.26,Gas Station,10,True,False,False,,credit_card
+6530,304,2024-10-15 18:00:00,-80.16,Grocery Store,1,True,False,False,,credit_card
+6531,304,2024-10-15 20:00:00,-35.14,Dinner Out,3,True,False,False,,credit_card
+6532,304,2024-10-15 17:00:00,-21.62,Gas Station,10,True,False,False,,credit_card
+6533,304,2024-10-22 18:00:00,-79.96,Grocery Store,1,True,False,False,,credit_card
+6534,304,2024-10-22 20:00:00,-35.38,Dinner Out,3,True,False,False,,credit_card
+6535,304,2024-10-22 17:00:00,-22.2,Gas Station,10,True,False,False,,credit_card
+6536,201,2024-10-27 20:00:00,-424.32,Credit Card Payment,17,True,True,False,,checking
+6537,304,2024-10-27 20:00:00,423.69,Credit Card Payment,17,False,False,False,,credit_card
+6538,201,2024-11-01 09:15:00,3499.58,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6539,201,2024-11-06 07:30:00,-299.51,Student Loan Payment,6,True,True,False,,checking
+6540,201,2024-11-07 09:00:00,-1000.14,Household Contribution Transfer,8,True,False,False,,checking
+6541,101,2024-11-07 09:01:00,999.64,Household Contribution Received,8,False,False,False,,checking
+6542,304,2024-11-12 06:00:00,-12.98,Spotify Subscription,7,True,False,True,,credit_card
+6543,304,2024-11-08 18:00:00,-80.1,Grocery Store,1,True,False,False,,credit_card
+6544,304,2024-11-08 20:00:00,-34.88,Dinner Out,3,True,False,False,,credit_card
+6545,304,2024-11-08 17:00:00,-22.06,Gas Station,10,True,False,False,,credit_card
+6546,304,2024-11-15 18:00:00,-80.07,Grocery Store,1,True,False,False,,credit_card
+6547,304,2024-11-15 20:00:00,-34.59,Dinner Out,3,True,False,False,,credit_card
+6548,304,2024-11-15 17:00:00,-22.3,Gas Station,10,True,False,False,,credit_card
+6549,304,2024-11-22 18:00:00,-79.69,Grocery Store,1,True,False,False,,credit_card
+6550,304,2024-11-22 20:00:00,-35.46,Dinner Out,3,True,False,False,,credit_card
+6551,304,2024-11-22 17:00:00,-22.31,Gas Station,10,True,False,False,,credit_card
+6552,201,2024-11-27 20:00:00,-424.06,Credit Card Payment,17,True,True,False,,checking
+6553,304,2024-11-27 20:00:00,424.27,Credit Card Payment,17,False,False,False,,credit_card
+6554,201,2024-12-01 09:15:00,3500.31,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6555,201,2024-12-06 07:30:00,-299.77,Student Loan Payment,6,True,True,False,,checking
+6556,201,2024-12-07 09:00:00,-999.97,Household Contribution Transfer,8,True,False,False,,checking
+6557,101,2024-12-07 09:01:00,999.62,Household Contribution Received,8,False,False,False,,checking
+6558,304,2024-12-12 06:00:00,-12.77,Spotify Subscription,7,True,False,True,,credit_card
+6559,304,2024-12-08 18:00:00,-80.25,Grocery Store,1,True,False,False,,credit_card
+6560,304,2024-12-08 20:00:00,-35.16,Dinner Out,3,True,False,False,,credit_card
+6561,304,2024-12-08 17:00:00,-22.11,Gas Station,10,True,False,False,,credit_card
+6562,304,2024-12-15 18:00:00,-80.08,Grocery Store,1,True,False,False,,credit_card
+6563,304,2024-12-15 20:00:00,-34.82,Dinner Out,3,True,False,False,,credit_card
+6564,304,2024-12-15 17:00:00,-21.78,Gas Station,10,True,False,False,,credit_card
+6565,304,2024-12-22 18:00:00,-80.28,Grocery Store,1,True,False,False,,credit_card
+6566,304,2024-12-22 20:00:00,-35.38,Dinner Out,3,True,False,False,,credit_card
+6567,304,2024-12-22 17:00:00,-22.09,Gas Station,10,True,False,False,,credit_card
+6568,201,2024-12-27 20:00:00,-424.22,Credit Card Payment,17,True,True,False,,checking
+6569,304,2024-12-27 20:00:00,424.17,Credit Card Payment,17,False,False,False,,credit_card
+6570,201,2025-01-01 09:15:00,3499.96,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6571,201,2025-01-06 07:30:00,-299.73,Student Loan Payment,6,True,True,False,,checking
+6572,201,2025-01-07 09:00:00,-1000.37,Household Contribution Transfer,8,True,False,False,,checking
+6573,101,2025-01-07 09:01:00,1000.45,Household Contribution Received,8,False,False,False,,checking
+6574,304,2025-01-12 06:00:00,-13.3,Spotify Subscription,7,True,False,True,,credit_card
+6575,304,2025-01-08 18:00:00,-79.59,Grocery Store,1,True,False,False,,credit_card
+6576,304,2025-01-08 20:00:00,-34.81,Dinner Out,3,True,False,False,,credit_card
+6577,304,2025-01-08 17:00:00,-21.69,Gas Station,10,True,False,False,,credit_card
+6578,304,2025-01-15 18:00:00,-80.1,Grocery Store,1,True,False,False,,credit_card
+6579,304,2025-01-15 20:00:00,-34.86,Dinner Out,3,True,False,False,,credit_card
+6580,304,2025-01-15 17:00:00,-21.88,Gas Station,10,True,False,False,,credit_card
+6581,304,2025-01-22 18:00:00,-79.64,Grocery Store,1,True,False,False,,credit_card
+6582,304,2025-01-22 20:00:00,-35.47,Dinner Out,3,True,False,False,,credit_card
+6583,304,2025-01-22 17:00:00,-22.39,Gas Station,10,True,False,False,,credit_card
+6584,201,2025-01-27 20:00:00,-424.14,Credit Card Payment,17,True,True,False,,checking
+6585,304,2025-01-27 20:00:00,423.66,Credit Card Payment,17,False,False,False,,credit_card
+6586,201,2025-02-01 09:15:00,3500.07,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6587,201,2025-02-06 07:30:00,-300.26,Student Loan Payment,6,True,True,False,,checking
+6588,201,2025-02-07 09:00:00,-1000.38,Household Contribution Transfer,8,True,False,False,,checking
+6589,101,2025-02-07 09:01:00,1000.36,Household Contribution Received,8,False,False,False,,checking
+6590,304,2025-02-12 06:00:00,-12.65,Spotify Subscription,7,True,False,True,,credit_card
+6591,304,2025-02-08 18:00:00,-80.21,Grocery Store,1,True,False,False,,credit_card
+6592,304,2025-02-08 20:00:00,-34.63,Dinner Out,3,True,False,False,,credit_card
+6593,304,2025-02-08 17:00:00,-22.24,Gas Station,10,True,False,False,,credit_card
+6594,304,2025-02-15 18:00:00,-79.85,Grocery Store,1,True,False,False,,credit_card
+6595,304,2025-02-15 20:00:00,-34.65,Dinner Out,3,True,False,False,,credit_card
+6596,304,2025-02-15 17:00:00,-21.78,Gas Station,10,True,False,False,,credit_card
+6597,304,2025-02-22 18:00:00,-79.72,Grocery Store,1,True,False,False,,credit_card
+6598,304,2025-02-22 20:00:00,-35.07,Dinner Out,3,True,False,False,,credit_card
+6599,304,2025-02-22 17:00:00,-21.8,Gas Station,10,True,False,False,,credit_card
+6600,201,2025-02-27 20:00:00,-423.79,Credit Card Payment,17,True,True,False,,checking
+6601,304,2025-02-27 20:00:00,424.44,Credit Card Payment,17,False,False,False,,credit_card
+6602,201,2025-03-01 09:15:00,3500.01,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6603,201,2025-03-06 07:30:00,-300.02,Student Loan Payment,6,True,True,False,,checking
+6604,201,2025-03-07 09:00:00,-1000.16,Household Contribution Transfer,8,True,False,False,,checking
+6605,101,2025-03-07 09:01:00,1000.18,Household Contribution Received,8,False,False,False,,checking
+6606,304,2025-03-12 06:00:00,-13.18,Spotify Subscription,7,True,False,True,,credit_card
+6607,304,2025-03-08 18:00:00,-80.39,Grocery Store,1,True,False,False,,credit_card
+6608,304,2025-03-08 20:00:00,-35.21,Dinner Out,3,True,False,False,,credit_card
+6609,304,2025-03-08 17:00:00,-22.4,Gas Station,10,True,False,False,,credit_card
+6610,304,2025-03-15 18:00:00,-80.18,Grocery Store,1,True,False,False,,credit_card
+6611,304,2025-03-15 20:00:00,-35.33,Dinner Out,3,True,False,False,,credit_card
+6612,304,2025-03-15 17:00:00,-21.86,Gas Station,10,True,False,False,,credit_card
+6613,304,2025-03-22 18:00:00,-79.57,Grocery Store,1,True,False,False,,credit_card
+6614,304,2025-03-22 20:00:00,-34.83,Dinner Out,3,True,False,False,,credit_card
+6615,304,2025-03-22 17:00:00,-21.79,Gas Station,10,True,False,False,,credit_card
+6616,201,2025-03-27 20:00:00,-424.05,Credit Card Payment,17,True,True,False,,checking
+6617,304,2025-03-27 20:00:00,424.33,Credit Card Payment,17,False,False,False,,credit_card
+6618,201,2025-04-01 09:15:00,3500.38,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6619,201,2025-04-06 07:30:00,-300.06,Student Loan Payment,6,True,True,False,,checking
+6620,201,2025-04-07 09:00:00,-1000.19,Household Contribution Transfer,8,True,False,False,,checking
+6621,101,2025-04-07 09:01:00,999.79,Household Contribution Received,8,False,False,False,,checking
+6622,304,2025-04-12 06:00:00,-13.14,Spotify Subscription,7,True,False,True,,credit_card
+6623,304,2025-04-08 18:00:00,-80.17,Grocery Store,1,True,False,False,,credit_card
+6624,304,2025-04-08 20:00:00,-34.81,Dinner Out,3,True,False,False,,credit_card
+6625,304,2025-04-08 17:00:00,-21.73,Gas Station,10,True,False,False,,credit_card
+6626,304,2025-04-15 18:00:00,-79.93,Grocery Store,1,True,False,False,,credit_card
+6627,304,2025-04-15 20:00:00,-35.32,Dinner Out,3,True,False,False,,credit_card
+6628,304,2025-04-15 17:00:00,-21.51,Gas Station,10,True,False,False,,credit_card
+6629,304,2025-04-22 18:00:00,-79.77,Grocery Store,1,True,False,False,,credit_card
+6630,304,2025-04-22 20:00:00,-34.81,Dinner Out,3,True,False,False,,credit_card
+6631,304,2025-04-22 17:00:00,-21.58,Gas Station,10,True,False,False,,credit_card
+6632,201,2025-04-27 20:00:00,-424.26,Credit Card Payment,17,True,True,False,,checking
+6633,304,2025-04-27 20:00:00,424.33,Credit Card Payment,17,False,False,False,,credit_card
+6634,201,2025-05-01 09:15:00,3500.46,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6635,201,2025-05-06 07:30:00,-300.41,Student Loan Payment,6,True,True,False,,checking
+6636,201,2025-05-07 09:00:00,-1000.32,Household Contribution Transfer,8,True,False,False,,checking
+6637,101,2025-05-07 09:01:00,999.55,Household Contribution Received,8,False,False,False,,checking
+6638,304,2025-05-12 06:00:00,-12.69,Spotify Subscription,7,True,False,True,,credit_card
+6639,304,2025-05-08 18:00:00,-80.1,Grocery Store,1,True,False,False,,credit_card
+6640,304,2025-05-08 20:00:00,-34.62,Dinner Out,3,True,False,False,,credit_card
+6641,304,2025-05-08 17:00:00,-21.53,Gas Station,10,True,False,False,,credit_card
+6642,304,2025-05-15 18:00:00,-80.11,Grocery Store,1,True,False,False,,credit_card
+6643,304,2025-05-15 20:00:00,-35.18,Dinner Out,3,True,False,False,,credit_card
+6644,304,2025-05-15 17:00:00,-22.47,Gas Station,10,True,False,False,,credit_card
+6645,304,2025-05-22 18:00:00,-79.83,Grocery Store,1,True,False,False,,credit_card
+6646,304,2025-05-22 20:00:00,-34.56,Dinner Out,3,True,False,False,,credit_card
+6647,304,2025-05-22 17:00:00,-22.39,Gas Station,10,True,False,False,,credit_card
+6648,201,2025-05-27 20:00:00,-423.55,Credit Card Payment,17,True,True,False,,checking
+6649,304,2025-05-27 20:00:00,423.82,Credit Card Payment,17,False,False,False,,credit_card
+6650,201,2025-06-01 09:15:00,3499.76,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6651,201,2025-06-06 07:30:00,-300.05,Student Loan Payment,6,True,True,False,,checking
+6652,201,2025-06-07 09:00:00,-1000.31,Household Contribution Transfer,8,True,False,False,,checking
+6653,101,2025-06-07 09:01:00,999.77,Household Contribution Received,8,False,False,False,,checking
+6654,304,2025-06-12 06:00:00,-13.4,Spotify Subscription,7,True,False,True,,credit_card
+6655,304,2025-06-08 18:00:00,-79.66,Grocery Store,1,True,False,False,,credit_card
+6656,304,2025-06-08 20:00:00,-34.62,Dinner Out,3,True,False,False,,credit_card
+6657,304,2025-06-08 17:00:00,-22.13,Gas Station,10,True,False,False,,credit_card
+6658,304,2025-06-15 18:00:00,-80.08,Grocery Store,1,True,False,False,,credit_card
+6659,304,2025-06-15 20:00:00,-34.8,Dinner Out,3,True,False,False,,credit_card
+6660,304,2025-06-15 17:00:00,-21.75,Gas Station,10,True,False,False,,credit_card
+6661,304,2025-06-22 18:00:00,-79.73,Grocery Store,1,True,False,False,,credit_card
+6662,304,2025-06-22 20:00:00,-35.23,Dinner Out,3,True,False,False,,credit_card
+6663,304,2025-06-22 17:00:00,-22.16,Gas Station,10,True,False,False,,credit_card
+6664,201,2025-06-27 20:00:00,-424.2,Credit Card Payment,17,True,True,False,,checking
+6665,304,2025-06-27 20:00:00,424.13,Credit Card Payment,17,False,False,False,,credit_card
+6666,201,2025-07-01 09:15:00,3499.71,Monthly Salary Direct Deposit,5,False,False,False,,checking
+6667,201,2025-07-06 07:30:00,-300.41,Student Loan Payment,6,True,True,False,,checking
+6668,201,2025-07-07 09:00:00,-999.58,Household Contribution Transfer,8,True,False,False,,checking
+6669,101,2025-07-07 09:01:00,999.9,Household Contribution Received,8,False,False,False,,checking
+6670,304,2025-07-12 06:00:00,-13.26,Spotify Subscription,7,True,False,True,,credit_card
+6671,304,2025-07-08 18:00:00,-79.52,Grocery Store,1,True,False,False,,credit_card
+6672,304,2025-07-08 20:00:00,-34.53,Dinner Out,3,True,False,False,,credit_card
+6673,304,2025-07-08 17:00:00,-21.85,Gas Station,10,True,False,False,,credit_card
+6674,304,2025-07-15 18:00:00,-79.97,Grocery Store,1,True,False,False,,credit_card
+6675,304,2025-07-15 20:00:00,-35.49,Dinner Out,3,True,False,False,,credit_card
+6676,304,2025-07-15 17:00:00,-21.84,Gas Station,10,True,False,False,,credit_card
+6677,304,2025-07-22 18:00:00,-79.65,Grocery Store,1,True,False,False,,credit_card
+6678,304,2025-07-22 20:00:00,-35.08,Dinner Out,3,True,False,False,,credit_card
+6679,304,2025-07-22 17:00:00,-21.56,Gas Station,10,True,False,False,,credit_card
+6680,201,2025-07-27 20:00:00,-424.23,Credit Card Payment,17,True,True,False,,checking
+6681,304,2025-07-27 20:00:00,423.54,Credit Card Payment,17,False,False,False,,credit_card
+6690,306,2024-08-03 09:00:00,800.02,Mortgage Principal Payment,19,False,False,False,,mortgage
+6691,101,2024-08-15 10:00:00,-500.2,Transfer to Brokerage,22,True,False,False,,checking
+6692,307,2024-08-15 10:01:00,499.9,Transfer from Checking,22,False,False,False,,investment
+6693,306,2024-09-03 09:00:00,800.41,Mortgage Principal Payment,19,False,False,False,,mortgage
+6694,101,2024-09-15 10:00:00,-499.56,Transfer to Brokerage,22,True,False,False,,checking
+6695,307,2024-09-15 10:01:00,499.66,Transfer from Checking,22,False,False,False,,investment
+6696,307,2024-09-25 12:00:00,199.52,Quarterly Dividend,21,False,False,False,,investment
+6697,306,2024-10-03 09:00:00,800.01,Mortgage Principal Payment,19,False,False,False,,mortgage
+6698,101,2024-10-15 10:00:00,-499.68,Transfer to Brokerage,22,True,False,False,,checking
+6699,307,2024-10-15 10:01:00,500.42,Transfer from Checking,22,False,False,False,,investment
+6700,306,2024-11-03 09:00:00,800.24,Mortgage Principal Payment,19,False,False,False,,mortgage
+6701,101,2024-11-15 10:00:00,-500.22,Transfer to Brokerage,22,True,False,False,,checking
+6702,307,2024-11-15 10:01:00,499.86,Transfer from Checking,22,False,False,False,,investment
+6703,306,2024-12-03 09:00:00,800.4,Mortgage Principal Payment,19,False,False,False,,mortgage
+6704,101,2024-12-15 10:00:00,-500.22,Transfer to Brokerage,22,True,False,False,,checking
+6705,307,2024-12-15 10:01:00,500.09,Transfer from Checking,22,False,False,False,,investment
+6706,307,2024-12-25 12:00:00,200.36,Quarterly Dividend,21,False,False,False,,investment
+6707,306,2025-01-03 09:00:00,799.86,Mortgage Principal Payment,19,False,False,False,,mortgage
+6708,101,2025-01-15 10:00:00,-499.73,Transfer to Brokerage,22,True,False,False,,checking
+6709,307,2025-01-15 10:01:00,499.75,Transfer from Checking,22,False,False,False,,investment
+6710,306,2025-02-03 09:00:00,799.96,Mortgage Principal Payment,19,False,False,False,,mortgage
+6711,101,2025-02-15 10:00:00,-500.42,Transfer to Brokerage,22,True,False,False,,checking
+6712,307,2025-02-15 10:01:00,500.15,Transfer from Checking,22,False,False,False,,investment
+6713,306,2025-03-03 09:00:00,799.72,Mortgage Principal Payment,19,False,False,False,,mortgage
+6714,101,2025-03-15 10:00:00,-500.3,Transfer to Brokerage,22,True,False,False,,checking
+6715,307,2025-03-15 10:01:00,499.57,Transfer from Checking,22,False,False,False,,investment
+6716,307,2025-03-25 12:00:00,199.99,Quarterly Dividend,21,False,False,False,,investment
+6717,306,2025-04-03 09:00:00,800.08,Mortgage Principal Payment,19,False,False,False,,mortgage
+6718,101,2025-04-15 10:00:00,-500.08,Transfer to Brokerage,22,True,False,False,,checking
+6719,307,2025-04-15 10:01:00,499.62,Transfer from Checking,22,False,False,False,,investment
+6720,306,2025-05-03 09:00:00,799.74,Mortgage Principal Payment,19,False,False,False,,mortgage
+6721,101,2025-05-15 10:00:00,-499.86,Transfer to Brokerage,22,True,False,False,,checking
+6722,307,2025-05-15 10:01:00,500.46,Transfer from Checking,22,False,False,False,,investment
+6723,306,2025-06-03 09:00:00,799.63,Mortgage Principal Payment,19,False,False,False,,mortgage
+6724,101,2025-06-15 10:00:00,-500.35,Transfer to Brokerage,22,True,False,False,,checking
+6725,307,2025-06-15 10:01:00,499.79,Transfer from Checking,22,False,False,False,,investment
+6726,307,2025-06-25 12:00:00,199.77,Quarterly Dividend,21,False,False,False,,investment
+6727,306,2025-07-03 09:00:00,800.4,Mortgage Principal Payment,19,False,False,False,,mortgage
+6728,101,2025-07-15 10:00:00,-499.55,Transfer to Brokerage,22,True,False,False,,checking
+6729,307,2025-07-15 10:01:00,500.04,Transfer from Checking,22,False,False,False,,investment
+6730,308,2024-08-05 07:35:00,100.03,Student Loan Principal Payment,20,False,False,False,,student_loan
+6731,301,2024-08-18 11:00:00,-199.9,Transfer to Brokerage,22,True,False,False,,checking
+6732,309,2024-08-18 11:01:00,200.15,Transfer from Checking,22,False,False,False,,investment
+6733,308,2024-09-05 07:35:00,100.33,Student Loan Principal Payment,20,False,False,False,,student_loan
+6734,301,2024-09-18 11:00:00,-199.96,Transfer to Brokerage,22,True,False,False,,checking
+6735,309,2024-09-18 11:01:00,199.82,Transfer from Checking,22,False,False,False,,investment
+6736,308,2024-10-05 07:35:00,99.85,Student Loan Principal Payment,20,False,False,False,,student_loan
+6737,301,2024-10-18 11:00:00,-199.57,Transfer to Brokerage,22,True,False,False,,checking
+6738,309,2024-10-18 11:01:00,200.34,Transfer from Checking,22,False,False,False,,investment
+6739,308,2024-11-05 07:35:00,100.26,Student Loan Principal Payment,20,False,False,False,,student_loan
+6740,301,2024-11-18 11:00:00,-200.46,Transfer to Brokerage,22,True,False,False,,checking
+6741,309,2024-11-18 11:01:00,199.54,Transfer from Checking,22,False,False,False,,investment
+6742,308,2024-12-05 07:35:00,99.93,Student Loan Principal Payment,20,False,False,False,,student_loan
+6743,301,2024-12-18 11:00:00,-199.98,Transfer to Brokerage,22,True,False,False,,checking
+6744,309,2024-12-18 11:01:00,199.77,Transfer from Checking,22,False,False,False,,investment
+6745,309,2024-12-27 14:00:00,50.26,Starbucks Coffee,21,False,False,False,,investment
+6746,308,2025-01-05 07:35:00,100.3,Student Loan Principal Payment,20,False,False,False,,student_loan
+6747,301,2025-01-18 11:00:00,-199.89,Transfer to Brokerage,22,True,False,False,,checking
+6748,309,2025-01-18 11:01:00,199.61,Transfer from Checking,22,False,False,False,,investment
+6749,308,2025-02-05 07:35:00,100.22,Student Loan Principal Payment,20,False,False,False,,student_loan
+6750,301,2025-02-18 11:00:00,-199.78,Transfer to Brokerage,22,True,False,False,,checking
+6751,309,2025-02-18 11:01:00,200.03,Transfer from Checking,22,False,False,False,,investment
+6752,308,2025-03-05 07:35:00,100.14,Student Loan Principal Payment,20,False,False,False,,student_loan
+6753,301,2025-03-18 11:00:00,-200.07,Transfer to Brokerage,22,True,False,False,,checking
+6754,309,2025-03-18 11:01:00,199.81,Transfer from Checking,22,False,False,False,,investment
+6755,308,2025-04-05 07:35:00,100.25,Student Loan Principal Payment,20,False,False,False,,student_loan
+6756,301,2025-04-18 11:00:00,-199.93,Transfer to Brokerage,22,True,False,False,,checking
+6757,309,2025-04-18 11:01:00,200.09,Transfer from Checking,22,False,False,False,,investment
+6758,308,2025-05-05 07:35:00,99.87,Student Loan Principal Payment,20,False,False,False,,student_loan
+6759,301,2025-05-18 11:00:00,-200.48,Transfer to Brokerage,22,True,False,False,,checking
+6760,309,2025-05-18 11:01:00,199.91,Transfer from Checking,22,False,False,False,,investment
+6761,308,2025-06-05 07:35:00,99.54,Student Loan Principal Payment,20,False,False,False,,student_loan
+6762,301,2025-06-18 11:00:00,-199.6,Transfer to Brokerage,22,True,False,False,,checking
+6763,309,2025-06-18 11:01:00,199.52,Transfer from Checking,22,False,False,False,,investment
+6764,309,2025-06-27 14:00:00,49.54,Shell Gas Station,21,False,False,False,,investment
+6765,308,2025-07-05 07:35:00,100.35,Student Loan Principal Payment,20,False,False,False,,student_loan
+6766,301,2025-07-18 11:00:00,-199.68,Transfer to Brokerage,22,True,False,False,,checking
+6767,309,2025-07-18 11:01:00,200.24,Transfer from Checking,22,False,False,False,,investment
+6768,310,2024-08-06 07:40:00,150.24,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6769,310,2024-09-06 07:40:00,150.23,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6770,310,2024-10-06 07:40:00,150.05,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6771,310,2024-11-06 07:40:00,149.95,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6772,310,2024-12-06 07:40:00,150.24,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6773,310,2025-01-06 07:40:00,150.09,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6774,310,2025-02-06 07:40:00,149.82,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6775,310,2025-03-06 07:40:00,150.21,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6776,310,2025-04-06 07:40:00,150.3,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6777,310,2025-05-06 07:40:00,149.72,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6778,310,2025-06-06 07:40:00,150.21,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6779,310,2025-07-06 07:40:00,150.23,Auto Loan Principal Payment,23,False,False,False,,auto_loan
+6793,303,2024-08-17 18:00:00,-129.78,Grocery Store Extra,1,True,False,False,,credit_card
+6794,303,2024-08-13 20:00:00,-81.56,Dinner Out Extra,3,True,False,False,,credit_card
+6795,303,2024-08-08 17:00:00,-49.38,Gas Station Extra,10,True,False,False,,credit_card
+6796,303,2024-09-05 18:00:00,-147.83,Grocery Store Extra,1,True,False,False,,credit_card
+6797,303,2024-09-19 20:00:00,-75.21,Dinner Out Extra,3,True,False,False,,credit_card
+6798,303,2024-09-20 17:00:00,-29.62,Gas Station Extra,10,True,False,False,,credit_card
+6799,303,2024-10-14 18:00:00,-100.59,Grocery Store Extra,1,True,False,False,,credit_card
+6800,303,2024-10-11 20:00:00,-85.31,Dinner Out Extra,3,True,False,False,,credit_card
+6801,303,2024-10-12 17:00:00,-47.28,Gas Station Extra,10,True,False,False,,credit_card
+6802,303,2024-11-21 18:00:00,-100.33,Grocery Store Extra,1,True,False,False,,credit_card
+6803,303,2024-11-05 20:00:00,-44.03,Dinner Out Extra,3,True,False,False,,credit_card
+6804,303,2024-11-15 17:00:00,-26.87,Gas Station Extra,10,True,False,False,,credit_card
+6805,303,2024-12-09 18:00:00,-134.44,Grocery Store Extra,1,True,False,False,,credit_card
+6806,303,2024-12-17 20:00:00,-75.49,Dinner Out Extra,3,True,False,False,,credit_card
+6807,303,2024-12-05 17:00:00,-37.41,Gas Station Extra,10,True,False,False,,credit_card
+6808,303,2025-01-24 18:00:00,-140.73,Grocery Store Extra,1,True,False,False,,credit_card
+6809,303,2025-01-19 20:00:00,-76.66,Dinner Out Extra,3,True,False,False,,credit_card
+6810,303,2025-01-08 17:00:00,-41.57,Gas Station Extra,10,True,False,False,,credit_card
+6811,303,2025-02-15 18:00:00,-63.96,Grocery Store Extra,1,True,False,False,,credit_card
+6812,303,2025-02-07 20:00:00,-70.73,Dinner Out Extra,3,True,False,False,,credit_card
+6813,303,2025-02-11 17:00:00,-51.12,Gas Station Extra,10,True,False,False,,credit_card
+6814,303,2025-03-24 18:00:00,-89.54,Grocery Store Extra,1,True,False,False,,credit_card
+6815,303,2025-03-05 20:00:00,-51.93,Dinner Out Extra,3,True,False,False,,credit_card
+6816,303,2025-03-13 17:00:00,-32.04,Gas Station Extra,10,True,False,False,,credit_card
+6817,303,2025-04-18 18:00:00,-71.58,Grocery Store Extra,1,True,False,False,,credit_card
+6818,303,2025-04-13 20:00:00,-43.7,Dinner Out Extra,3,True,False,False,,credit_card
+6819,303,2025-04-23 17:00:00,-48.75,Gas Station Extra,10,True,False,False,,credit_card
+6820,303,2025-05-13 18:00:00,-135.11,Grocery Store Extra,1,True,False,False,,credit_card
+6821,303,2025-05-06 20:00:00,-71.72,Dinner Out Extra,3,True,False,False,,credit_card
+6822,303,2025-05-10 17:00:00,-53.8,Gas Station Extra,10,True,False,False,,credit_card
+6823,303,2025-06-21 18:00:00,-132.84,Grocery Store Extra,1,True,False,False,,credit_card
+6824,303,2025-06-12 20:00:00,-47.27,Dinner Out Extra,3,True,False,False,,credit_card
+6825,303,2025-06-17 17:00:00,-49.18,Gas Station Extra,10,True,False,False,,credit_card
+6826,303,2025-07-06 18:00:00,-77.99,Grocery Store Extra,1,True,False,False,,credit_card
+6827,303,2025-07-20 20:00:00,-30.01,Dinner Out Extra,3,True,False,False,,credit_card
+6828,303,2025-07-20 17:00:00,-48.17,Gas Station Extra,10,True,False,False,,credit_card
+6829,304,2024-08-09 18:00:00,-123.06,Grocery Store Extra,1,True,False,False,,credit_card
+6830,304,2024-08-20 20:00:00,-57.2,Dinner Out Extra,3,True,False,False,,credit_card
+6831,304,2024-08-04 17:00:00,-44.52,Gas Station Extra,10,True,False,False,,credit_card
+6832,304,2024-09-06 18:00:00,-70.68,Grocery Store Extra,1,True,False,False,,credit_card
+6833,304,2024-09-17 20:00:00,-70.1,Dinner Out Extra,3,True,False,False,,credit_card
+6834,304,2024-09-13 17:00:00,-45.2,Gas Station Extra,10,True,False,False,,credit_card
+6835,304,2024-10-16 18:00:00,-128.69,Grocery Store Extra,1,True,False,False,,credit_card
+6836,304,2024-10-17 20:00:00,-62.76,Dinner Out Extra,3,True,False,False,,credit_card
+6837,304,2024-10-20 17:00:00,-44.55,Gas Station Extra,10,True,False,False,,credit_card
+6838,304,2024-11-10 18:00:00,-62.68,Grocery Store Extra,1,True,False,False,,credit_card
+6839,304,2024-11-24 20:00:00,-56.43,Dinner Out Extra,3,True,False,False,,credit_card
+6840,304,2024-11-08 17:00:00,-39.3,Gas Station Extra,10,True,False,False,,credit_card
+6841,304,2024-12-04 18:00:00,-137.25,Grocery Store Extra,1,True,False,False,,credit_card
+6842,304,2024-12-08 20:00:00,-33.63,Dinner Out Extra,3,True,False,False,,credit_card
+6843,304,2024-12-23 17:00:00,-35.19,Gas Station Extra,10,True,False,False,,credit_card
+6844,304,2025-01-10 18:00:00,-119.53,Grocery Store Extra,1,True,False,False,,credit_card
+6845,304,2025-01-14 20:00:00,-63.05,Dinner Out Extra,3,True,False,False,,credit_card
+6846,304,2025-01-20 17:00:00,-48.69,Gas Station Extra,10,True,False,False,,credit_card
+6847,304,2025-02-12 18:00:00,-96.81,Grocery Store Extra,1,True,False,False,,credit_card
+6848,304,2025-02-21 20:00:00,-40.02,Dinner Out Extra,3,True,False,False,,credit_card
+6849,304,2025-02-06 17:00:00,-26.08,Gas Station Extra,10,True,False,False,,credit_card
+6850,304,2025-03-05 18:00:00,-124.93,Grocery Store Extra,1,True,False,False,,credit_card
+6851,304,2025-03-19 20:00:00,-57.46,Dinner Out Extra,3,True,False,False,,credit_card
+6852,304,2025-03-07 17:00:00,-42.23,Gas Station Extra,10,True,False,False,,credit_card
+6853,304,2025-04-14 18:00:00,-73.71,Grocery Store Extra,1,True,False,False,,credit_card
+6854,304,2025-04-18 20:00:00,-57.09,Dinner Out Extra,3,True,False,False,,credit_card
+6855,304,2025-04-09 17:00:00,-38.34,Gas Station Extra,10,True,False,False,,credit_card
+6856,304,2025-05-10 18:00:00,-116.69,Grocery Store Extra,1,True,False,False,,credit_card
+6857,304,2025-05-24 20:00:00,-51.39,Dinner Out Extra,3,True,False,False,,credit_card
+6858,304,2025-05-05 17:00:00,-29.6,Gas Station Extra,10,True,False,False,,credit_card
+6859,304,2025-06-11 18:00:00,-146.84,Grocery Store Extra,1,True,False,False,,credit_card
+6860,304,2025-06-23 20:00:00,-72.27,Dinner Out Extra,3,True,False,False,,credit_card
+6861,304,2025-06-20 17:00:00,-34.01,Gas Station Extra,10,True,False,False,,credit_card
+6862,304,2025-07-24 18:00:00,-129.65,Grocery Store Extra,1,True,False,False,,credit_card
+6863,304,2025-07-20 20:00:00,-73.01,Dinner Out Extra,3,True,False,False,,credit_card
+6864,304,2025-07-13 17:00:00,-34.65,Gas Station Extra,10,True,False,False,,credit_card
+6865,305,2024-08-13 18:00:00,-68.68,Grocery Store Extra,1,True,False,False,,credit_card
+6866,305,2024-08-22 20:00:00,-57.68,Dinner Out Extra,3,True,False,False,,credit_card
+6867,305,2024-08-19 17:00:00,-32.35,Gas Station Extra,10,True,False,False,,credit_card
+6868,305,2024-09-10 18:00:00,-111.82,Grocery Store Extra,1,True,False,False,,credit_card
+6869,305,2024-09-13 20:00:00,-40.48,Dinner Out Extra,3,True,False,False,,credit_card
+6870,305,2024-09-21 17:00:00,-51.83,Gas Station Extra,10,True,False,False,,credit_card
+6871,305,2024-10-17 18:00:00,-124.92,Grocery Store Extra,1,True,False,False,,credit_card
+6872,305,2024-10-13 20:00:00,-67.54,Dinner Out Extra,3,True,False,False,,credit_card
+6873,305,2024-10-05 17:00:00,-45.62,Gas Station Extra,10,True,False,False,,credit_card
+6874,305,2024-11-17 18:00:00,-67.6,Grocery Store Extra,1,True,False,False,,credit_card
+6875,305,2024-11-20 20:00:00,-54.74,Dinner Out Extra,3,True,False,False,,credit_card
+6876,305,2024-11-04 17:00:00,-42.22,Gas Station Extra,10,True,False,False,,credit_card
+6877,305,2024-12-17 18:00:00,-89.81,Grocery Store Extra,1,True,False,False,,credit_card
+6878,305,2024-12-07 20:00:00,-36.2,Dinner Out Extra,3,True,False,False,,credit_card
+6879,305,2024-12-20 17:00:00,-45.62,Gas Station Extra,10,True,False,False,,credit_card
+6880,305,2025-01-07 18:00:00,-143.67,Grocery Store Extra,1,True,False,False,,credit_card
+6881,305,2025-01-13 20:00:00,-65.21,Dinner Out Extra,3,True,False,False,,credit_card
+6882,305,2025-01-11 17:00:00,-45.77,Gas Station Extra,10,True,False,False,,credit_card
+6883,305,2025-02-07 18:00:00,-61.89,Grocery Store Extra,1,True,False,False,,credit_card
+6884,305,2025-02-24 20:00:00,-59.33,Dinner Out Extra,3,True,False,False,,credit_card
+6885,305,2025-02-05 17:00:00,-52.69,Gas Station Extra,10,True,False,False,,credit_card
+6886,305,2025-03-05 18:00:00,-103.56,Grocery Store Extra,1,True,False,False,,credit_card
+6887,305,2025-03-13 20:00:00,-59.37,Dinner Out Extra,3,True,False,False,,credit_card
+6888,305,2025-03-23 17:00:00,-44.84,Gas Station Extra,10,True,False,False,,credit_card
+6889,305,2025-04-20 18:00:00,-102.3,Grocery Store Extra,1,True,False,False,,credit_card
+6890,305,2025-04-09 20:00:00,-49.93,Dinner Out Extra,3,True,False,False,,credit_card
+6891,305,2025-04-21 17:00:00,-42.95,Gas Station Extra,10,True,False,False,,credit_card
+6892,305,2025-05-13 18:00:00,-62.06,Grocery Store Extra,1,True,False,False,,credit_card
+6893,305,2025-05-04 20:00:00,-79.58,Dinner Out Extra,3,True,False,False,,credit_card
+6894,305,2025-05-22 17:00:00,-29.73,Gas Station Extra,10,True,False,False,,credit_card
+6895,305,2025-06-10 18:00:00,-110.1,Grocery Store Extra,1,True,False,False,,credit_card
+6896,305,2025-06-06 20:00:00,-70.05,Dinner Out Extra,3,True,False,False,,credit_card
+6897,305,2025-06-09 17:00:00,-34.84,Gas Station Extra,10,True,False,False,,credit_card
+6898,305,2025-07-17 18:00:00,-124.95,Grocery Store Extra,1,True,False,False,,credit_card
+6899,305,2025-07-10 20:00:00,-75.71,Dinner Out Extra,3,True,False,False,,credit_card
+6900,305,2025-07-06 17:00:00,-56.94,Gas Station Extra,10,True,False,False,,credit_card
+6914,303,2024-08-12 00:00:00,-15.9,Netflix Subscription,7,True,False,True,,credit_card
+6915,303,2024-08-12 00:00:00,-11.59,Hulu Subscription,7,True,False,True,,credit_card
+6916,303,2024-08-12 00:00:00,-3.05,Apple iCloud Storage,7,True,False,True,,credit_card
+6917,303,2024-09-12 00:00:00,-15.02,Netflix Subscription,7,True,False,True,,credit_card
+6918,303,2024-09-12 00:00:00,-12.38,Hulu Subscription,7,True,False,True,,credit_card
+6919,303,2024-09-12 00:00:00,-2.67,Apple iCloud Storage,7,True,False,True,,credit_card
+6920,303,2024-10-12 00:00:00,-15.16,Netflix Subscription,7,True,False,True,,credit_card
+6921,303,2024-10-12 00:00:00,-11.64,Hulu Subscription,7,True,False,True,,credit_card
+6922,303,2024-10-12 00:00:00,-3.04,Apple iCloud Storage,7,True,False,True,,credit_card
+6923,303,2024-11-12 00:00:00,-15.97,Netflix Subscription,7,True,False,True,,credit_card
+6924,303,2024-11-12 00:00:00,-11.65,Hulu Subscription,7,True,False,True,,credit_card
+6925,303,2024-11-12 00:00:00,-2.69,Apple iCloud Storage,7,True,False,True,,credit_card
+6926,303,2024-12-12 00:00:00,-15.45,Netflix Subscription,7,True,False,True,,credit_card
+6927,303,2024-12-12 00:00:00,-12.09,Hulu Subscription,7,True,False,True,,credit_card
+6928,303,2024-12-12 00:00:00,-3.35,Apple iCloud Storage,7,True,False,True,,credit_card
+6929,303,2025-01-12 00:00:00,-15.38,Netflix Subscription,7,True,False,True,,credit_card
+6930,303,2025-01-12 00:00:00,-11.57,Hulu Subscription,7,True,False,True,,credit_card
+6931,303,2025-01-12 00:00:00,-2.75,Apple iCloud Storage,7,True,False,True,,credit_card
+6932,303,2025-02-12 00:00:00,-15.22,Netflix Subscription,7,True,False,True,,credit_card
+6933,303,2025-02-12 00:00:00,-12.22,Hulu Subscription,7,True,False,True,,credit_card
+6934,303,2025-02-12 00:00:00,-3.15,Apple iCloud Storage,7,True,False,True,,credit_card
+6935,303,2025-03-12 00:00:00,-15.86,Netflix Subscription,7,True,False,True,,credit_card
+6936,303,2025-03-12 00:00:00,-12.07,Hulu Subscription,7,True,False,True,,credit_card
+6937,303,2025-03-12 00:00:00,-2.99,Apple iCloud Storage,7,True,False,True,,credit_card
+6938,303,2025-04-12 00:00:00,-15.28,Netflix Subscription,7,True,False,True,,credit_card
+6939,303,2025-04-12 00:00:00,-11.51,Hulu Subscription,7,True,False,True,,credit_card
+6940,303,2025-04-12 00:00:00,-3.29,Apple iCloud Storage,7,True,False,True,,credit_card
+6941,303,2025-05-12 00:00:00,-15.64,Netflix Subscription,7,True,False,True,,credit_card
+6942,303,2025-05-12 00:00:00,-12.41,Hulu Subscription,7,True,False,True,,credit_card
+6943,303,2025-05-12 00:00:00,-3.07,Apple iCloud Storage,7,True,False,True,,credit_card
+6944,303,2025-06-12 00:00:00,-15.57,Netflix Subscription,7,True,False,True,,credit_card
+6945,303,2025-06-12 00:00:00,-11.66,Hulu Subscription,7,True,False,True,,credit_card
+6946,303,2025-06-12 00:00:00,-2.81,Apple iCloud Storage,7,True,False,True,,credit_card
+6947,303,2025-07-12 00:00:00,-15.23,Netflix Subscription,7,True,False,True,,credit_card
+6948,303,2025-07-12 00:00:00,-11.63,Hulu Subscription,7,True,False,True,,credit_card
+6949,303,2025-07-12 00:00:00,-3.28,Apple iCloud Storage,7,True,False,True,,credit_card
+6950,304,2024-08-12 00:00:00,-15.37,Netflix Subscription,7,True,False,True,,credit_card
+6951,304,2024-08-12 00:00:00,-12.26,Hulu Subscription,7,True,False,True,,credit_card
+6952,304,2024-08-12 00:00:00,-2.53,Apple iCloud Storage,7,True,False,True,,credit_card
+6953,304,2024-09-12 00:00:00,-15.96,Netflix Subscription,7,True,False,True,,credit_card
+6954,304,2024-09-12 00:00:00,-11.51,Hulu Subscription,7,True,False,True,,credit_card
+6955,304,2024-09-12 00:00:00,-2.81,Apple iCloud Storage,7,True,False,True,,credit_card
+6956,304,2024-10-12 00:00:00,-15.17,Netflix Subscription,7,True,False,True,,credit_card
+6957,304,2024-10-12 00:00:00,-11.85,Hulu Subscription,7,True,False,True,,credit_card
+6958,304,2024-10-12 00:00:00,-2.87,Apple iCloud Storage,7,True,False,True,,credit_card
+6959,304,2024-11-12 00:00:00,-15.39,Netflix Subscription,7,True,False,True,,credit_card
+6960,304,2024-11-12 00:00:00,-11.57,Hulu Subscription,7,True,False,True,,credit_card
+6961,304,2024-11-12 00:00:00,-3.44,Apple iCloud Storage,7,True,False,True,,credit_card
+6962,304,2024-12-12 00:00:00,-15.48,Netflix Subscription,7,True,False,True,,credit_card
+6963,304,2024-12-12 00:00:00,-11.78,Hulu Subscription,7,True,False,True,,credit_card
+6964,304,2024-12-12 00:00:00,-3.3,Apple iCloud Storage,7,True,False,True,,credit_card
+6965,304,2025-01-12 00:00:00,-15.89,Netflix Subscription,7,True,False,True,,credit_card
+6966,304,2025-01-12 00:00:00,-12.31,Hulu Subscription,7,True,False,True,,credit_card
+6967,304,2025-01-12 00:00:00,-3.13,Apple iCloud Storage,7,True,False,True,,credit_card
+6968,304,2025-02-12 00:00:00,-15.17,Netflix Subscription,7,True,False,True,,credit_card
+6969,304,2025-02-12 00:00:00,-12.08,Hulu Subscription,7,True,False,True,,credit_card
+6970,304,2025-02-12 00:00:00,-2.67,Apple iCloud Storage,7,True,False,True,,credit_card
+6971,304,2025-03-12 00:00:00,-15.44,Netflix Subscription,7,True,False,True,,credit_card
+6972,304,2025-03-12 00:00:00,-12.45,Hulu Subscription,7,True,False,True,,credit_card
+6973,304,2025-03-12 00:00:00,-3.13,Apple iCloud Storage,7,True,False,True,,credit_card
+6974,304,2025-04-12 00:00:00,-15.54,Netflix Subscription,7,True,False,True,,credit_card
+6975,304,2025-04-12 00:00:00,-12.11,Hulu Subscription,7,True,False,True,,credit_card
+6976,304,2025-04-12 00:00:00,-3.47,Apple iCloud Storage,7,True,False,True,,credit_card
+6977,304,2025-05-12 00:00:00,-15.73,Netflix Subscription,7,True,False,True,,credit_card
+6978,304,2025-05-12 00:00:00,-12.3,Hulu Subscription,7,True,False,True,,credit_card
+6979,304,2025-05-12 00:00:00,-2.79,Apple iCloud Storage,7,True,False,True,,credit_card
+6980,304,2025-06-12 00:00:00,-15.37,Netflix Subscription,7,True,False,True,,credit_card
+6981,304,2025-06-12 00:00:00,-11.51,Hulu Subscription,7,True,False,True,,credit_card
+6982,304,2025-06-12 00:00:00,-2.55,Apple iCloud Storage,7,True,False,True,,credit_card
+6983,304,2025-07-12 00:00:00,-15.41,Netflix Subscription,7,True,False,True,,credit_card
+6984,304,2025-07-12 00:00:00,-11.85,Hulu Subscription,7,True,False,True,,credit_card
+6985,304,2025-07-12 00:00:00,-2.55,Apple iCloud Storage,7,True,False,True,,credit_card
+6986,305,2024-08-12 00:00:00,-15.25,Netflix Subscription,7,True,False,True,,credit_card
+6987,305,2024-08-12 00:00:00,-11.91,Hulu Subscription,7,True,False,True,,credit_card
+6988,305,2024-08-12 00:00:00,-3.03,Apple iCloud Storage,7,True,False,True,,credit_card
+6989,305,2024-09-12 00:00:00,-15.5,Netflix Subscription,7,True,False,True,,credit_card
+6990,305,2024-09-12 00:00:00,-11.73,Hulu Subscription,7,True,False,True,,credit_card
+6991,305,2024-09-12 00:00:00,-3.32,Apple iCloud Storage,7,True,False,True,,credit_card
+6992,305,2024-10-12 00:00:00,-15.02,Netflix Subscription,7,True,False,True,,credit_card
+6993,305,2024-10-12 00:00:00,-12.33,Hulu Subscription,7,True,False,True,,credit_card
+6994,305,2024-10-12 00:00:00,-3.37,Apple iCloud Storage,7,True,False,True,,credit_card
+6995,305,2024-11-12 00:00:00,-15.37,Netflix Subscription,7,True,False,True,,credit_card
+6996,305,2024-11-12 00:00:00,-11.79,Hulu Subscription,7,True,False,True,,credit_card
+6997,305,2024-11-12 00:00:00,-3.24,Apple iCloud Storage,7,True,False,True,,credit_card
+6998,305,2024-12-12 00:00:00,-15.1,Netflix Subscription,7,True,False,True,,credit_card
+6999,305,2024-12-12 00:00:00,-12.11,Hulu Subscription,7,True,False,True,,credit_card
+7000,305,2024-12-12 00:00:00,-2.69,Apple iCloud Storage,7,True,False,True,,credit_card
+7001,305,2025-01-12 00:00:00,-15.17,Netflix Subscription,7,True,False,True,,credit_card
+7002,305,2025-01-12 00:00:00,-11.94,Hulu Subscription,7,True,False,True,,credit_card
+7003,305,2025-01-12 00:00:00,-2.63,Apple iCloud Storage,7,True,False,True,,credit_card
+7004,305,2025-02-12 00:00:00,-15.57,Netflix Subscription,7,True,False,True,,credit_card
+7005,305,2025-02-12 00:00:00,-11.7,Hulu Subscription,7,True,False,True,,credit_card
+7006,305,2025-02-12 00:00:00,-3.1,Apple iCloud Storage,7,True,False,True,,credit_card
+7007,305,2025-03-12 00:00:00,-15.91,Netflix Subscription,7,True,False,True,,credit_card
+7008,305,2025-03-12 00:00:00,-12.01,Hulu Subscription,7,True,False,True,,credit_card
+7009,305,2025-03-12 00:00:00,-3.15,Apple iCloud Storage,7,True,False,True,,credit_card
+7010,305,2025-04-12 00:00:00,-15.05,Netflix Subscription,7,True,False,True,,credit_card
+7011,305,2025-04-12 00:00:00,-11.99,Hulu Subscription,7,True,False,True,,credit_card
+7012,305,2025-04-12 00:00:00,-3.24,Apple iCloud Storage,7,True,False,True,,credit_card
+7013,305,2025-05-12 00:00:00,-15.74,Netflix Subscription,7,True,False,True,,credit_card
+7014,305,2025-05-12 00:00:00,-11.68,Hulu Subscription,7,True,False,True,,credit_card
+7015,305,2025-05-12 00:00:00,-2.54,Apple iCloud Storage,7,True,False,True,,credit_card
+7016,305,2025-06-12 00:00:00,-15.36,Netflix Subscription,7,True,False,True,,credit_card
+7017,305,2025-06-12 00:00:00,-12.47,Hulu Subscription,7,True,False,True,,credit_card
+7018,305,2025-06-12 00:00:00,-3.17,Apple iCloud Storage,7,True,False,True,,credit_card
+7019,305,2025-07-12 00:00:00,-15.51,Netflix Subscription,7,True,False,True,,credit_card
+7020,305,2025-07-12 00:00:00,-12.22,Hulu Subscription,7,True,False,True,,credit_card
+7021,305,2025-07-12 00:00:00,-2.63,Apple iCloud Storage,7,True,False,True,,credit_card
+7022,101,2024-08-20 00:00:00,480.69,Uber Driver Payout,24,False,False,False,,checking
+7023,101,2024-09-20 00:00:00,650.52,Upwork Transfer,24,False,False,False,,checking
+7024,101,2024-10-20 00:00:00,480.13,Uber Driver Payout,24,False,False,False,,checking
+7025,101,2024-11-20 00:00:00,650.88,Upwork Transfer,24,False,False,False,,checking
+7026,101,2024-12-20 00:00:00,480.12,Uber Driver Payout,24,False,False,False,,checking
+7027,101,2025-01-20 00:00:00,651.03,Upwork Transfer,24,False,False,False,,checking
+7028,101,2025-02-20 00:00:00,480.7,Uber Driver Payout,24,False,False,False,,checking
+7029,101,2025-03-20 00:00:00,650.4,Upwork Transfer,24,False,False,False,,checking
+7030,101,2025-04-20 00:00:00,479.97,Uber Driver Payout,24,False,False,False,,checking
+7031,101,2025-05-20 00:00:00,650.43,Upwork Transfer,24,False,False,False,,checking
+7032,101,2025-06-20 00:00:00,480.24,Uber Driver Payout,24,False,False,False,,checking
+7033,101,2025-07-20 00:00:00,651.01,Upwork Transfer,24,False,False,False,,checking
+7034,301,2024-08-20 00:00:00,480.24,Uber Driver Payout,24,False,False,False,,checking
+7035,301,2024-09-20 00:00:00,650.68,Upwork Transfer,24,False,False,False,,checking
+7036,301,2024-10-20 00:00:00,480.09,Uber Driver Payout,24,False,False,False,,checking
+7037,301,2024-11-20 00:00:00,651.05,Upwork Transfer,24,False,False,False,,checking
+7038,301,2024-12-20 00:00:00,480.37,Uber Driver Payout,24,False,False,False,,checking
+7039,301,2025-01-20 00:00:00,650.73,Upwork Transfer,24,False,False,False,,checking
+7040,301,2025-02-20 00:00:00,480.27,Uber Driver Payout,24,False,False,False,,checking
+7041,301,2025-03-20 00:00:00,650.33,Upwork Transfer,24,False,False,False,,checking
+7042,301,2025-04-20 00:00:00,479.92,Uber Driver Payout,24,False,False,False,,checking
+7043,301,2025-05-20 00:00:00,650.48,Upwork Transfer,24,False,False,False,,checking
+7044,301,2025-06-20 00:00:00,480.35,Uber Driver Payout,24,False,False,False,,checking
+7045,301,2025-07-20 00:00:00,650.31,Upwork Transfer,24,False,False,False,,checking
+7046,101,2024-08-04 00:00:00,12933.18,Opening Balance,12,False,False,False,,checking
+7047,102,2024-08-04 00:00:00,9521.56,Opening Balance,12,False,False,False,,savings
+7048,201,2024-08-04 00:00:00,-12708.34,Opening Balance,12,True,False,False,,checking
+7049,301,2024-08-04 00:00:00,-17367.66,Opening Balance,12,True,False,False,,checking
+7050,302,2024-08-04 00:00:00,-1768.88,Opening Balance,12,True,False,False,,savings
+7051,303,2024-08-04 00:00:00,2958.25,Opening Balance,12,False,False,False,,credit_card
+7052,304,2024-08-04 00:00:00,2849.9,Opening Balance,12,False,False,False,,credit_card
+7053,305,2024-08-04 00:00:00,2780.18,Opening Balance,12,False,False,False,,credit_card
+7054,306,2024-08-04 00:00:00,-409600.47,Opening Balance,12,True,False,False,,mortgage
+7055,307,2024-08-04 00:00:00,13201.05,Opening Balance,12,False,False,False,,investment
+7056,308,2024-08-04 00:00:00,-26201.07,Opening Balance,12,True,False,False,,student_loan
+7057,309,2024-08-04 00:00:00,501.37,Opening Balance,12,False,False,False,,investment
+7058,310,2024-08-04 00:00:00,-16801.29,Opening Balance,12,True,False,False,,auto_loan

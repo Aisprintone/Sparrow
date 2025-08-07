@@ -1,6 +1,16 @@
-account_id,customer_id,institution_name,account_type,balance
-101,1,Chase,checking,5000.0
-102,1,Chase,savings,15000.0
-103,1,Ally,credit_card,-2000.0
-201,2,Wells,checking,3000.0
-301,3,BofA,savings,1000.0
+account_id,customer_id,institution_name,account_number,account_type,balance,created_at,credit_limit
+101,1,Chase,****1234,checking,12500.25,2018-05-10,
+102,1,Chase,****5678,savings,32000.0,2018-05-10,
+201,2,Chase,****9876,checking,8600.75,2019-03-22,
+301,3,Chase,****1111,checking,2400.1,2023-08-14,
+302,3,Ally,****2222,savings,650.35,2023-09-01,
+303,1,Chase,****4321,credit_card,-3750.0,2024-08-04,15000.0
+304,2,Chase,****6543,credit_card,-1400.0,2024-08-04,7000.0
+305,3,Amex,****3333,credit_card,-2500.0,2024-08-04,10000.0
+306,1,Chase,****M001,mortgage,-400000.0,2024-08-04,
+307,1,Fidelity,****INV1,investment,20000.0,2024-08-04,
+308,3,Moov,****SL03,student_loan,-25000.0,2024-08-04,
+309,3,Robinhood,****INV3,investment,3000.0,2024-08-04,
+310,2,Chase Auto,****AUTO2,auto_loan,-15000.0,2024-08-04,
+311,1,Real Estate,****HOME1,investment,550000.0,2020-03-15,
+312,2,Auto Asset,****CAR2,investment,22000.0,2022-06-20,

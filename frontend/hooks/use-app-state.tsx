@@ -12,6 +12,7 @@ import {
 } from "@/lib/data"
 import { useToast } from "@/hooks/use-toast"
 import { performanceMonitor } from "@/lib/utils/performance-monitor"
+import { aiActionsService } from '@/lib/api/ai-actions-service'
 
 export type Screen =
   | "login"
@@ -117,6 +118,7 @@ export interface AIAction {
   currentStep?: string
   estimatedCompletion?: string
   userAction?: string
+  executionId?: string // Add execution ID for workflow tracking
   detailed_insights?: {
     mechanics_explanation: string
     key_insights: string[]
@@ -194,6 +196,8 @@ export interface AppState {
   setSelectedSimulations: (sims: Simulation[]) => void
   goals: Goal[]
   addGoal: (goal: Omit<Goal, "id">) => void
+  updateGoal: (id: number, updates: Partial<Goal>) => void
+  deleteGoal: (id: number) => void
   selectedGoal: Goal | null
   setSelectedGoal: (goal: Goal | null) => void
   isThoughtDetailOpen: boolean
@@ -217,6 +221,7 @@ export interface AppState {
     items: { name: string; amount: number; icon: string; moreCount?: number }[]
   }
   aiActions: AIAction[]
+  setAiActions: (actions: AIAction[]) => void
   demographic: Demographic
   setDemographic: (demo: Demographic) => void
   // New simplified simulation state
@@ -574,221 +579,208 @@ export default function useAppState(): AppState {
   }, [profileData, demographic])
 
   // Generate AI actions based on real profile data
-  const aiActions = useMemo(() => {
+  const [aiActions, setAiActions] = useState<AIAction[]>([])
+
+  // Load AI actions when profile data changes
+  useEffect(() => {
     if (!profileData) {
-      // Return default actions while loading
-      return [
-    {
-      id: "high-yield-savings",
-      title: demographic === "genz" ? "Open High-Yield Savings" : "Move to High-Yield Savings",
-      description:
-        demographic === "genz"
-          ? "Start earning 4.5% APY on your savings"
-          : "Detected excess in checking, earning you +$8/month",
-      rationale:
-        demographic === "genz"
-          ? "Analysis of your account shows $5,200 in savings earning minimal interest (likely 0.01% APY). By moving to a high-yield savings account with 4.5% APY, you'd earn an additional $234 annually. This is a risk-free way to optimize your money while maintaining liquidity for emergencies."
-          : "Our analysis detected $3,200 sitting in your checking account earning 0.01% APY. This excess cash (beyond your typical monthly expenses) could be moved to a high-yield savings account earning 4.5% APY, generating an additional $144 annually with zero risk and full liquidity.",
-      type: "optimization" as const,
-      potentialSaving: demographic === "genz" ? 15 : 8,
-      steps: [
-        "Research high-yield savings accounts",
-        "Open account with partner bank",
-        "Set up automatic transfer",
-        "Monitor and adjust monthly",
-      ],
-      status: "suggested" as const,
-    },
-    {
-      id: "budget-optimization",
-      title: demographic === "genz" ? "Create First Budget" : "Optimize Monthly Budget",
-      description:
-        demographic === "genz" ? "Track spending and save $200/month" : "Reduce unnecessary expenses by $150/month",
-      rationale:
-        demographic === "genz"
-          ? "Transaction analysis reveals you're spending $450/month on food & dining (21% of income) and $220 on entertainment (10% of income). Compared to peers in your income bracket, this is 35% higher than average. A structured budget with meal planning and entertainment limits could reduce spending by $200/month while maintaining your lifestyle quality."
-          : "Our spending analysis identified $380/month on entertainment and multiple subscription services totaling $89/month. By optimizing subscriptions (canceling unused services) and reducing dining out by 2 meals per week, you could save $150/month without significantly impacting your lifestyle. This represents a 3.6% reduction in total spending.",
-      type: "optimization" as const,
-      potentialSaving: demographic === "genz" ? 200 : 150,
-      steps: ["Analyze spending patterns", "Set category budgets", "Set up spending alerts", "Review monthly progress"],
-      status: "suggested" as const,
-    },
-    {
-      id: "subscription-audit",
-      title: "Cancel Unused Subscriptions",
-      description: "Found 3 unused subscriptions costing $47/month",
-      rationale:
-        "Analysis of your recurring charges identified subscriptions you haven't used in the past 60 days. These include a gym membership ($29/month), streaming service ($12/month), and software subscription ($6/month) that show no recent activity.",
-      type: "optimization" as const,
-      potentialSaving: 47,
-      steps: ["Review subscription list", "Cancel unused services", "Set up usage tracking", "Monthly review process"],
-      status: "suggested" as const,
-    },
-    {
-      id: "cashback-optimization",
-      title: "Optimize Credit Card Rewards",
-      description: "Switch to better cashback card for +$23/month",
-      rationale:
-        "Your current spending patterns show 40% on groceries and gas. A cashback card with 3% on these categories vs your current 1% would generate an additional $276 annually based on your spending history.",
-      type: "optimization" as const,
-      potentialSaving: 23,
-      steps: ["Compare cashback cards", "Apply for optimal card", "Update payment methods", "Track rewards earned"],
-      status: "suggested" as const,
-    },
-    {
-      id: "emergency-fund-completed",
-      title: "Emergency Fund Optimization",
-      description: "Successfully moved $5,000 to high-yield savings",
-      rationale:
-        "Completed action that moved emergency fund to Marcus savings account earning 4.5% APY instead of 0.01%.",
-      type: "optimization" as const,
-      potentialSaving: 18,
-      steps: ["Account opened", "Funds transferred", "Auto-transfer setup", "Monthly monitoring active"],
-      status: "completed" as const,
-    },
-    {
-      id: "bill-negotiation-completed",
-      title: "Negotiated Internet Bill",
-      description: "Reduced monthly internet cost by $15/month",
-      rationale:
-        "Successfully negotiated with internet provider to reduce monthly bill from $79 to $64 by switching to a promotional rate.",
-      type: "optimization" as const,
-      potentialSaving: 15,
-      steps: ["Called provider", "Negotiated rate", "Confirmed new billing", "Set calendar reminder"],
-      status: "completed" as const,
-    },
-    {
-      id: "bill-negotiation-in-progress",
-      title: "Negotiate Cable Bill",
-      description: "Currently negotiating with Comcast for better rates",
-      rationale:
-        "Your cable bill has increased 15% this year. We're negotiating with Comcast to match competitor rates and secure a better deal.",
-      type: "optimization" as const,
-      potentialSaving: 35,
-      steps: ["Contact Comcast retention", "Present competitor offers", "Negotiate new rate", "Confirm changes"],
-      status: "in-process" as const,
-      progress: 65,
-      workflowStatus: "running" as const,
-      currentStep: "Negotiating with retention department",
-      estimatedCompletion: "2-3 hours",
-      userAction: "Review and approve the new rate offer"
-    },
-    {
-      id: "high-yield-transfer",
-      title: "Move to High-Yield Savings",
-      description: "Transferring $5,200 to earn 4.5% APY",
-      rationale:
-        "Your savings account is earning only 0.01% APY. We're moving funds to a high-yield account to earn an additional $234 annually.",
-      type: "optimization" as const,
-      potentialSaving: 20,
-      steps: ["Open high-yield account", "Verify account details", "Initiate transfer", "Confirm completion"],
-      status: "in-process" as const,
-      progress: 40,
-      workflowStatus: "running" as const,
-      currentStep: "Verifying account details",
-      estimatedCompletion: "1-2 business days",
-      userAction: "Confirm your identity with the new bank"
-    },
-  ] as AIAction[]
+      // Set default actions while loading
+      setAiActions([
+        {
+          id: "high-yield-savings",
+          title: demographic === "genz" ? "Open High-Yield Savings" : "Move to High-Yield Savings",
+          description:
+            demographic === "genz"
+              ? "Start earning 4.5% APY on your savings"
+              : "Detected excess in checking, earning you +$8/month",
+          rationale:
+            demographic === "genz"
+              ? "Analysis of your account shows $5,200 in savings earning minimal interest (likely 0.01% APY). By moving to a high-yield savings account with 4.5% APY, you'd earn an additional $234 annually. This is a risk-free way to optimize your money while maintaining liquidity for emergencies."
+              : "Our analysis detected $3,200 sitting in your checking account earning 0.01% APY. This excess cash (beyond your typical monthly expenses) could be moved to a high-yield savings account earning 4.5% APY, generating an additional $144 annually with zero risk and full liquidity.",
+          type: "optimization" as const,
+          potentialSaving: demographic === "genz" ? 15 : 8,
+          steps: [
+            "Research high-yield savings accounts",
+            "Open account with partner bank",
+            "Set up automatic transfer",
+            "Monitor and adjust monthly",
+          ],
+          status: "suggested" as const,
+        },
+        {
+          id: "budget-optimization",
+          title: demographic === "genz" ? "Create First Budget" : "Optimize Monthly Budget",
+          description:
+            demographic === "genz" ? "Track spending and save $200/month" : "Reduce unnecessary expenses by $150/month",
+          rationale:
+            demographic === "genz"
+              ? "Transaction analysis reveals you're spending $450/month on food & dining (21% of income) and $220 on entertainment (10% of income). Compared to peers in your income bracket, this is 35% higher than average. A structured budget with meal planning and entertainment limits could reduce spending by $200/month while maintaining your lifestyle quality."
+              : "Our spending analysis identified $380/month on entertainment and multiple subscription services totaling $89/month. By optimizing subscriptions (canceling unused services) and reducing dining out by 2 meals per week, you could save $150/month without significantly impacting your lifestyle. This represents a 3.6% reduction in total spending.",
+          type: "optimization" as const,
+          potentialSaving: demographic === "genz" ? 200 : 150,
+          steps: ["Analyze spending patterns", "Set category budgets", "Set up spending alerts", "Review monthly progress"],
+          status: "suggested" as const,
+        },
+        {
+          id: "subscription-audit",
+          title: "Cancel Unused Subscriptions",
+          description: "Found 3 unused subscriptions costing $47/month",
+          rationale:
+            "Analysis of your recurring charges identified subscriptions you haven't used in the past 60 days. These include a gym membership ($29/month), streaming service ($12/month), and software subscription ($6/month) that show no recent activity.",
+          type: "optimization" as const,
+          potentialSaving: 47,
+          steps: ["Review subscription list", "Cancel unused services", "Set up usage tracking", "Monthly review process"],
+          status: "suggested" as const,
+        },
+        {
+          id: "cashback-optimization",
+          title: "Optimize Credit Card Rewards",
+          description: "Switch to better cashback card for +$23/month",
+          rationale:
+            "Your current spending patterns show 40% on groceries and gas. A cashback card with 3% on these categories vs your current 1% would generate an additional $276 annually based on your spending history.",
+          type: "optimization" as const,
+          potentialSaving: 23,
+          steps: ["Compare cashback cards", "Apply for optimal card", "Update payment methods", "Track rewards earned"],
+          status: "suggested" as const,
+        },
+        {
+          id: "emergency-fund-completed",
+          title: "Emergency Fund Optimization",
+          description: "Successfully moved $5,000 to high-yield savings",
+          rationale:
+            "Completed action that moved emergency fund to Marcus savings account earning 4.5% APY instead of 0.01%.",
+          type: "optimization" as const,
+          potentialSaving: 18,
+          steps: ["Account opened", "Funds transferred", "Auto-transfer setup", "Monthly monitoring active"],
+          status: "completed" as const,
+        },
+        {
+          id: "bill-negotiation-completed",
+          title: "Negotiated Internet Bill",
+          description: "Reduced monthly internet cost by $15/month",
+          rationale:
+            "Successfully negotiated with internet provider to reduce monthly bill from $79 to $64 by switching to a promotional rate.",
+          type: "optimization" as const,
+          potentialSaving: 15,
+          steps: ["Called provider", "Negotiated rate", "Confirmed new billing", "Set calendar reminder"],
+          status: "completed" as const,
+        },
+        {
+          id: "bill-negotiation-in-progress",
+          title: "Negotiate Cable Bill",
+          description: "Currently negotiating with Comcast for better rates",
+          rationale:
+            "Your cable bill has increased 15% this year. We're negotiating with Comcast to match competitor rates and secure a better deal.",
+          type: "optimization" as const,
+          potentialSaving: 35,
+          steps: ["Contact Comcast retention", "Present competitor offers", "Negotiate new rate", "Confirm changes"],
+          status: "in-process" as const,
+        },
+      ])
+      return
     }
-    
-    // Generate personalized AI actions based on real profile data
-    const actions: AIAction[] = []
-    
-    // Check for savings optimization opportunity
-    if (profileData?.accounts?.some((a: any) => a.accountType === 'savings' && a.balance > 1000)) {
-      actions.push({
-        id: "high-yield-savings",
-        title: "Optimize Savings Account",
-        description: `Move $${Math.round((profileData?.accounts?.[0]?.balance || 1000) / 2)} to high-yield savings for +$${Math.round((profileData?.accounts?.[0]?.balance || 1000) * 0.045 / 12)}/month`,
-        rationale: `Analysis shows ${profileData?.accounts?.filter((a: any) => a.type === 'asset')?.length || 0} accounts with suboptimal interest rates. Moving funds to a high-yield account earning 4.5% APY would generate significant additional income.`,
-        type: "optimization" as const,
-        potentialSaving: Math.round((profileData?.accounts?.[0]?.balance || 1000) * 0.045 / 12),
-        steps: [
-          "Research high-yield savings accounts",
-          "Open account with partner bank",
-          "Set up automatic transfer",
-          "Monitor and adjust monthly"
-        ],
-        status: "suggested"
+
+    // Use the AI actions service to get workflows-based actions
+    aiActionsService.getAIActions("1", demographic)
+      .then(actions => {
+        setAiActions(actions)
       })
-    }
-    
-    // Check for high spending categories
-    const highSpendingCategory = profileData?.spending?.categories?.[0]
-    if (highSpendingCategory && highSpendingCategory.percentage > 20) {
-      actions.push({
-        id: "budget-optimization",
-        title: `Reduce ${highSpendingCategory.name} Spending`,
-        description: `Save $${Math.round(highSpendingCategory.spent * 0.2)}/month by optimizing ${highSpendingCategory.name.toLowerCase()}`,
-        rationale: `Your ${highSpendingCategory.name} spending is ${highSpendingCategory.percentage.toFixed(1)}% of total expenses. Industry benchmarks suggest this should be under 15% for your income level.`,
-        type: "optimization" as const,
-        potentialSaving: Math.round(highSpendingCategory.spent * 0.2),
-        steps: [
-          "Analyze spending patterns",
-          "Set category budgets",
-          "Set up spending alerts",
-          "Review monthly progress"
-        ],
-        status: "suggested"
+      .catch(() => {
+        // Fallback to hardcoded actions if service fails
+        setAiActions([
+          {
+            id: "high-yield-savings",
+            title: demographic === "genz" ? "Open High-Yield Savings" : "Move to High-Yield Savings",
+            description:
+              demographic === "genz"
+                ? "Start earning 4.5% APY on your savings"
+                : "Detected excess in checking, earning you +$8/month",
+            rationale:
+              demographic === "genz"
+                ? "Analysis of your account shows $5,200 in savings earning minimal interest (likely 0.01% APY). By moving to a high-yield savings account with 4.5% APY, you'd earn an additional $234 annually. This is a risk-free way to optimize your money while maintaining liquidity for emergencies."
+                : "Our analysis detected $3,200 sitting in your checking account earning 0.01% APY. This excess cash (beyond your typical monthly expenses) could be moved to a high-yield savings account earning 4.5% APY, generating an additional $144 annually with zero risk and full liquidity.",
+            type: "optimization" as const,
+            potentialSaving: demographic === "genz" ? 15 : 8,
+            steps: [
+              "Research high-yield savings accounts",
+              "Open account with partner bank",
+              "Set up automatic transfer",
+              "Monitor and adjust monthly",
+            ],
+            status: "suggested" as const,
+          },
+          {
+            id: "budget-optimization",
+            title: demographic === "genz" ? "Create First Budget" : "Optimize Monthly Budget",
+            description:
+              demographic === "genz" ? "Track spending and save $200/month" : "Reduce unnecessary expenses by $150/month",
+            rationale:
+              demographic === "genz"
+                ? "Transaction analysis reveals you're spending $450/month on food & dining (21% of income) and $220 on entertainment (10% of income). Compared to peers in your income bracket, this is 35% higher than average. A structured budget with meal planning and entertainment limits could reduce spending by $200/month while maintaining your lifestyle quality."
+                : "Our spending analysis identified $380/month on entertainment and multiple subscription services totaling $89/month. By optimizing subscriptions (canceling unused services) and reducing dining out by 2 meals per week, you could save $150/month without significantly impacting your lifestyle. This represents a 3.6% reduction in total spending.",
+            type: "optimization" as const,
+            potentialSaving: demographic === "genz" ? 200 : 150,
+            steps: ["Analyze spending patterns", "Set category budgets", "Set up spending alerts", "Review monthly progress"],
+            status: "suggested" as const,
+          },
+          {
+            id: "subscription-audit",
+            title: "Cancel Unused Subscriptions",
+            description: "Found 3 unused subscriptions costing $47/month",
+            rationale:
+              "Analysis of your recurring charges identified subscriptions you haven't used in the past 60 days. These include a gym membership ($29/month), streaming service ($12/month), and software subscription ($6/month) that show no recent activity.",
+            type: "optimization" as const,
+            potentialSaving: 47,
+            steps: ["Review subscription list", "Cancel unused services", "Set up usage tracking", "Monthly review process"],
+            status: "suggested" as const,
+          },
+          {
+            id: "cashback-optimization",
+            title: "Optimize Credit Card Rewards",
+            description: "Switch to better cashback card for +$23/month",
+            rationale:
+              "Your current spending patterns show 40% on groceries and gas. A cashback card with 3% on these categories vs your current 1% would generate an additional $276 annually based on your spending history.",
+            type: "optimization" as const,
+            potentialSaving: 23,
+            steps: ["Compare cashback cards", "Apply for optimal card", "Update payment methods", "Track rewards earned"],
+            status: "suggested" as const,
+          },
+          {
+            id: "emergency-fund-completed",
+            title: "Emergency Fund Optimization",
+            description: "Successfully moved $5,000 to high-yield savings",
+            rationale:
+              "Completed action that moved emergency fund to Marcus savings account earning 4.5% APY instead of 0.01%.",
+            type: "optimization" as const,
+            potentialSaving: 18,
+            steps: ["Account opened", "Funds transferred", "Auto-transfer setup", "Monthly monitoring active"],
+            status: "completed" as const,
+          },
+          {
+            id: "bill-negotiation-completed",
+            title: "Negotiated Internet Bill",
+            description: "Reduced monthly internet cost by $15/month",
+            rationale:
+              "Successfully negotiated with internet provider to reduce monthly bill from $79 to $64 by switching to a promotional rate.",
+            type: "optimization" as const,
+            potentialSaving: 15,
+            steps: ["Called provider", "Negotiated rate", "Confirmed new billing", "Set calendar reminder"],
+            status: "completed" as const,
+          },
+          {
+            id: "bill-negotiation-in-progress",
+            title: "Negotiate Cable Bill",
+            description: "Currently negotiating with Comcast for better rates",
+            rationale:
+              "Your cable bill has increased 15% this year. We're negotiating with Comcast to match competitor rates and secure a better deal.",
+            type: "optimization" as const,
+            potentialSaving: 35,
+            steps: ["Contact Comcast retention", "Present competitor offers", "Negotiate new rate", "Confirm changes"],
+            status: "in-process" as const,
+          },
+        ])
       })
-    }
-    
-    // Add credit optimization if credit score is below 750
-    if (profileData?.metrics?.creditScore < 750) {
-      actions.push({
-        id: "credit-optimization",
-        title: "Improve Credit Score",
-        description: `Boost credit score by ${Math.round((750 - (profileData?.metrics?.creditScore || 700)) / 2)} points in 3 months`,
-        rationale: `Your current score of ${profileData?.metrics?.creditScore || 700} could be improved. Better credit means lower interest rates on loans and credit cards.`,
-        type: "optimization" as const,
-        potentialSaving: 50,
-        steps: [
-          "Pay down credit card balances",
-          "Set up automatic payments",
-          "Monitor credit utilization",
-          "Review credit report for errors"
-        ],
-        status: "suggested"
-      })
-    }
-    
-    // Add default actions if we have less than 3
-    const defaultActions: AIAction[] = [
-      {
-        id: "subscription-audit",
-        title: "Cancel Unused Subscriptions",
-        description: "Found 3 unused subscriptions costing $47/month",
-        rationale: "Analysis of your recurring charges identified subscriptions you haven't used in the past 60 days.",
-        type: "optimization" as const,
-        potentialSaving: 47,
-        steps: ["Review subscription list", "Cancel unused services", "Set up usage tracking", "Monthly review process"],
-        status: "suggested"
-      },
-      {
-        id: "cashback-optimization",
-        title: "Optimize Credit Card Rewards",
-        description: "Switch to better cashback card for +$23/month",
-        rationale: "Your spending patterns show opportunity for better rewards optimization.",
-        type: "optimization" as const,
-        potentialSaving: 23,
-        steps: ["Compare cashback cards", "Apply for optimal card", "Update payment methods", "Track rewards earned"],
-        status: "suggested"
-      }
-    ]
-    
-    // Fill with default actions if needed
-    while (actions.length < 4) {
-      const nextDefault = defaultActions[actions.length % defaultActions.length]
-      if (!actions.find(a => a.id === nextDefault.id)) {
-        actions.push(nextDefault)
-      } else {
-        break
-      }
-    }
-    
-    return actions
-  }, [profileData])
+  }, [profileData, demographic])
 
   // ============================================================================
   // LOAD PROFILE DATA WHEN DEMOGRAPHIC CHANGES
@@ -890,8 +882,8 @@ export default function useAppState(): AppState {
       setSimulationProgress(30)
       const profileId = demographicToProfileId(demographic)
       
-      // Map simulation IDs to backend scenario types
-      const scenarioMap: Record<string, string> = {
+      // SOLID Principle: Single Responsibility - Centralized scenario mapping
+      const SCENARIO_MAPPING: Record<string, string> = {
         'emergency-fund': 'emergency_fund',
         'student-loan': 'student_loan',
         'home-purchase': 'home_purchase',
@@ -902,7 +894,25 @@ export default function useAppState(): AppState {
         'auto-repair': 'auto_repair'
       }
       
-      const scenarioType = currentSimulation ? scenarioMap[currentSimulation.id] || 'emergency_fund' : 'emergency_fund'
+      // DRY Principle: Reusable scenario type resolution
+      const resolveScenarioType = (simulation: SelectedSimulation | null): string => {
+        if (!simulation) {
+          console.warn('[USE-APP-STATE] ⚠️ No simulation selected, defaulting to emergency_fund')
+          return 'emergency_fund'
+        }
+        
+        const scenarioType = SCENARIO_MAPPING[simulation.id]
+        if (!scenarioType) {
+          console.error(`[USE-APP-STATE] ❌ Unknown scenario: ${simulation.id}`)
+          console.log('[USE-APP-STATE] Available scenarios:', Object.keys(SCENARIO_MAPPING))
+          return 'emergency_fund'
+        }
+        
+        console.log(`[USE-APP-STATE] ✅ Mapped ${simulation.id} -> ${scenarioType}`)
+        return scenarioType
+      }
+      
+      const scenarioType = resolveScenarioType(currentSimulation)
       
       // Stage 3: Risk analysis (60-80%)
       setSimulationProgress(70)
@@ -911,19 +921,13 @@ export default function useAppState(): AppState {
       setSimulationProgress(85)
       setIsGeneratingExplanations(true)
       
-      // Map simulation ID to correct API endpoint
-      const SIMULATION_ENDPOINTS = {
-        "emergency-fund": "/simulation/emergency_fund",
-        "student-loan": "/simulation/student_loan",
-        "home-purchase": "/simulation/home_purchase",
-        "market-crash": "/simulation/market_crash",
-        "medical-crisis": "/simulation/medical_crisis",
-        "gig-economy": "/simulation/gig_economy",
-        "rent-hike": "/simulation/rent_hike",
-        "auto-repair": "/simulation/auto_repair"
+      // SOLID Principle: Open/Closed - Easy to extend without modifying
+      const buildSimulationEndpoint = (scenarioType: string): string => {
+        return `/simulation/${scenarioType}`
       }
       
-      const endpoint = SIMULATION_ENDPOINTS[currentSimulation?.id as keyof typeof SIMULATION_ENDPOINTS] || "/simulation/emergency-fund"
+      const endpoint = buildSimulationEndpoint(scenarioType)
+      console.log(`[USE-APP-STATE] 🔗 API Endpoint: ${endpoint}`)
       
       // Call backend API with simulation and explanation generation
       const response = await fetch(`https://sparrow-backend.aisprintone.workers.dev/api${endpoint}`, {
@@ -946,10 +950,29 @@ export default function useAppState(): AppState {
       
       const result = await response.json()
       
-      // Store the simulation results
-      if (result.data && result.data.simulation_results) {
-        console.log('Simulation results received:', result.data.simulation_results)
-        setSimulationResults(result.data.simulation_results)
+      // Store the entire simulation result including AI explanations
+      if (result.data) {
+        console.log('[USE-APP-STATE] 📦 Full API response structure:', result)
+        console.log('[USE-APP-STATE] 📊 Simulation data received:', result.data)
+        console.log('[USE-APP-STATE] 🤖 AI explanations:', result.data.ai_explanations)
+        console.log('[USE-APP-STATE] 🔢 AI explanations count:', result.data.ai_explanations?.length || 0)
+        
+        // Store the complete data object
+        setSimulationResults(result.data)
+        
+        // SOLID Principle: Single Responsibility - Persist to localStorage for recovery
+        try {
+          localStorage.setItem('lastSimulationResult', JSON.stringify(result.data))
+          console.log('[USE-APP-STATE] 💾 Saved to localStorage for recovery')
+        } catch (e) {
+          console.error('[USE-APP-STATE] Failed to save to localStorage:', e)
+        }
+        
+        // Log what was stored
+        console.log('[USE-APP-STATE] ✅ Stored simulationResults with ai_explanations')
+      } else {
+        console.log('[USE-APP-STATE] ⚠️ No data in API response')
+        console.log('[USE-APP-STATE] Full response:', result)
       }
       
       // Check if we have AI-generated plans
@@ -1071,16 +1094,60 @@ export default function useAppState(): AppState {
   }, [])
 
   const saveAutomation = (automation: AutomationAction) => {
-    if (!activeAutomations.find((a) => a.title === automation.title)) {
+    // Check if automation with same execution ID already exists (instead of just title)
+    if (!activeAutomations.find((a) => a.executionId === automation.executionId)) {
       setActiveAutomations((prev) => [...prev, automation])
+      
+      // Also add to aiActions state so it appears in the AI Actions screen
+      const aiAction: AIAction = {
+        id: automation.executionId || `automation-${Date.now()}`,
+        title: automation.title,
+        description: automation.description,
+        rationale: automation.rationale || `Automated action: ${automation.title}`,
+        type: "optimization" as const,
+        potentialSaving: automation.potentialSaving || 0,
+        steps: automation.steps.map(step => step.name),
+        status: "in-process" as const,
+        progress: 0,
+        workflowStatus: "running" as const,
+        currentStep: "Initializing",
+        estimatedCompletion: "3m remaining",
+        executionId: automation.executionId
+      }
+      
+      setAiActions((prev) => [...prev, aiAction])
       // Removed automation activated toast
     }
   }
 
   const addGoal = (goal: Omit<Goal, "id">) => {
-    const newGoal = { ...goal, id: Date.now() }
-    setGoals((prev) => [...prev, newGoal])
-    setCurrentScreen("goals" as Screen)
+    const newGoal = {
+      ...goal,
+      id: Math.max(...goals.map(g => g.id)) + 1,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      userId: 1,
+      aiInsights: {
+        lastUpdated: new Date().toISOString(),
+        recommendations: [],
+        riskAssessment: '',
+        optimizationOpportunities: []
+      },
+      simulationImpact: []
+    }
+    setGoals([...goals, newGoal])
+  }
+
+  const updateGoal = (id: number, updates: Partial<Goal>) => {
+    setGoals(goals.map(goal => 
+      goal.id === id 
+        ? { ...goal, ...updates, updatedAt: new Date().toISOString() }
+        : goal
+    ))
+  }
+
+  const deleteGoal = (id: number) => {
+    setGoals(goals.filter(goal => goal.id !== id))
   }
 
   const payBill = (billId: number) => {
@@ -1125,6 +1192,8 @@ export default function useAppState(): AppState {
     setSelectedSimulations,
     goals,
     addGoal,
+    updateGoal,
+    deleteGoal,
     selectedGoal,
     setSelectedGoal,
     isThoughtDetailOpen,
@@ -1145,6 +1214,7 @@ export default function useAppState(): AppState {
     spendingCategories,
     recurringExpenses,
     aiActions,
+    setAiActions,
     demographic,
     setDemographic,
     currentSimulation,

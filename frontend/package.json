@@ -15,7 +15,10 @@
     "test:integration": "jest --testPathPattern=__tests__/integration",
     "test:e2e": "playwright test",
     "test:performance": "jest --testPathPattern=__tests__/performance",
-    "test:security": "jest --testPathPattern=__tests__/security"
+    "test:security": "jest --testPathPattern=__tests__/security",
+    "test:ai-personalization": "node scripts/test-ai-personalization.js",
+    "test:millennial": "playwright test e2e/millennial-ai-personalization.spec.ts --project=chromium",
+    "test:validate": "node scripts/validate-test-environment.js"
   },
   "dependencies": {
     "@emotion/is-prop-valid": "latest",

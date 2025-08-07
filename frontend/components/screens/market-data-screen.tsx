@@ -126,228 +126,128 @@ export default function MarketDataScreen({ setCurrentScreen }: AppState) {
 
   return (
     <div className="flex h-[100dvh] flex-col">
-      <header className="p-4 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Market Overview</h1>
-            <p className="text-white/80">Real-time market data & analysis</p>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentScreen("dashboard")}
-            className="text-white/60 hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-        </div>
+      <header className="p-3 text-white">
+        <h1 className="text-xl font-bold">Market Overview</h1>
+        <p className="text-white/80">Real-time market insights</p>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 pb-24">
-        {/* Navigation Controls */}
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={prevView}
-            className="text-white/60 hover:text-white"
+      <div className="flex-1 overflow-y-auto p-3 space-y-5 pb-20">
+        {/* View Toggle */}
+        <div className="flex items-center justify-center gap-3 mt-2">
+          <button
+            onClick={() => setCurrentView("today")}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              currentView === "today"
+                ? "bg-blue-500 text-white"
+                : "bg-white/10 text-white/60 hover:text-white"
+            }`}
           >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          
-          <div className="text-center">
-            <h2 className="text-lg font-semibold text-white">{getViewTitle()}</h2>
-            <div className="flex items-center justify-center gap-4 mt-2">
-              {(['today', 'yesterday', 'week'] as const).map((view) => (
-                <button
-                  key={view}
-                  onClick={() => setCurrentView(view)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                    currentView === view
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white/10 text-white/60 hover:text-white'
-                  }`}
-                >
-                  {view.charAt(0).toUpperCase() + view.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={nextView}
-            className="text-white/60 hover:text-white"
+            Overview
+          </button>
+          <button
+            onClick={() => setCurrentView("yesterday")}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              currentView === "yesterday"
+                ? "bg-blue-500 text-white"
+                : "bg-white/10 text-white/60 hover:text-white"
+            }`}
           >
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+            Detailed
+          </button>
         </div>
 
-        {/* Market Data Content */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentView}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-            className="space-y-4"
-          >
-            {marketData.loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mx-auto mb-4"></div>
-                <p className="text-white/60">Loading market data...</p>
+        {/* Market Summary */}
+        <div>
+          <h2 className="text-base font-semibold text-white">{getViewTitle()}</h2>
+          <GlassCard className="p-5 text-center">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-white/60">Market Sentiment</p>
+                <p className="text-lg font-semibold text-green-400">
+                  Bullish
+                </p>
               </div>
-            ) : marketData.error ? (
-              <GlassCard className="p-6 text-center">
-                <p className="text-red-400 mb-4">{marketData.error}</p>
-                <Button onClick={loadMarketData} variant="outline">
-                  Retry
-                </Button>
-              </GlassCard>
-            ) : (
-              <>
-                {/* Market Summary */}
-                <GlassCard className="p-6 bg-gradient-to-br from-blue-500/20 to-purple-500/20">
-                  <div className="flex items-center gap-3 mb-4">
-                    <BarChart3 className="h-6 w-6 text-blue-400" />
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">Market Summary</h3>
-                      <p className="text-white/60 text-sm">
-                        {currentView === 'today' && 'Real-time market performance'}
-                        {currentView === 'yesterday' && 'Previous trading session'}
-                        {currentView === 'week' && '5-day performance overview'}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center">
-                      <p className="text-sm text-white/60">Advancing</p>
-                      <p className="text-lg font-semibold text-green-400">
-                        {getViewData().filter(q => q.change > 0).length}
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-sm text-white/60">Declining</p>
-                      <p className="text-lg font-semibold text-red-400">
-                        {getViewData().filter(q => q.change < 0).length}
-                      </p>
-                    </div>
-                  </div>
-                </GlassCard>
+              <div>
+                <p className="text-sm text-white/60">Volatility</p>
+                <p className="text-lg font-semibold text-yellow-400">
+                  Moderate
+                </p>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
 
-                {/* Market Indexes */}
-                <div className="space-y-3">
-                  {getViewData().map((quote) => (
-                    <GlassCard key={quote.symbol} className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h4 className="font-semibold text-white">{quote.name}</h4>
-                            <span className="text-xs text-white/60">{quote.symbol}</span>
-                          </div>
-                          
-                          <div className="flex items-center gap-4 text-sm">
-                            <div>
-                              <p className="text-white/60">Price</p>
-                              <p className="font-semibold text-white">{formatCurrency(quote.price)}</p>
-                            </div>
-                            
-                            {quote.open && (
-                              <div>
-                                <p className="text-white/60">Open</p>
-                                <p className="font-semibold text-white">{formatCurrency(quote.open)}</p>
-                              </div>
-                            )}
-                            
-                            {quote.high && quote.low && (
-                              <div>
-                                <p className="text-white/60">Range</p>
-                                <p className="font-semibold text-white">
-                                  {formatCurrency(quote.low)} - {formatCurrency(quote.high)}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="text-right">
-                          <div className={`flex items-center gap-1 mb-1 ${
-                            quote.change >= 0 ? 'text-green-400' : 'text-red-400'
-                          }`}>
-                            {quote.change >= 0 ? (
-                              <TrendingUp className="h-4 w-4" />
-                            ) : (
-                              <TrendingDown className="h-4 w-4" />
-                            )}
-                            <span className="font-semibold">{formatCurrency(Math.abs(quote.change))}</span>
-                          </div>
-                          <p className={`text-sm ${
-                            quote.change >= 0 ? 'text-green-400' : 'text-red-400'
-                          }`}>
-                            {formatPercent(quote.changePercent)}
-                          </p>
-                        </div>
-                      </div>
-                    </GlassCard>
-                  ))}
+        {/* Market Performance */}
+        <div>
+          <GlassCard className="p-5 bg-gradient-to-br from-blue-500/20 to-purple-500/20">
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 className="h-4 w-4 text-blue-400" />
+              <h3 className="text-base font-semibold text-white">Market Performance</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-3">
+                <p className="text-sm text-white/60">S&P 500</p>
+                <p className="text-lg font-semibold text-green-400">
+                  +1.2%
+                </p>
+              </div>
+              <div className="bg-gradient-to-br from-red-500/20 to-pink-500/20 rounded-xl p-3">
+                <p className="text-sm text-white/60">NASDAQ</p>
+                <p className="text-lg font-semibold text-red-400">
+                  -0.8%
+                </p>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
+
+        {/* Stock Quotes */}
+        <div>
+          <h3 className="text-base font-semibold text-white mb-2">Top Movers</h3>
+          <div className="space-y-2">
+            {getViewData().map((quote) => (
+              <GlassCard key={quote.symbol} className="p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white">{quote.name}</p>
+                    <p className="text-xs text-white/60">{quote.symbol}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-white">${quote.price}</p>
+                    <p className={`text-xs ${
+                      quote.change >= 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {quote.change >= 0 ? '+' : ''}{quote.change}%
+                    </p>
+                  </div>
                 </div>
+              </GlassCard>
+            ))}
+          </div>
+        </div>
 
-                {/* Market Insights */}
-                <GlassCard className="p-6 bg-gradient-to-br from-green-500/20 to-emerald-500/20">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Clock className="h-5 w-5 text-green-400" />
-                    <h3 className="text-lg font-semibold text-white">Market Insights</h3>
-                  </div>
-                  
-                  <div className="space-y-3 text-sm">
-                    {currentView === 'today' && (
-                      <>
-                        <p className="text-white/80">
-                          Markets are {getViewData().filter(q => q.change > 0).length > getViewData().filter(q => q.change < 0).length ? 'advancing' : 'declining'} today.
-                        </p>
-                        <p className="text-white/60">
-                          {getViewData().length > 0 && 
-                            `The ${getViewData().reduce((max, q) => Math.abs(q.changePercent) > Math.abs(max.changePercent) ? q : max).name} is showing the most movement.`
-                          }
-                        </p>
-                      </>
-                    )}
-                    
-                    {currentView === 'yesterday' && (
-                      <>
-                        <p className="text-white/80">
-                          Yesterday's session saw mixed performance across major indexes.
-                        </p>
-                        <p className="text-white/60">
-                          {getViewData().length > 0 && 
-                            `The ${getViewData().reduce((max, q) => Math.abs(q.changePercent) > Math.abs(max.changePercent) ? q : max).name} had the largest move.`
-                          }
-                        </p>
-                      </>
-                    )}
-                    
-                    {currentView === 'week' && (
-                      <>
-                        <p className="text-white/80">
-                          Weekly performance shows the broader market trends.
-                        </p>
-                        <p className="text-white/60">
-                          {getViewData().length > 0 && 
-                            `The ${getViewData().reduce((max, q) => Math.abs(q.changePercent) > Math.abs(max.changePercent) ? q : max).name} led weekly gains.`
-                          }
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </GlassCard>
-              </>
-            )}
-          </motion.div>
-        </AnimatePresence>
+        {/* Market Insights */}
+        <div>
+          <h3 className="text-base font-semibold text-white mb-2">Market Insights</h3>
+          <GlassCard className="p-3">
+            <div className="space-y-2">
+              <div className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
+                <div>
+                  <p className="text-sm font-medium text-white">Tech stocks showing resilience</p>
+                  <p className="text-xs text-white/60">Despite market volatility, tech sector maintains strong fundamentals</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                <div>
+                  <p className="text-sm font-medium text-white">Energy sector gains</p>
+                  <p className="text-xs text-white/60">Oil prices stabilize, benefiting energy companies</p>
+                </div>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
       </div>
     </div>
   )

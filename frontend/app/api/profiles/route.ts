@@ -46,18 +46,26 @@ const profiles = {
 }
 
 export async function GET(request: NextRequest) {
+  console.log('[PROFILES API] 🚀 Profile request received')
+  console.log('[PROFILES API] Request URL:', request.url)
+  console.log('[PROFILES API] User Agent:', request.headers.get('user-agent'))
+  
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
     
+    console.log('[PROFILES API] Profile ID requested:', id || 'ALL')
+    
     if (id) {
       const profile = profiles[parseInt(id) as keyof typeof profiles]
       if (!profile) {
+        console.log('[PROFILES API] ❌ Profile not found for ID:', id)
         return NextResponse.json(
           { error: 'Profile not found' },
           { status: 404 }
         )
       }
+      console.log('[PROFILES API] ✅ Single profile returned for ID:', id)
       return NextResponse.json({
         success: true,
         data: profile
@@ -65,12 +73,13 @@ export async function GET(request: NextRequest) {
     }
     
     // Return all profiles
+    console.log('[PROFILES API] ✅ All profiles returned (count:', Object.values(profiles).length, ')')
     return NextResponse.json({
       success: true,
       data: Object.values(profiles)
     })
   } catch (error) {
-    console.error('Error fetching profiles:', error)
+    console.error('[PROFILES API] ❌ Error fetching profiles:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

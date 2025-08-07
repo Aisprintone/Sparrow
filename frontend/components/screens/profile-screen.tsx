@@ -13,6 +13,14 @@ import {
   AlertCircle,
   ChevronRight,
   Edit,
+  Phone,
+  DollarSign,
+  Home,
+  GraduationCap,
+  MapPin,
+  Shield,
+  Download,
+  MessageSquare,
 } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
@@ -31,149 +39,178 @@ export default function ProfileScreen({ setCurrentScreen }: AppState) {
   }
 
   return (
-    <div className="pb-28">
-      <header className="p-6 text-white">
-        <h1 className="text-2xl font-bold">Profile</h1>
+    <div className="flex h-[100dvh] flex-col">
+      <header className="p-3 text-white">
+        <h1 className="text-xl font-bold">Profile</h1>
+        <p className="text-white/80">Manage your account settings</p>
       </header>
 
-      <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6 p-4">
-        {/* Profile Header */}
-        <motion.div variants={itemVariants}>
-          <GlassCard className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 text-center">
-            <div className="relative inline-block mb-4">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-2xl font-bold text-white">
-                JD
+      <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-5 p-3">
+        {/* Personal Information */}
+        <div>
+          <h2 className="text-base font-semibold text-white mb-3">Personal Information</h2>
+          <div className="space-y-2">
+            <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-blue-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Name</p>
+                  <p className="text-xs text-white/60">John Doe</p>
+                </div>
               </div>
-              <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg">
-                <Edit className="h-4 w-4 text-gray-600" />
-              </button>
-            </div>
-            <h2 className="text-xl font-bold text-white">John Doe</h2>
-            <p className="text-gray-400">john.doe@email.com</p>
-            <p className="text-sm text-gray-500 mt-1">Member since Jan 2024</p>
-          </GlassCard>
-        </motion.div>
-
-        {/* Account Section */}
-        <motion.div variants={itemVariants}>
-          <h3 className="text-lg font-semibold text-white mb-3 px-2">Account</h3>
-          <GlassCard className="bg-white/5 p-0">
-            <div className="divide-y divide-gray-700">
-              <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                    <User className="h-5 w-5 text-blue-400" />
-                  </div>
-                  <span className="text-white font-medium">Personal Information</span>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </button>
+            
+            <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 text-green-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Email</p>
+                  <p className="text-xs text-white/60">john.doe@example.com</p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
-              </button>
-
-              <button
-                onClick={() => setCurrentScreen("connect-account")}
-                className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                    <CreditCard className="h-5 w-5 text-green-400" />
-                  </div>
-                  <div className="text-left">
-                    <p className="text-white font-medium">Connected Accounts</p>
-                    <p className="text-sm text-gray-400">3 accounts linked</p>
-                  </div>
-                </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
-              </button>
-            </div>
-          </GlassCard>
-        </motion.div>
-
-        {/* Preferences Section */}
-        <motion.div variants={itemVariants}>
-          <h3 className="text-lg font-semibold text-white mb-3 px-2">Preferences</h3>
-          <GlassCard className="bg-white/5 p-0">
-            <div className="divide-y divide-gray-700">
-              <div className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                    <Bell className="h-5 w-5 text-purple-400" />
-                  </div>
-                  <span className="text-white font-medium">Push Notifications</span>
-                </div>
-                <Switch defaultChecked={true} />
               </div>
-
-              <div className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center">
-                    <Mail className="h-5 w-5 text-orange-400" />
-                  </div>
-                  <span className="text-white font-medium">Email Summaries</span>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </button>
+            
+            <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-purple-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Phone</p>
+                  <p className="text-xs text-white/60">+1 (555) 123-4567</p>
                 </div>
-                <Switch defaultChecked={false} />
               </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </button>
+          </div>
+        </div>
 
-              <div className="flex items-center justify-between p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center">
-                    <AlertCircle className="h-5 w-5 text-red-400" />
-                  </div>
-                  <span className="text-white font-medium">Low Balance Alerts</span>
+        {/* Financial Profile */}
+        <div>
+          <h2 className="text-base font-semibold text-white mb-3">Financial Profile</h2>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-green-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Annual Income</p>
+                  <p className="text-xs text-white/60">$85,000</p>
                 </div>
-                <Switch defaultChecked={true} />
               </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
             </div>
-          </GlassCard>
-        </motion.div>
-
-        {/* Security & Support */}
-        <motion.div variants={itemVariants}>
-          <h3 className="text-lg font-semibold text-white mb-3 px-2">Security & Support</h3>
-          <GlassCard className="bg-white/5 p-0">
-            <div className="divide-y divide-gray-700">
-              <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center">
-                    <ShieldCheck className="h-5 w-5 text-green-400" />
-                  </div>
-                  <span className="text-white font-medium">Security Settings</span>
+            
+            <div className="flex items-center justify-between p-3">
+              <div className="flex items-center gap-2">
+                <Home className="h-4 w-4 text-blue-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Housing Status</p>
+                  <p className="text-xs text-white/60">Renting</p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
-              </button>
-
-              <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                    <HelpCircle className="h-5 w-5 text-blue-400" />
-                  </div>
-                  <span className="text-white font-medium">Help Center</span>
-                </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
-              </button>
-
-              <button className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-500/20 rounded-xl flex items-center justify-center">
-                    <FileText className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <span className="text-white font-medium">Terms of Service</span>
-                </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
-              </button>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
             </div>
-          </GlassCard>
-        </motion.div>
+            
+            <div className="flex items-center justify-between p-3">
+              <div className="flex items-center gap-2">
+                <GraduationCap className="h-4 w-4 text-purple-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Education Level</p>
+                  <p className="text-xs text-white/60">Bachelor's Degree</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </div>
+            
+            <div className="flex items-center justify-between p-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-orange-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Location</p>
+                  <p className="text-xs text-white/60">San Francisco, CA</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </div>
+          </div>
+        </div>
 
-        {/* Sign Out */}
-        <motion.div variants={itemVariants}>
-          <Button
-            variant="ghost"
-            className="w-full justify-center p-4 text-lg font-medium text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-400 border border-red-500/20"
+        {/* Account Settings */}
+        <div>
+          <h2 className="text-base font-semibold text-white mb-3">Account Settings</h2>
+          <div className="space-y-2">
+            <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <Shield className="h-4 w-4 text-red-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Privacy & Security</p>
+                  <p className="text-xs text-white/60">Manage your privacy settings</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </button>
+            
+            <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4 text-yellow-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Notifications</p>
+                  <p className="text-xs text-white/60">Configure alerts and reminders</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </button>
+            
+            <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <Download className="h-4 w-4 text-blue-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Export Data</p>
+                  <p className="text-xs text-white/60">Download your financial data</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </button>
+          </div>
+        </div>
+
+        {/* Support & Help */}
+        <div>
+          <h2 className="text-base font-semibold text-white mb-3">Support & Help</h2>
+          <div className="space-y-2">
+            <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <HelpCircle className="h-4 w-4 text-green-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Help Center</p>
+                  <p className="text-xs text-white/60">Find answers to common questions</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </button>
+            
+            <button className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-purple-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Contact Support</p>
+                  <p className="text-xs text-white/60">Get help from our team</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </button>
+          </div>
+        </div>
+
+        {/* Logout */}
+        <div className="pt-4">
+          <button 
+            onClick={() => setCurrentScreen("login")}
+            className="w-full justify-center p-3 text-base font-medium text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-400 border border-red-500/20 rounded-lg"
           >
-            <LogOut className="mr-3 h-5 w-5" />
             Sign Out
-          </Button>
-        </motion.div>
+          </button>
+        </div>
       </motion.div>
     </div>
   )

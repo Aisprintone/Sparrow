@@ -17,7 +17,7 @@ from fastapi.responses import StreamingResponse
 from sse_starlette.sse import EventSourceResponse, ServerSentEvent
 
 # Local imports
-from streaming_ai import (
+from api.streaming_ai import (
     StreamingAIPipeline, 
     StreamEvent, 
     StreamEventType, 

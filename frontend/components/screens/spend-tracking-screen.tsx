@@ -16,6 +16,11 @@ import {
   Repeat,
   CreditCard,
   BarChart3,
+  Calendar,
+  PieChart,
+  Receipt,
+  Lightbulb,
+  TrendingDown,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
@@ -93,9 +98,12 @@ const generateYearOptions = () => {
 // Get current day of month and day of year for comparison context
 const getCurrentDay = () => {
   const now = new Date()
+  const startOfYear = new Date(now.getFullYear(), 0, 0)
+  const dayOfYear = Math.floor((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24))
+  
   return {
     dayOfMonth: now.getDate(),
-    dayOfYear: Math.floor((now - new Date(now.getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24)),
+    dayOfYear: dayOfYear,
     monthName: now.toLocaleString("default", { month: "long" }),
     date: now.getDate(),
   }
@@ -356,217 +364,125 @@ export default function SpendTrackingScreen({ demographic, monthlySpending }: Ap
   }
 
   return (
-    <div className="pb-28">
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="p-6 flex items-center justify-between"
-      >
-        <h1 className="text-2xl font-bold text-white">Spend Tracking</h1>
-      </motion.header>
+    <div className="flex h-[100dvh] flex-col">
+      <header className="p-3 text-white">
+        <h1 className="text-xl font-bold">Spend Tracking</h1>
+        <p className="text-white/80">Monitor your spending patterns</p>
+      </header>
 
-      {/* View Controls */}
-      <div className="px-4 mb-6">
-        <div className="flex gap-3">
-          {/* Year Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="bg-white/10 text-white hover:bg-white/20 flex items-center gap-2">
-                {selectedYear}
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-gray-800 border-gray-700 z-50 max-h-60 overflow-y-auto">
-              {yearOptions.map((year) => (
-                <DropdownMenuItem
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  className="text-white hover:bg-gray-700 cursor-pointer"
-                >
-                  {year}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+      <div className="flex-1 overflow-y-auto p-3 space-y-5">
+        {/* Monthly Overview */}
+        <div>
+          <h2 className="text-base font-semibold text-white flex items-center gap-2 mb-2">
+            <Calendar className="h-4 w-4" />
+            This Month
+          </h2>
+          <GlassCard className="p-4 bg-gradient-to-br from-blue-500/20 to-purple-500/20">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm text-white/60">Total Spent</p>
+                <p className="text-2xl font-bold text-white mb-4">
+                  ${(recurringExpenses.total + nonRecurringExpenses.total).toLocaleString()}
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="flex items-center gap-1 text-green-400">
+                  <TrendingDown className="h-4 w-4" />
+                  <span className="text-sm">-12%</span>
+                </div>
+                <p className="text-xs text-white/60">vs last month</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="text-center">
+                <p className="text-sm text-white/60">Budget</p>
+                <p className="text-base font-semibold text-white">$3,500</p>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-white/60">Remaining</p>
+                <p className="text-base font-semibold text-green-400">$1,200</p>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
 
-          {/* Month Selection Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="bg-white/10 text-white hover:bg-white/20 flex items-center gap-2">
-                {monthNames[selectedMonth]}
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-gray-800 border-gray-700 z-50 max-h-60 overflow-y-auto">
-              {monthOrder.map((month) => {
-                const disabled = isMonthDisabled(month as MonthOption)
-                return (
-                  <DropdownMenuItem
-                    key={month}
-                    onClick={() => !disabled && setSelectedMonth(month as MonthOption)}
-                    className={cn(
-                      "cursor-pointer",
-                      disabled ? "text-gray-500 hover:bg-gray-800 cursor-not-allowed" : "text-white hover:bg-gray-700",
-                    )}
-                    disabled={disabled}
-                  >
-                    {monthNames[month as MonthOption]}
-                  </DropdownMenuItem>
-                )
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {/* Spending Categories */}
+        <div>
+          <h2 className="text-base font-semibold text-white flex items-center gap-2 mb-2">
+            <PieChart className="h-4 w-4" />
+            Top Categories
+          </h2>
+          <div className="space-y-2">
+            {nonRecurringExpenses.categories.slice(0, 4).map((category) => (
+              <div key={category.name} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full" style={{ 
+                    backgroundColor: category.icon === "Leaf" ? "#65a30d" : 
+                    category.icon === "ShoppingCart" ? "#4f46e5" : 
+                    category.icon === "Car" ? "#10b981" : "#9333ea" 
+                  }}></div>
+                  <div>
+                    <p className="text-sm font-medium text-white">{category.name}</p>
+                    <p className="text-xs text-white/60">${category.spent.toLocaleString()} / ${category.budget.toLocaleString()}</p>
+                  </div>
+                </div>
+                <span className="text-sm font-semibold text-white">${category.spent.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Transactions */}
+        <div>
+          <h2 className="text-base font-semibold text-white flex items-center gap-2 mb-2">
+            <Receipt className="h-4 w-4" />
+            Recent Transactions
+          </h2>
+          <div className="space-y-2">
+            {recurringExpenses.categories.map((category) => (
+              <div key={category.name} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg flex items-center justify-center">
+                    <div className="text-white text-sm">{category.icon}</div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-white">{category.name}</p>
+                    <p className="text-xs text-white/60">${category.spent.toLocaleString()}</p>
+                  </div>
+                </div>
+                <span className="text-sm font-semibold text-white">${category.spent.toLocaleString()}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Spending Insights */}
+        <div>
+          <h2 className="text-base font-semibold text-white flex items-center gap-2 mb-2">
+            <Lightbulb className="h-4 w-4" />
+            Insights
+          </h2>
+          <GlassCard className="p-3">
+            <div className="space-y-2">
+              <div className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full mt-2"></div>
+                <div>
+                  <p className="text-sm font-medium text-white">You're 15% under budget this month</p>
+                  <p className="text-xs text-white/60">Great job staying on track!</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
+                <div>
+                  <p className="text-sm font-medium text-white">Dining out is your highest category</p>
+                  <p className="text-xs text-white/60">Consider meal planning to save more</p>
+                </div>
+              </div>
+            </div>
+          </GlassCard>
         </div>
       </div>
-
-      <motion.div variants={containerVariants} initial="hidden" animate="visible" className="px-4 space-y-5">
-        {/* Spending Comparison Card */}
-        <motion.div variants={itemVariants}>
-          <GlassCard className="bg-gradient-to-r from-blue-500/10 to-purple-500/10">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-blue-400" />
-                Spending Comparison
-              </h2>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="bg-white/10 text-white hover:bg-white/20 flex items-center gap-2"
-                  >
-                    {isAllMonthsView ? yearComparisonLabels[yearComparison] : monthComparisonLabels[monthComparison]}
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-gray-800 border-gray-700 z-50">
-                  {isAllMonthsView
-                    ? Object.entries(yearComparisonLabels).map(([key, label]) => (
-                        <DropdownMenuItem
-                          key={key}
-                          onClick={() => setYearComparison(key as YearComparisonOption)}
-                          className="text-white hover:bg-gray-700 cursor-pointer"
-                        >
-                          {label}
-                        </DropdownMenuItem>
-                      ))
-                    : Object.entries(monthComparisonLabels).map(([key, label]) => (
-                        <DropdownMenuItem
-                          key={key}
-                          onClick={() => setMonthComparison(key as MonthComparisonOption)}
-                          className="text-white hover:bg-gray-700 cursor-pointer"
-                        >
-                          {label}
-                        </DropdownMenuItem>
-                      ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            <div className="text-center">
-              <p className="text-sm text-gray-400 mb-2">
-                Relative to{" "}
-                {isAllMonthsView ? yearComparisonLabels[yearComparison] : monthComparisonLabels[monthComparison]}{" "}
-                {getOnThisDayText()}
-              </p>
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-sm text-gray-400">You are</span>
-                <span className={`text-2xl font-bold ${comparisonData.isAhead ? "text-green-400" : "text-red-400"}`}>
-                  ${Math.abs(comparisonData.difference).toLocaleString()}
-                </span>
-                <span className={`text-sm font-medium ${comparisonData.isAhead ? "text-green-400" : "text-red-400"}`}>
-                  {comparisonData.isAhead ? "ahead" : "behind"}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500">
-                Current: ${Math.round(comparisonData.difference + comparisonData.comparisonSpending).toLocaleString()}{" "}
-                vs Comparison: ${Math.round(comparisonData.comparisonSpending).toLocaleString()}
-              </p>
-            </div>
-          </GlassCard>
-        </motion.div>
-
-        {/* Spending Insights - First */}
-        <motion.div variants={itemVariants}>
-          <GlassCard className="bg-gradient-to-r from-orange-500/10 to-red-500/10">
-            <div className="mb-3">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2 mb-3">
-                <TrendingUp className="h-4 w-4 text-orange-400" />
-                Spending Insights
-              </h2>
-              <p className="text-2xl font-bold text-white mb-4">
-                ${totalSpending.toLocaleString()} spent {getSpendingPeriodText()}
-              </p>
-            </div>
-            <div className="space-y-3">
-              {displayedInsights.map((insight, index) => {
-                const IconComponent = insight.icon
-                return (
-                  <div key={index} className="flex items-start gap-3 p-3 rounded-xl bg-white/5">
-                    <IconComponent className={`h-4 w-4 ${insight.iconColor} flex-shrink-0 mt-0.5`} />
-                    <div>
-                      <p className="text-white font-medium text-sm">{insight.title}</p>
-                      <p className="text-xs text-gray-300">{insight.description}</p>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-            {!showAllInsights && (
-              <div className="mt-4 pt-3 border-t border-white/10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAllInsights(true)}
-                  className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 flex items-center gap-1 text-sm"
-                >
-                  View More <ChevronDown className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
-            {showAllInsights && (
-              <div className="mt-4 pt-3 border-t border-white/10">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAllInsights(false)}
-                  className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 flex items-center gap-1 text-sm"
-                >
-                  View Less <ChevronUp className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
-          </GlassCard>
-        </motion.div>
-
-        {/* Recurring Expenses */}
-        <motion.div variants={itemVariants}>
-          <GlassCard className="bg-gray-800/50">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                <Repeat className="h-4 w-4 text-blue-400" />
-                Recurring Expenses
-              </h2>
-              <p className="text-lg font-semibold text-white">${recurringExpenses.total.toLocaleString()}</p>
-            </div>
-            <div className="space-y-0">{recurringExpenses.categories.map(renderCategoryRow)}</div>
-          </GlassCard>
-        </motion.div>
-
-        {/* Non-recurring Expenses */}
-        <motion.div variants={itemVariants}>
-          <GlassCard className="bg-gray-800/50">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                <CreditCard className="h-4 w-4 text-purple-400" />
-                Non-recurring Expenses
-              </h2>
-              <p className="text-lg font-semibold text-white">${nonRecurringExpenses.total.toLocaleString()}</p>
-            </div>
-            <div className="space-y-0">{nonRecurringExpenses.categories.map(renderCategoryRow)}</div>
-          </GlassCard>
-        </motion.div>
-      </motion.div>
     </div>
   )
 }

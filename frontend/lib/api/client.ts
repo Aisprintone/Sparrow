@@ -69,12 +69,20 @@ export class ApiClient {
   constructor(config: Partial<ApiClientConfig> = {}) {
     this.config = { 
       ...DEFAULT_CONFIG, 
-      baseURL: config.baseURL || process.env.NEXT_PUBLIC_API_URL || 'https://sparrow-backend.aisprintone.workers.dev',
+      baseURL: config.baseURL || process.env.NEXT_PUBLIC_API_URL || 'https://feeble-bite-production.up.railway.app',
       ...config 
     };
     
     // Add default interceptors
     this.setupDefaultInterceptors();
+    
+    // Log configuration for debugging
+    if (typeof window !== 'undefined') {
+      console.log('[API CLIENT] 🚀 API Client initialized')
+      console.log('[API CLIENT] Base URL:', this.config.baseURL)
+      console.log('[API CLIENT] Timeout:', this.config.timeout, 'ms')
+      console.log('[API CLIENT] Retry attempts:', this.config.retryAttempts)
+    }
   }
 
   // ==========================================================================
@@ -93,6 +101,7 @@ export class ApiClient {
       if (refreshToken) {
         localStorage.setItem('refresh_token', refreshToken);
       }
+      console.log('[API CLIENT] 🔐 Tokens stored in localStorage')
     }
   }
 
@@ -234,6 +243,14 @@ export class ApiClient {
   }
 
   private async executeRequest<T>(config: RequestConfig): Promise<T> {
+    const requestId = this.generateRequestId();
+    const startTime = performance.now();
+    
+    console.log(`[API CLIENT] 🚀 REQUEST STARTED: ${requestId}`)
+    console.log(`[API CLIENT] 📍 URL: ${config.url}`)
+    console.log(`[API CLIENT] 🔧 Method: ${config.method || 'GET'}`)
+    console.log(`[API CLIENT] 🔐 Skip auth: ${config.skipAuth || false}`)
+    
     // Apply request interceptors
     let finalConfig = config;
     for (const interceptor of this.requestInterceptors) {
@@ -244,6 +261,7 @@ export class ApiClient {
 
     // Build URL with params
     const url = this.buildUrl(finalConfig.url, finalConfig.params);
+    console.log(`[API CLIENT] 🌐 Final URL: ${url}`)
 
     // Set default headers
     finalConfig.headers = {
@@ -253,7 +271,10 @@ export class ApiClient {
     };
 
     // Execute with retry logic
-    return this.executeWithRetry<T>(url, finalConfig);
+    const result = await this.executeWithRetry<T>(url, finalConfig);
+    const totalTime = performance.now() - startTime;
+    console.log(`[API CLIENT] ✅ REQUEST COMPLETED: ${requestId} in ${totalTime.toFixed(2)}ms`);
+    return result;
   }
 
   private async executeWithRetry<T>(
@@ -261,13 +282,16 @@ export class ApiClient {
     config: RequestConfig, 
     attempt = 1
   ): Promise<T> {
+    const startTime = performance.now()
+    const maxAttempts = config.retryAttempts || this.config.retryAttempts || 3;
+    
+    console.log(`[API CLIENT] 🔄 ATTEMPT ${attempt}/${maxAttempts} started`)
+    
     try {
       // Create abort controller for timeout
       const controller = new AbortController();
-      const timeout = setTimeout(
-        () => controller.abort(),
-        config.timeout || this.config.timeout || 30000
-      );
+      const timeoutMs = config.timeout || this.config.timeout || 30000;
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
       const response = await fetch(url, {
         ...config,
@@ -275,6 +299,10 @@ export class ApiClient {
       });
 
       clearTimeout(timeout);
+      const responseTime = performance.now() - startTime
+      
+      console.log(`[API CLIENT] 📡 RESPONSE: ${response.status} ${response.statusText}`)
+      console.log(`[API CLIENT] ⏱️ Response time: ${responseTime.toFixed(2)}ms`)
 
       // Handle response
       const data = await this.handleResponse<T>(response);
@@ -290,8 +318,20 @@ export class ApiClient {
         }
       }
 
+      console.log(`[API CLIENT] ✅ ATTEMPT ${attempt} SUCCESSFUL`)
       return finalData;
     } catch (error) {
+      const errorTime = performance.now() - startTime
+      console.error(`[API CLIENT] ❌ ATTEMPT ${attempt} FAILED: ${errorTime.toFixed(2)}ms`)
+      console.error(`[API CLIENT] 💥 Error details:`, error)
+      
+      if (attempt < maxAttempts) {
+        const retryDelay = this.getRetryDelay(attempt);
+        console.log(`[API CLIENT] ⏳ RETRYING in ${retryDelay}ms...`)
+        await this.delay(retryDelay);
+        return this.executeWithRetry<T>(url, config, attempt + 1);
+      }
+      
       return this.handleError<T>(error, url, config, attempt);
     }
   }

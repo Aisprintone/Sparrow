@@ -18,9 +18,13 @@ load_dotenv()
 from langchain_core.documents import Document
 from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
 from langchain_core.retrievers import BaseRetriever
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+# ENFORCED: Import unified cache for embeddings
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from core.api_cache import CacheAwareEmbeddings, api_cache
 
 # DSPy for structured queries
 import dspy
@@ -30,7 +34,11 @@ from dspy import Signature, Module, InputField, OutputField
 from langchain_core.tools import Tool
 from typing import Union
 
-logging.basicConfig(level=logging.INFO)
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 
@@ -69,29 +77,16 @@ class ProfileRAGSystem:
         self._setup_dspy_analyzer()
     
     def _setup_embeddings(self):
-        """Setup embeddings with Anthropic as primary, OpenAI as fallback"""
+        """ENFORCED: Use unified cached embeddings - no more duplicates."""
         try:
-            # Try Anthropic first (primary)
-            if os.getenv("ANTHROPIC_API_KEY"):
-                try:
-                    from langchain_anthropic import AnthropicEmbeddings
-                    self.embeddings = AnthropicEmbeddings()
-                    logger.info("Using Anthropic embeddings")
-                    return
-                except ImportError:
-                    logger.warning("Anthropic embeddings not available, trying OpenAI")
-                except Exception as e:
-                    logger.warning(f"Anthropic embeddings failed: {e}, trying OpenAI")
-            
-            # Fallback to OpenAI
-            if os.getenv("OPENAI_API_KEY"):
-                self.embeddings = OpenAIEmbeddings()
-                logger.info("Using OpenAI embeddings (fallback)")
-            else:
-                # Final fallback to in-memory embeddings for testing
-                logger.warning("No API keys found, using basic embeddings")
-                from langchain_core.embeddings import DeterministicFakeEmbedding
-                self.embeddings = DeterministicFakeEmbedding(size=384)
+            # Use unified cache-aware embeddings
+            self.embeddings = CacheAwareEmbeddings()
+            logger.info(f"Using cached embeddings with provider: {self.embeddings.provider.value}")
+        except ValueError as e:
+            # Final fallback to in-memory embeddings for testing
+            logger.warning(f"No API keys found: {e}, using basic embeddings")
+            from langchain_core.embeddings import DeterministicFakeEmbedding
+            self.embeddings = DeterministicFakeEmbedding(size=384)
         except Exception as e:
             logger.error(f"Failed to setup embeddings: {e}")
             raise
@@ -535,17 +530,31 @@ class ProfileRAGSystem:
         Returns:
             Analysis result string
         """
+        start_time = time.time()
+        logger.info(f"🔍 RAG QUERY: Profile {self.profile_id}")
+        logger.info(f"📝 Query: {query[:100]}...")
+        logger.info(f"🛠️ Tool: {tool_name or 'query_all_data'}")
+        
         try:
             if tool_name and tool_name in self.tools_registry:
                 # Use specific tool
+                logger.info(f"🎯 USING SPECIFIC TOOL: {tool_name}")
                 tool = self.tools_registry[tool_name]
-                return tool.func(query)
+                result = tool.func(query)
+                query_time = time.time() - start_time
+                logger.info(f"✅ TOOL QUERY COMPLETED: {query_time:.3f}s")
+                return result
             else:
                 # Use general query across all data
-                return self.tools_registry['query_all_data'].func(query)
+                logger.info(f"🌐 USING GENERAL QUERY")
+                result = self.tools_registry['query_all_data'].func(query)
+                query_time = time.time() - start_time
+                logger.info(f"✅ GENERAL QUERY COMPLETED: {query_time:.3f}s")
+                return result
                 
         except Exception as e:
-            logger.error(f"Query error: {e}")
+            query_time = time.time() - start_time
+            logger.error(f"❌ RAG QUERY FAILED: {e} after {query_time:.3f}s")
             return f"Error processing query: {str(e)}"
     
     def get_profile_summary(self) -> Dict[str, Any]:

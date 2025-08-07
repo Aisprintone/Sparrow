@@ -1,208 +1,366 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { Badge } from '@/components/ui/badge'
+import { 
+  Plus, 
+  Target, 
+  Shield, 
+  Home, 
+  Plane, 
+  TrendingUp, 
+  GraduationCap, 
+  Briefcase, 
+  BarChart3, 
+  BookOpen,
+  Trash2,
+  Edit,
+  Play,
+  AlertCircle
+} from 'lucide-react'
+import { Goal } from '@/lib/data'
+import { GoalService } from '@/lib/services/goal-service'
+import { useToast } from '@/hooks/use-toast'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import type { AppState } from "@/hooks/use-app-state"
-import { Plus, Sparkles, Shield, Plane, ChevronDown } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import GlassCard from "@/components/ui/glass-card"
-import { Button } from "@/components/ui/button"
-import { Progress } from "@/components/ui/progress"
-import { cn } from "@/lib/utils"
-import GoalMilestoneTracker from "@/components/ui/goal-milestone-tracker"
 
-const goalColorStyles = {
-  green: {
-    iconContainer: "bg-green-100 text-green-600",
-    progress: "bg-green-500",
-  },
-  blue: {
-    iconContainer: "bg-blue-100 text-blue-600",
-    progress: "bg-blue-500",
-  },
+const goalIcons: Record<string, React.ReactNode> = {
+  Target: <Target className="h-5 w-5" />,
+  Shield: <Shield className="h-5 w-5" />,
+  Home: <Home className="h-5 w-5" />,
+  Plane: <Plane className="h-5 w-5" />,
+  TrendingUp: <TrendingUp className="h-5 w-5" />,
+  GraduationCap: <GraduationCap className="h-5 w-5" />,
+  Briefcase: <Briefcase className="h-5 w-5" />,
+  BarChart3: <BarChart3 className="h-5 w-5" />,
+  BookOpen: <BookOpen className="h-5 w-5" />
 }
 
-export default function GoalsScreen({ goals, setCurrentScreen, setSelectedGoal, setGoalFeedbackOpen }: AppState) {
-  const [expandedGoalId, setExpandedGoalId] = useState<number | null>(null)
-  const totalSaved = goals.reduce((sum, goal) => sum + goal.current, 0)
-  const totalTarget = goals.reduce((sum, goal) => sum + goal.target, 0)
-  const overallProgress = (totalSaved / totalTarget) * 100
+const goalColors: Record<string, string> = {
+  green: 'bg-green-500',
+  blue: 'bg-blue-500',
+  purple: 'bg-purple-500',
+  red: 'bg-red-500',
+  orange: 'bg-orange-500',
+  indigo: 'bg-indigo-500',
+  teal: 'bg-teal-500',
+  cyan: 'bg-cyan-500'
+}
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
+const priorityColors: Record<string, string> = {
+  high: 'bg-red-100 text-red-800',
+  medium: 'bg-yellow-100 text-yellow-800',
+  low: 'bg-green-100 text-green-800'
+}
+
+export default function GoalsScreen({ 
+  goals, 
+  addGoal, 
+  updateGoal, 
+  deleteGoal, 
+  setSelectedGoal,
+  setCurrentScreen
+}: AppState) {
+  const { toast } = useToast()
+  const [goalService] = useState(() => GoalService.getInstance())
+  const [selectedGoal, setSelectedGoalLocal] = useState<Goal | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [goalToDelete, setGoalToDelete] = useState<Goal | null>(null)
+
+  const getGoalIcon = (iconName: string) => {
+    return goalIcons[iconName] || <Target className="h-5 w-5" />
   }
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { type: "spring" } },
+  const getGoalColor = (color: string) => {
+    return goalColors[color] || 'bg-blue-500'
   }
 
-  const getIcon = (iconName: string) => {
-    switch (iconName) {
-      case "Shield":
-        return <Shield className="h-6 w-6" />
-      case "Plane":
-        return <Plane className="h-6 w-6" />
-      default:
-        return <Shield className="h-6 w-6" />
+  const getPriorityColor = (priority: string | undefined) => {
+    return priorityColors[priority || 'medium'] || priorityColors.medium
+  }
+
+  const calculateProgress = (goal: Goal) => {
+    return (goal.current / goal.target) * 100
+  }
+
+  const getGoalStatus = (goal: Goal) => {
+    const progress = calculateProgress(goal)
+    const status = goalService.getGoalStatus(goal)
+    
+    return {
+      status,
+      progress,
+      recommendations: goalService.getGoalRecommendations(goal)
     }
   }
 
-  const handleToggleGoal = (goalId: number) => {
-    setExpandedGoalId(expandedGoalId === goalId ? null : goalId)
+  const handleDeleteGoal = async (goal: Goal) => {
+    try {
+      await goalService.deleteGoal(goal.id)
+      deleteGoal(goal.id)
+      toast({
+        title: 'Goal deleted',
+        description: `${goal.title} has been deleted successfully.`,
+      })
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete goal. Please try again.',
+        variant: 'destructive',
+      })
+    }
   }
 
+  const handleRunSimulation = async (goal: Goal) => {
+    try {
+      const simulations = await goalService.getGoalSimulations(goal.id)
+      toast({
+        title: 'Simulations found',
+        description: `Found ${simulations.totalSimulations} relevant simulations for ${goal.title}`,
+      })
+      // Navigate to simulations screen with pre-selected simulations
+      setCurrentScreen('simulations')
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch simulations. Please try again.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleGoalClick = (goal: Goal) => {
+    setSelectedGoal(goal)
+    setCurrentScreen('goal-detail')
+  }
+
+  const handleAddGoal = () => {
+    setCurrentScreen('create-goal')
+  }
+
+  const totalProgress = goals.length > 0 
+    ? goals.reduce((sum, goal) => sum + calculateProgress(goal), 0) / goals.length 
+    : 0
+
   return (
-    <div className="pb-28">
+    <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring" }}
-        className="p-6 pb-20 text-white"
-      >
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Your Goals</h1>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => setCurrentScreen("create-goal")}
-            className="rounded-xl bg-white/20 backdrop-blur-lg hover:bg-white/30"
-            aria-label="Create new goal"
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold">Financial Goals</h1>
+          <p className="text-muted-foreground">
+            Track your progress and stay motivated
+          </p>
         </div>
+        <Button onClick={handleAddGoal}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Goal
+        </Button>
+      </div>
 
-        {/* Overall Progress */}
-        <GlassCard onClick={() => setGoalFeedbackOpen(true)} className="cursor-pointer">
-          <p className="mb-1 text-sm text-white/80">Total Progress</p>
-          <p className="mb-3 text-3xl font-bold" aria-live="polite">
-            ${totalSaved.toLocaleString()}
-          </p>
-          <Progress
-            value={overallProgress}
-            className="h-3 bg-white/20 [&>*]:bg-gradient-to-r [&>*]:from-purple-400 [&>*]:to-pink-400"
-            aria-label={`Overall goal progress: ${overallProgress.toFixed(1)}%`}
-          />
-          <p className="mt-2 text-sm text-white/80">
-            of ${totalTarget.toLocaleString()} across {goals.length} goals
-          </p>
-        </GlassCard>
-      </motion.div>
-
-      {/* AI Recommendation */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1, type: "spring" }}
-        className="px-4 -mt-16"
-      >
-        <div className="rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 p-4 text-white shadow-lg">
-          <div className="mb-2 flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
-            <h3 className="font-semibold">AI Insight</h3>
+      {/* Overall Progress */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Target className="h-5 w-5" />
+            Overall Progress
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Average completion</span>
+              <span>{totalProgress.toFixed(1)}%</span>
+            </div>
+            <Progress value={totalProgress} className="h-2" />
+            <p className="text-xs text-muted-foreground">
+              {goals.length} active goals
+            </p>
           </div>
-          <p className="mb-3 text-sm">
-            You can reach all your goals 3 months faster by optimizing your monthly contributions.
-          </p>
-          <Button size="sm" className="bg-white/20 text-white backdrop-blur-lg hover:bg-white/30">
-            Optimize My Goals
-          </Button>
-        </div>
-      </motion.div>
+        </CardContent>
+      </Card>
 
-      {/* Goals List */}
-      <motion.div variants={containerVariants} initial="hidden" animate="visible" className="px-4 mt-6 space-y-4">
+      {/* Goals Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {goals.map((goal) => {
-          const progress = (goal.current / goal.target) * 100
-          const styles = goalColorStyles[goal.color] || goalColorStyles.green
-          const isExpanded = expandedGoalId === goal.id
-
+          const { status, progress, recommendations } = getGoalStatus(goal)
+          
           return (
-            <motion.div key={goal.id} variants={itemVariants}>
-              <GlassCard
-                onClick={() => handleToggleGoal(goal.id)}
-                className="cursor-pointer bg-white/80 text-foreground"
-                aria-label={`View details for ${goal.title}`}
-                layout
-              >
-                <motion.div layout="position" className="mb-3 flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        "flex h-12 w-12 items-center justify-center rounded-xl text-2xl",
-                        styles.iconContainer,
-                      )}
-                    >
-                      {getIcon(goal.icon)}
-                    </div>
-                    <div className="text-left">
-                      <h3 className="font-semibold">{goal.title}</h3>
-                      <p className="text-sm text-gray-600">
-                        ${goal.current.toLocaleString()} / ${goal.target.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
+            <Card key={goal.id} className="relative group hover:shadow-lg transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex justify-between items-start">
                   <div className="flex items-center gap-2">
-                    <p className="text-lg font-bold">{progress.toFixed(1)}%</p>
-                    <ChevronDown
-                      className={cn("h-5 w-5 text-gray-400 transition-transform", isExpanded && "rotate-180")}
-                    />
-                  </div>
-                </motion.div>
-                <motion.div layout="position">
-                  <Progress
-                    value={progress}
-                    className={cn("h-2 bg-gray-200", "[&>*]:" + styles.progress)}
-                    aria-label={`${goal.title} progress: ${progress.toFixed(0)}%`}
-                  />
-                </motion.div>
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden"
-                    >
-                      <GoalMilestoneTracker goal={goal} />
-                      <div className="px-4 pb-2">
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setSelectedGoal(goal)
-                            setCurrentScreen("goal-detail")
-                          }}
-                          className="w-full"
-                        >
-                          View Full Details
-                        </Button>
+                    <div className={`p-2 rounded-lg ${getGoalColor(goal.color)} text-white`}>
+                      {getGoalIcon(goal.icon)}
+                    </div>
+                    <div>
+                      <CardTitle className="text-lg">{goal.title}</CardTitle>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge className={getPriorityColor(goal.priority)}>
+                          {goal.priority}
+                        </Badge>
+                        <Badge variant={status === 'behind' ? 'destructive' : 'secondary'}>
+                          {status}
+                        </Badge>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </GlassCard>
-            </motion.div>
+                    </div>
+                  </div>
+                  
+                  {/* Action Menu */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRunSimulation(goal)}
+                        title="Run simulations"
+                      >
+                        <Play className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleGoalClick(goal)}
+                        title="Edit goal"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setGoalToDelete(goal)}
+                            title="Delete goal"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Goal</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to delete "{goal.title}"? This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteGoal(goal)}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                {/* Progress */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Progress</span>
+                    <span>${goal.current.toLocaleString()} / ${goal.target.toLocaleString()}</span>
+                  </div>
+                  <Progress value={progress} className="h-2" />
+                  <p className="text-xs text-muted-foreground">
+                    {progress.toFixed(1)}% complete
+                  </p>
+                </div>
+
+                {/* Goal Details */}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Monthly contribution</span>
+                    <span>${goal.monthlyContribution.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Deadline</span>
+                    <span>{goal.deadline}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Type</span>
+                    <span className="capitalize">{goal.type}</span>
+                  </div>
+                </div>
+
+                {/* AI Insights */}
+                {goal.aiInsights && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <AlertCircle className="h-4 w-4" />
+                      AI Insights
+                    </div>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      {goal.aiInsights.recommendations.slice(0, 2).map((rec, index) => (
+                        <div key={index} className="flex items-start gap-1">
+                          <span className="text-blue-500">•</span>
+                          <span>{rec}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Recommendations */}
+                {recommendations.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Recommendations</div>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      {recommendations.slice(0, 2).map((rec, index) => (
+                        <div key={index} className="flex items-start gap-1">
+                          <span className="text-green-500">•</span>
+                          <span>{rec}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Simulation Impact */}
+                {goal.simulationImpact && goal.simulationImpact.length > 0 && (
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Simulation Impact</div>
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      {goal.simulationImpact.slice(0, 2).map((impact, index) => (
+                        <div key={index} className="flex items-center justify-between">
+                          <span>{impact.scenarioName}</span>
+                          <span className="text-blue-500">+{impact.impactOnGoal}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )
         })}
-        <motion.div variants={itemVariants}>
-          <GlassCard
-            onClick={() => setCurrentScreen("create-goal")}
-            className="cursor-pointer border-2 border-dashed border-gray-400/50 bg-white/50 text-center text-foreground"
-          >
-            <Plus className="mx-auto mb-2 h-8 w-8 text-gray-400" />
-            <p className="font-medium text-gray-600">Add New Goal</p>
-            <p className="mt-1 text-sm text-gray-500">Start saving for what matters</p>
-          </GlassCard>
-        </motion.div>
-      </motion.div>
+      </div>
+
+      {/* Empty State */}
+      {goals.length === 0 && (
+        <Card className="text-center py-12">
+          <CardContent>
+            <Target className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No goals yet</h3>
+            <p className="text-muted-foreground mb-4">
+              Create your first financial goal to start tracking your progress
+            </p>
+            <Button onClick={handleAddGoal}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Your First Goal
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

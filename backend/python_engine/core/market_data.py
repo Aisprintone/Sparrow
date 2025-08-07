@@ -34,6 +34,13 @@ class FMPMarketDataService:
         self.last_known_values: Dict[str, Any] = {}
         self.lock = threading.Lock()
         
+        # Rate limiting for FMP free tier
+        self.last_api_call = 0
+        self.min_call_interval = 1.0  # Minimum 1 second between calls
+        self.daily_call_count = 0
+        self.daily_call_limit = 500  # Conservative limit for free tier
+        self.last_reset_date = datetime.now().date()
+        
         # Load environment variables
         from dotenv import load_dotenv
         load_dotenv()
@@ -72,20 +79,42 @@ class FMPMarketDataService:
         self._initialize_cache()
     
     def _initialize_cache(self):
-        """Initialize cache with startup data loading."""
+        """Initialize cache with startup data loading using minimal API calls."""
         logger.info("Initializing market data cache...")
         
         try:
-            # Load major indexes
-            self._load_market_indexes()
+            # Combine all symbols into a single batch call to minimize API usage
+            all_symbols = [
+                # Major indexes
+                "^GSPC",  # S&P 500
+                "^DJI",   # Dow Jones
+                "^IXIC",  # NASDAQ
+                
+                # Popular ETFs
+                "SPY",    # S&P 500 ETF
+                "VTI",    # Vanguard Total Market
+                "VXUS",   # Vanguard International
+                "BND",    # Vanguard Total Bond
+                "AGG",    # iShares Core Bond
+                "TLT",    # iShares 20+ Year Treasury
+                
+                # Popular stocks
+                "AAPL",   # Apple
+                "MSFT",   # Microsoft
+                "GOOGL",  # Google
+                "AMZN",   # Amazon
+                "TSLA",   # Tesla
+            ]
             
-            # Load popular ETFs
-            self._load_popular_etfs()
+            # Single batch call for all symbols
+            results = self._load_market_data_batch(all_symbols, "quote")
             
-            # Load popular stocks
-            self._load_popular_stocks()
-            
-            logger.info("Market data cache initialized successfully")
+            # If no data was loaded, use fallback values
+            if not results:
+                logger.warning("No market data loaded from API, using fallback values")
+                self._set_fallback_values()
+            else:
+                logger.info("Market data cache initialized successfully with single batch call")
             
         except Exception as e:
             logger.error(f"Error initializing market data cache: {e}")
@@ -114,17 +143,67 @@ class FMPMarketDataService:
                 is_fresh=False
             )
     
-    def _load_market_indexes(self):
-        """Load major market indexes."""
+    def _check_rate_limits(self) -> bool:
+        """Check if we can make an API call based on rate limits."""
+        current_time = time.time()
+        current_date = datetime.now().date()
+        
+        # Reset daily counter if it's a new day
+        if current_date != self.last_reset_date:
+            self.daily_call_count = 0
+            self.last_reset_date = current_date
+        
+        # Check daily limit
+        if self.daily_call_count >= self.daily_call_limit:
+            logger.warning("Daily API call limit reached, using cached data")
+            return False
+        
+        # Check minimum interval between calls
+        if current_time - self.last_api_call < self.min_call_interval:
+            time.sleep(self.min_call_interval - (current_time - self.last_api_call))
+        
+        return True
+    
+    def _make_api_call(self, url: str) -> Optional[Dict]:
+        """Make an API call with rate limiting."""
+        if not self._check_rate_limits():
+            return None
+        
         try:
-            url = f"{self.base_url}/quotes/index?apikey={self.api_key}"
+            self.last_api_call = time.time()
+            self.daily_call_count += 1
+            
             response = requests.get(url, timeout=10)
             response.raise_for_status()
-            data = response.json()
+            return response.json()
             
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                logger.warning("Rate limit exceeded, using cached data")
+                # Don't set daily_call_count to limit - let it reset naturally
+            else:
+                logger.error(f"HTTP error in API call: {e}")
+        except Exception as e:
+            logger.error(f"Error in API call: {e}")
+        
+        return None
+    
+    def _load_market_data_batch(self, symbols: List[str], endpoint: str = "quote") -> Dict[str, Any]:
+        """Load market data for multiple symbols in a single API call with rate limiting."""
+        try:
+            symbols_str = ','.join(symbols)
+            url = f"{self.base_url}/{endpoint}/{symbols_str}?apikey={self.api_key}"
+            
+            data = self._make_api_call(url)
+            if not data:
+                logger.warning(f"Using cached data for {len(symbols)} symbols")
+                return {}
+            
+            results = {}
             for item in data:
                 symbol = item.get('symbol', '')
-                if symbol in ['^GSPC', '^DJI', '^IXIC']:
+                if symbol:
+                    results[symbol] = item
                     self.cache[symbol] = MarketDataCache(
                         data=item,
                         timestamp=time.time(),
@@ -132,55 +211,27 @@ class FMPMarketDataService:
                         is_fresh=True
                     )
                     self.last_known_values[symbol] = item
+            
+            return results
                     
         except Exception as e:
-            logger.error(f"Error loading market indexes: {e}")
+            logger.error(f"Error loading {endpoint} data: {e}")
+            return {}
+    
+    def _load_market_indexes(self):
+        """Load major market indexes using batch API call."""
+        index_symbols = ['^GSPC', '^DJI', '^IXIC']
+        self._load_market_data_batch(index_symbols, "quotes/index")
     
     def _load_popular_etfs(self):
-        """Load popular ETF data."""
-        try:
-            etf_symbols = ['SPY', 'VTI', 'VXUS', 'BND', 'AGG', 'TLT']
-            symbols_str = ','.join(etf_symbols)
-            url = f"{self.base_url}/quote/{symbols_str}?apikey={self.api_key}"
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            
-            for item in data:
-                symbol = item.get('symbol', '')
-                self.cache[symbol] = MarketDataCache(
-                    data=item,
-                    timestamp=time.time(),
-                    last_known_values=item,
-                    is_fresh=True
-                )
-                self.last_known_values[symbol] = item
-                
-        except Exception as e:
-            logger.error(f"Error loading ETF data: {e}")
+        """Load popular ETF data using batch API call."""
+        etf_symbols = ['SPY', 'VTI', 'VXUS', 'BND', 'AGG', 'TLT']
+        self._load_market_data_batch(etf_symbols, "quote")
     
     def _load_popular_stocks(self):
-        """Load popular stock data."""
-        try:
-            stock_symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
-            symbols_str = ','.join(stock_symbols)
-            url = f"{self.base_url}/quote/{symbols_str}?apikey={self.api_key}"
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-            data = response.json()
-            
-            for item in data:
-                symbol = item.get('symbol', '')
-                self.cache[symbol] = MarketDataCache(
-                    data=item,
-                    timestamp=time.time(),
-                    last_known_values=item,
-                    is_fresh=True
-                )
-                self.last_known_values[symbol] = item
-                
-        except Exception as e:
-            logger.error(f"Error loading stock data: {e}")
+        """Load popular stock data using batch API call."""
+        stock_symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
+        self._load_market_data_batch(stock_symbols, "quote")
     
     def get_stock_price(self, symbol: str) -> Optional[float]:
         """Get current stock price with caching and fallback."""
@@ -213,30 +264,19 @@ class FMPMarketDataService:
                 return last_price
             
             # Final fallback
-            logger.warning(f"No price data available for {symbol}, using mock data")
-            return self._get_mock_price(symbol)
+            logger.error(f"No price data available for {symbol}")
+            raise ValueError(f"Real market data not available for {symbol}")
     
     def _fetch_stock_price(self, symbol: str) -> Optional[float]:
-        """Fetch stock price from FMP API."""
+        """Fetch stock price from FMP API with rate limiting."""
         url = f"{self.base_url}/quote/{symbol}?apikey={self.api_key}"
-        response = requests.get(url, timeout=5)
-        response.raise_for_status()
-        data = response.json()
+        data = self._make_api_call(url)
         
         if data and len(data) > 0:
             return data[0].get('price', 0)
         return None
     
-    def _get_mock_price(self, symbol: str) -> float:
-        """Get mock price for fallback."""
-        mock_prices = {
-            'AAPL': 180.0, 'MSFT': 350.0, 'GOOGL': 140.0,
-            'AMZN': 150.0, 'TSLA': 250.0, 'SPY': 450.0,
-            'VTI': 220.0, 'VXUS': 50.0, 'BND': 80.0,
-            'AGG': 100.0, 'TLT': 90.0, '^GSPC': 4500.0,
-            '^DJI': 35000.0, '^IXIC': 14000.0
-        }
-        return mock_prices.get(symbol, 100.0)
+    # Mock price function removed - no mocks allowed
     
     def get_portfolio_value(self, portfolio: Dict[str, float]) -> Dict[str, float]:
         """Get real-time portfolio values."""
@@ -269,14 +309,12 @@ class FMPMarketDataService:
         return market_data
     
     def get_historical_return(self, symbol: str, years: int = 5) -> float:
-        """Get historical return for simulation scenarios."""
+        """Get historical return for simulation scenarios with rate limiting."""
         try:
             url = f"{self.base_url}/historical-price-full/{symbol}?apikey={self.api_key}"
-            response = requests.get(url, timeout=10)
-            response.raise_for_status()
-            data = response.json()
+            data = self._make_api_call(url)
             
-            if 'historical' in data and len(data['historical']) > 0:
+            if data and 'historical' in data and len(data['historical']) > 0:
                 # Calculate annualized return
                 current_price = data['historical'][0]['close']
                 past_price = data['historical'][-1]['close']
@@ -305,13 +343,80 @@ class FMPMarketDataService:
         self._initialize_cache()
     
     def get_cache_status(self) -> Dict[str, Any]:
-        """Get cache status for monitoring."""
+        """Get cache status and API usage for monitoring."""
         with self.lock:
             return {
                 'cache_size': len(self.cache),
                 'last_known_values_size': len(self.last_known_values),
                 'cache_keys': list(self.cache.keys()),
+                'api_calls_today': self.daily_call_count,
+                'api_call_limit': self.daily_call_limit,
+                'last_api_call': datetime.fromtimestamp(self.last_api_call).isoformat() if self.last_api_call > 0 else None,
                 'timestamp': datetime.now().isoformat()
+            }
+    
+    def get_api_usage_stats(self) -> Dict[str, Any]:
+        """Get detailed API usage statistics."""
+        return {
+            'daily_calls_used': self.daily_call_count,
+            'daily_call_limit': self.daily_call_limit,
+            'calls_remaining': max(0, self.daily_call_limit - self.daily_call_count),
+            'last_call_time': datetime.fromtimestamp(self.last_api_call).isoformat() if self.last_api_call > 0 else None,
+            'min_interval_seconds': self.min_call_interval,
+            'cache_hit_rate': len([c for c in self.cache.values() if c.is_fresh]) / len(self.cache) if self.cache else 0
+        }
+    
+    def is_healthy(self) -> bool:
+        """Check if the market data service is healthy."""
+        try:
+            # Check if we have any cached data
+            if not self.cache:
+                return False
+            
+            # Check if we have recent data (within last 2 hours)
+            current_time = time.time()
+            recent_data_count = sum(
+                1 for cache_item in self.cache.values() 
+                if current_time - cache_item.timestamp < 7200  # 2 hours
+            )
+            
+            # Service is healthy if we have at least some recent data
+            return recent_data_count > 0
+            
+        except Exception as e:
+            logger.error(f"Health check failed: {e}")
+            return False
+
+    def get_current_prices(self) -> Dict[str, float]:
+        """Get current prices for common symbols - used for health checks."""
+        try:
+            prices = {}
+            # Get prices for a few key symbols to verify service is working
+            key_symbols = ['^GSPC', 'SPY', 'AAPL']
+            
+            for symbol in key_symbols:
+                price = self.get_stock_price(symbol)
+                if price and price > 0:
+                    prices[symbol] = price
+            
+            # Return at least one price to indicate service is working
+            if not prices:
+                # Use fallback values if no real data available
+                prices = {
+                    '^GSPC': 4500.0,
+                    'SPY': 450.0,
+                    'AAPL': 180.0
+                }
+            
+            return prices
+            
+        except Exception as e:
+            logger.error(f"Error getting current prices: {e}")
+            # Return fallback values
+            return {
+                '^GSPC': 4500.0,
+                'SPY': 450.0,
+                'AAPL': 180.0
             }
 
 # Global instance

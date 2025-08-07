@@ -22,20 +22,43 @@ from core.models import (
 
 
 class CSVDataLoader:
-    """
-    Loads profile data from CSV files.
-    Single Responsibility: Load and transform CSV data.
-    """
+    """Load and process CSV data for financial profiles."""
     
-    def __init__(self, data_dir: str = "/Users/ai-sprint-02/Documents/Sparrow/data"):
+    def __init__(self, data_dir: str = None):
         """
-        Initialize loader with data directory.
+        Initialize CSV data loader.
         
         Args:
-            data_dir: Directory containing CSV files
+            data_dir: Directory containing CSV files. If None, tries multiple locations.
         """
-        self.data_dir = data_dir
-        self._validate_data_directory()
+        if data_dir is None:
+            # Try multiple possible locations
+            possible_paths = [
+                "data",  # Relative to current directory
+                "../data",  # One level up
+                "../../data",  # Two levels up
+                "/Users/ai-sprint-02/Documents/Sparrow/data",  # Original path
+                "/app/data"  # Railway deployment path
+            ]
+            
+            for path in possible_paths:
+                if os.path.exists(path):
+                    self.data_dir = path
+                    break
+            else:
+                # If no path exists, use current directory and don't validate
+                self.data_dir = "data"
+                self._skip_validation = True
+        else:
+            self.data_dir = data_dir
+            self._skip_validation = False
+        
+        # Only validate if we're not skipping validation
+        if not hasattr(self, '_skip_validation'):
+            self._skip_validation = False
+            
+        if not self._skip_validation:
+            self._validate_data_directory()
     
     def _validate_data_directory(self):
         """Validate that required CSV files exist."""
@@ -45,10 +68,17 @@ class CSVDataLoader:
             'transaction.csv'
         ]
         
+        missing_files = []
         for file in required_files:
             filepath = os.path.join(self.data_dir, file)
             if not os.path.exists(filepath):
-                raise FileNotFoundError(f"Required CSV file not found: {filepath}")
+                missing_files.append(filepath)
+        
+        if missing_files:
+            # Raise an error if CSV files are missing - no mocks allowed
+            raise FileNotFoundError(f"Required CSV files not found: {missing_files}")
+        else:
+            self._use_mock_data = False
     
     def load_profile(self, customer_id: int) -> ProfileData:
         """
@@ -63,6 +93,8 @@ class CSVDataLoader:
         Raises:
             ValueError: If customer not found
         """
+        # No mock data allowed - must use real CSV data
+        
         # Load customer data
         customer_df = pd.read_csv(os.path.join(self.data_dir, 'customer.csv'))
         customer = customer_df[customer_df['customer_id'] == customer_id]
@@ -99,6 +131,8 @@ class CSVDataLoader:
             age=int(customer_data['age']),
             location=customer_data.get('location', 'Unknown')
         )
+    
+    # Mock profile function removed - no mocks allowed
     
     def _load_accounts(self, customer_id: int) -> List[Account]:
         """
@@ -462,5 +496,9 @@ class CSVDataLoader:
         Returns:
             List of customer IDs
         """
-        customer_df = pd.read_csv(os.path.join(self.data_dir, 'customer.csv'))
-        return customer_df['customer_id'].tolist()
+        try:
+            customer_df = pd.read_csv(os.path.join(self.data_dir, 'customer.csv'))
+            return customer_df['customer_id'].tolist()
+        except (FileNotFoundError, pd.errors.EmptyDataError) as e:
+            logger.error(f"Failed to load customer data: {e}")
+            raise ValueError("Cannot load profiles from CSV data")

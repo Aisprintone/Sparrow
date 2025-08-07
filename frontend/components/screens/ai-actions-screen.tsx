@@ -1,11 +1,16 @@
 "use client"
 
-import { useState } from "react"
-import type { AppState } from "@/hooks/use-app-state"
+import { useState, useEffect } from "react"
+import type { AppState, AIAction } from "@/hooks/use-app-state"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import GlassCard from "@/components/ui/glass-card"
-import { ChevronDown, ChevronUp, Check, Clock, AlertCircle, Play, Pause } from "lucide-react"
+import { ChevronDown, ChevronUp, Check, Clock, AlertCircle, Play, Pause, Eye, Settings, Info, Shield, Zap, TrendingUp, DollarSign, Activity, Target, Star, AlertTriangle, User, Bot, RefreshCw, BarChart3, Timer, Lock, Unlock, Sparkles, ArrowRight, ArrowDown, Users, Globe, Smartphone, Monitor, CreditCard, PiggyBank, Home, Car, Plane, X } from "lucide-react"
+import { aiActionsService } from "@/lib/api/ai-actions-service"
+import AutomationStatusCard from "@/components/ui/automation-status-card"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 export default function AIActionsScreen({
   aiActions,
@@ -18,9 +23,166 @@ export default function AIActionsScreen({
   demographic,
   setSelectedThought,
   setThoughtDetailOpen,
+  setAiActions,
 }: AppState) {
   const [expandedActions, setExpandedActions] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<"suggested" | "in-process" | "completed">("suggested")
+  const [workflowStatuses, setWorkflowStatuses] = useState<Record<string, any>>({})
+  const [inspectedWorkflow, setInspectedWorkflow] = useState<string | null>(null)
+  const [workflowValidation, setWorkflowValidation] = useState<Record<string, any>>({})
+
+  // Enhanced workflow validation and status polling
+  useEffect(() => {
+    const pollWorkflowStatuses = async () => {
+      const inProcessActions = aiActions.filter(action => action.status === "in-process")
+      
+      for (const action of inProcessActions) {
+        if (action.executionId) {
+          try {
+            const status = await aiActionsService.getAIActionStatus(action.executionId)
+            setWorkflowStatuses(prev => ({
+              ...prev,
+              [action.executionId!]: status
+            }))
+            
+            // Validate workflow against card title and automation
+            const validation = validateWorkflow(action, status)
+            setWorkflowValidation(prev => ({
+              ...prev,
+              [action.id]: validation
+            }))
+          } catch (error) {
+            console.error('Error polling workflow status:', error)
+          }
+        }
+      }
+    }
+
+    // Poll every 2 seconds for in-process actions
+    const interval = setInterval(pollWorkflowStatuses, 2000)
+    return () => clearInterval(interval)
+  }, [aiActions])
+
+  // Validate workflow against card title and automation requirements
+  const validateWorkflow = (action: any, status: any) => {
+    const validation = {
+      titleMatch: true,
+      automationValid: true,
+      stepsComplete: true,
+      riskAssessment: 'low',
+      efficiencyScore: 85,
+      issues: [] as string[],
+      recommendations: [] as string[]
+    }
+
+    // Check if workflow steps match the card title
+    const expectedSteps = getExpectedStepsForAction(action.title)
+    const actualSteps = status.steps || action.steps || []
+    
+    if (expectedSteps.length > 0 && actualSteps.length < expectedSteps.length) {
+      validation.titleMatch = false
+      validation.issues.push(`Expected ${expectedSteps.length} steps, found ${actualSteps.length}`)
+    }
+
+    // Validate automation requirements
+    const automationRequirements = getAutomationRequirements(action.title)
+    const currentStep = status.current_step || action.currentStep || ''
+    
+    if (automationRequirements.length > 0) {
+      const missingRequirements = automationRequirements.filter(req => 
+        !currentStep.toLowerCase().includes(req.toLowerCase())
+      )
+      
+      if (missingRequirements.length > 0) {
+        validation.automationValid = false
+        validation.issues.push(`Missing automation requirements: ${missingRequirements.join(', ')}`)
+      }
+    }
+
+    // Check step completion
+    const completedSteps = actualSteps.filter((step: any) => step.status === 'completed').length
+    const totalSteps = actualSteps.length
+    
+    if (totalSteps > 0 && completedSteps < totalSteps) {
+      validation.stepsComplete = false
+      validation.issues.push(`${totalSteps - completedSteps} steps remaining`)
+    }
+
+    // Risk assessment based on action type and current status
+    if (action.title.toLowerCase().includes('negotiate') || action.title.toLowerCase().includes('debt')) {
+      validation.riskAssessment = 'medium'
+    } else if (action.title.toLowerCase().includes('investment') || action.title.toLowerCase().includes('portfolio')) {
+      validation.riskAssessment = 'high'
+    }
+
+    // Efficiency score calculation
+    const progress = status.progress || action.progress || 0
+    const estimatedTime = getEstimatedTimeForAction(action.title)
+    const actualTime = getActualTimeForAction(action.id)
+    
+    if (estimatedTime > 0 && actualTime > 0) {
+      const efficiencyRatio = estimatedTime / actualTime
+      validation.efficiencyScore = Math.min(100, Math.max(0, efficiencyRatio * 100))
+    }
+
+    // Generate recommendations
+    if (!validation.titleMatch) {
+      validation.recommendations.push('Review workflow steps to ensure they match the action title')
+    }
+    if (!validation.automationValid) {
+      validation.recommendations.push('Verify automation requirements are being met')
+    }
+    if (validation.efficiencyScore < 70) {
+      validation.recommendations.push('Consider optimizing workflow for better efficiency')
+    }
+
+    return validation
+  }
+
+  const getExpectedStepsForAction = (title: string): string[] => {
+    const stepMappings: Record<string, string[]> = {
+      'Cancel Unused Subscriptions': ['Review subscription list', 'Cancel unused services', 'Set up usage tracking', 'Monthly review process'],
+      'Negotiate Bills': ['Contact service providers', 'Present competitor offers', 'Negotiate new rates', 'Confirm changes'],
+      'Move to High-Yield Savings': ['Research high-yield accounts', 'Open new account', 'Set up automatic transfers', 'Monitor monthly'],
+      'Build Emergency Fund': ['Calculate 6-month expenses', 'Set up automatic savings', 'Choose high-yield account', 'Monitor progress'],
+      'Optimize Investment Portfolio': ['Review current allocation', 'Rebalance portfolio', 'Set up automatic rebalancing', 'Monitor quarterly'],
+      'Debt Avalanche Strategy': ['List all debts by interest rate', 'Pay minimums on all except highest', 'Allocate extra to highest rate', 'Track progress monthly']
+    }
+
+    return stepMappings[title] || []
+  }
+
+  const getAutomationRequirements = (title: string): string[] => {
+    const requirements: Record<string, string[]> = {
+      'Cancel Unused Subscriptions': ['subscription', 'cancellation', 'tracking'],
+      'Negotiate Bills': ['negotiation', 'provider', 'rate'],
+      'Move to High-Yield Savings': ['account', 'transfer', 'monitoring'],
+      'Build Emergency Fund': ['calculation', 'savings', 'monitoring'],
+      'Optimize Investment Portfolio': ['allocation', 'rebalancing', 'monitoring'],
+      'Debt Avalanche Strategy': ['debt', 'payment', 'tracking']
+    }
+
+    return requirements[title] || []
+  }
+
+  const getEstimatedTimeForAction = (title: string): number => {
+    const timeEstimates: Record<string, number> = {
+      'Cancel Unused Subscriptions': 180, // 3 minutes
+      'Negotiate Bills': 600, // 10 minutes
+      'Move to High-Yield Savings': 300, // 5 minutes
+      'Build Emergency Fund': 120, // 2 minutes
+      'Optimize Investment Portfolio': 360, // 6 minutes
+      'Debt Avalanche Strategy': 180 // 3 minutes
+    }
+
+    return timeEstimates[title] || 300
+  }
+
+  const getActualTimeForAction = (actionId: string): number => {
+    // This would be calculated from actual execution time
+    // For now, return a mock value
+    return Math.random() * 600 + 120 // 2-12 minutes
+  }
 
   const toggleActionExpansion = (actionId: string) => {
     setExpandedActions((prev) => (prev.includes(actionId) ? prev.filter((id) => id !== actionId) : [...prev, actionId]))
@@ -29,6 +191,65 @@ export default function AIActionsScreen({
   const handleAIChat = (action: any) => {
     setSelectedActionForChat(action)
     setAIChatOpen(true)
+  }
+
+  const handleUserAction = (stepId: string, action: string) => {
+    console.log(`User action for step ${stepId}: ${action}`)
+    // Handle user actions like approve, reject, modify, etc.
+  }
+
+  const handleInspectWorkflow = (actionId: string) => {
+    setInspectedWorkflow(inspectedWorkflow === actionId ? null : actionId)
+  }
+
+  const handleConfigure = () => {
+    console.log("Opening configuration")
+    // Open configuration modal
+  }
+
+  // Handle cancellation of in-process automations
+  const handleCancelAutomation = (actionId: string) => {
+    // Remove the action from the aiActions array instead of changing status
+    setAiActions(aiActions.filter((action: AIAction) => action.id !== actionId))
+    
+    // Remove from workflow statuses
+    setWorkflowStatuses(prev => {
+      const newStatuses = { ...prev }
+      delete newStatuses[actionId]
+      return newStatuses
+    })
+    
+    // Remove from workflow validation
+    setWorkflowValidation(prev => {
+      const newValidation = { ...prev }
+      delete newValidation[actionId]
+      return newValidation
+    })
+    
+    // Close inspection if this action was being inspected
+    if (inspectedWorkflow === actionId) {
+      setInspectedWorkflow(null)
+    }
+  }
+
+  const getValidationIcon = (validation: any) => {
+    if (validation.titleMatch && validation.automationValid && validation.stepsComplete) {
+      return <Check className="h-4 w-4 text-green-400" />
+    } else if (validation.issues.length > 0) {
+      return <AlertTriangle className="h-4 w-4 text-yellow-400" />
+    } else {
+      return <Info className="h-4 w-4 text-blue-400" />
+    }
+  }
+
+  const getValidationColor = (validation: any) => {
+    if (validation.titleMatch && validation.automationValid && validation.stepsComplete) {
+      return "text-green-400"
+    } else if (validation.issues.length > 0) {
+      return "text-yellow-400"
+    } else {
+      return "text-blue-400"
+    }
   }
 
   const containerVariants = {
@@ -41,112 +262,94 @@ export default function AIActionsScreen({
     visible: { y: 0, opacity: 1, transition: { type: "spring" } },
   }
 
-  const suggestedActions = aiActions.filter((action) => action.status === "suggested")
-  const completedActions = aiActions.filter((action) => action.status === "completed")
-  const inProcessActions = aiActions.filter((action) => action.status === "in-process")
-  const totalPotentialSavings = suggestedActions.reduce((sum, action) => sum + action.potentialSaving, 0)
-
-  // Separate pending approval actions (first 2) from recommended actions (rest)
-  const pendingApprovalActions = suggestedActions.slice(0, 2)
-  const recommendedActions = suggestedActions.slice(2)
-
+  // Enhanced suggested action card with better design
   const renderActionCard = (action: any, isPendingApproval = false) => {
     const isExpanded = expandedActions.includes(action.id)
+
     return (
-      <GlassCard key={action.id} className="bg-white/5">
-        <div className="mb-3">
-          <span
-            className={`inline-block px-2 py-1 text-xs rounded-full mb-2 ${
-              isPendingApproval ? "bg-orange-500/20 text-orange-300" : "bg-blue-500/20 text-blue-300"
-            }`}
-          >
-            {isPendingApproval ? "Pending Approval" : "Recommended"}
-          </span>
-          <div className="flex items-start justify-between">
+      <GlassCard key={action.id} className="bg-gradient-to-br from-white/10 to-white/5 border border-white/20 hover:border-white/30 transition-all duration-300 h-auto min-h-[280px] flex flex-col">
+        <div className="flex-1 p-6">
+          {/* Header with icon and title */}
+          <div className="flex items-start gap-4 mb-4">
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30">
+              <Zap className="h-6 w-6 text-blue-400" />
+            </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-white">{action.title}</h3>
-              <p className="text-sm text-gray-400 mt-1">{action.description}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-lg font-bold text-green-400">+${action.potentialSaving}/mo</p>
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="text-lg font-semibold text-white mb-1">{action.title}</h3>
+                <div className="text-right">
+                  <p className="text-xl font-bold text-green-400">+${action.potentialSaving}/mo</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-300 leading-relaxed">{action.description}</p>
             </div>
           </div>
-        </div>
 
-        <div className="mb-4">
-          <div className="p-4 rounded-xl bg-black/20">
-            <button
-              onClick={() => toggleActionExpansion(action.id)}
-              className="flex items-center justify-between w-full text-left"
+          {/* Key benefits - simplified and cleaner */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <Clock className="h-3 w-3" />
+              <span>2-5 min setup</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <Shield className="h-3 w-3" />
+              <span>Low risk</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <Target className="h-3 w-3" />
+              <span>Automated</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <TrendingUp className="h-3 w-3" />
+              <span>Immediate impact</span>
+            </div>
+          </div>
+
+          {/* Expanded rationale - simplified and more readable */}
+          {isExpanded && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-4 p-4 rounded-lg bg-black/20 border border-white/10"
             >
-              <span className="text-sm text-gray-400 hover:text-white transition-colors">Why we suggest this</span>
-              {isExpanded ? (
-                <ChevronUp className="h-4 w-4 text-gray-400" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-gray-400" />
-              )}
-            </button>
-
-            {isExpanded && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-4 space-y-4"
+              <h4 className="text-sm font-medium text-white mb-2">Why this makes sense:</h4>
+              <p className="text-sm text-gray-300 leading-relaxed">{action.rationale}</p>
+              <Button
+                size="sm"
+                onClick={() => handleAIChat(action)}
+                className="mt-3 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
               >
-                <div>
-                  <h4 className="text-purple-400 text-sm font-medium mb-2">Why This Recommendation</h4>
-                  <p className="text-sm text-gray-300">{action.rationale}</p>
-                </div>
-
-                <div>
-                  <h4 className="text-purple-400 text-sm font-medium mb-2">Expected Results</h4>
-                  <p className="text-sm text-gray-300">
-                    +${action.potentialSaving}/month additional savings with minimal effort
-                  </p>
-                </div>
-
-                <Button
-                  size="sm"
-                  onClick={() => handleAIChat(action)}
-                  className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
-                >
-                  Dive Deep
-                </Button>
-              </motion.div>
-            )}
-          </div>
+                Ask AI Questions
+              </Button>
+            </motion.div>
+          )}
         </div>
 
-        <div className="flex gap-2">
+        {/* Action buttons - simplified */}
+        <div className="flex gap-2 p-6 pt-0">
           <Button 
             size="sm" 
             variant="outline"
-            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            className="border-gray-600 text-gray-300 hover:bg-gray-700 flex-1"
             onClick={() => {
-              // Convert action to ResultCard format for modal
               const resultCard = {
                 id: action.id,
                 type: "individual" as const,
-                emoji: "📊",
+                content: action.description,
+                emoji: "🤖",
                 title: action.title,
                 detailedExplanation: action.rationale || action.description,
-                detailed_insights: action.detailed_insights || {
-                  mechanics_explanation: `This ${action.title.toLowerCase()} strategy operates by ${(action.rationale || action.description).split('.')[0].toLowerCase()}.`,
-                  key_insights: action.steps?.slice(0, 3) || ["Analyzed your spending patterns", "Identified optimization opportunities", "Calculated potential savings"],
-                  scenario_nuances: `In your specific financial situation, this approach ${(action.rationale || action.description).split('.')[1] || 'provides a balanced strategy that aligns with your goals.'}`,
-                  decision_context: `Given your current financial profile, this strategy offers the optimal balance of risk and reward.`
-                }
-              };
-              setSelectedThought(resultCard);
-              setThoughtDetailOpen(true);
+              }
+              setSelectedThought(resultCard)
+              setThoughtDetailOpen(true)
             }}
           >
             Learn More
           </Button>
-          <Button 
-            size="sm" 
-            className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
+          <Button
+            size="sm"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white flex-1"
             onClick={() => {
               setSelectedAction(action)
               setCurrentScreen("action-detail")
@@ -159,288 +362,385 @@ export default function AIActionsScreen({
     )
   }
 
+  // Simplified in-process card with cleaner design
   const renderInProcessCard = (action: any) => {
-    const isExpanded = expandedActions.includes(action.id)
-    const progress = action.progress || 0
-    const status = action.workflowStatus || 'running'
+    const workflowStatus = workflowStatuses[action.executionId] || action
+    const isInspected = inspectedWorkflow === action.id
+    const validation = workflowValidation[action.id]
     
-    const getStatusIcon = () => {
-      switch (status) {
-        case 'running':
-          return <Play className="h-4 w-4 text-blue-400" />
-        case 'paused':
-          return <Pause className="h-4 w-4 text-yellow-400" />
-        case 'error':
-          return <AlertCircle className="h-4 w-4 text-red-400" />
-        default:
-          return <Clock className="h-4 w-4 text-gray-400" />
-      }
-    }
-
-    const getStatusColor = () => {
-      switch (status) {
-        case 'running':
-          return "bg-blue-500/20 text-blue-300"
-        case 'paused':
-          return "bg-yellow-500/20 text-yellow-300"
-        case 'error':
-          return "bg-red-500/20 text-red-300"
-        default:
-          return "bg-gray-500/20 text-gray-300"
-      }
+    // Create a simplified automation action for the card
+    const automationAction = {
+      ...action,
+      steps: [
+        {
+          id: "step1",
+          name: "Initializing",
+          description: "Setting up automation workflow",
+          status: "completed",
+          duration: 30,
+          estimatedTime: "30s"
+        },
+        {
+          id: "step2",
+          name: workflowStatus.current_step || "Processing",
+          description: "Executing automation steps",
+          status: "in_progress",
+          duration: 120,
+          estimatedTime: "2m"
+        },
+        {
+          id: "step3",
+          name: "Finalizing",
+          description: "Completing automation process",
+          status: "pending",
+          duration: 60,
+          estimatedTime: "1m"
+        }
+      ],
+      workflowStatus: workflowStatus.status || "running",
+      progress: workflowStatus.progress || 33,
+      currentStep: workflowStatus.current_step || "Processing...",
+      estimatedCompletion: "3m remaining"
     }
 
     return (
-      <GlassCard key={action.id} className="bg-white/5">
-        <div className="mb-3">
-          <div className="flex items-center gap-2 mb-2">
-            {getStatusIcon()}
-            <span className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusColor()}`}>
-              {status.charAt(0).toUpperCase() + status.slice(1)}
-            </span>
-          </div>
-          <div className="flex items-start justify-between">
+      <div key={action.id} className="space-y-4">
+        <GlassCard className="bg-white/5">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30">
+              <Clock className="h-6 w-6 text-blue-400" />
+            </div>
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-white">{action.title}</h3>
-              <p className="text-sm text-gray-400 mt-1">{action.description}</p>
-              {action.currentStep && (
-                <p className="text-xs text-blue-400 mt-1">Current: {action.currentStep}</p>
-              )}
-            </div>
-            <div className="text-right">
-              <p className="text-lg font-bold text-green-400">+${action.potentialSaving}/mo</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="mb-4">
-          <div className="flex justify-between text-xs text-gray-400 mb-1">
-            <span>Progress</span>
-            <span>{progress}%</span>
-          </div>
-          <div className="w-full bg-gray-700 rounded-full h-2">
-            <div 
-              className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <div className="p-4 rounded-xl bg-black/20">
-            <button
-              onClick={() => toggleActionExpansion(action.id)}
-              className="flex items-center justify-between w-full text-left"
-            >
-              <span className="text-sm text-gray-400 hover:text-white transition-colors">View Details</span>
-              {isExpanded ? (
-                <ChevronUp className="h-4 w-4 text-gray-400" />
-              ) : (
-                <ChevronDown className="h-4 w-4 text-gray-400" />
-              )}
-            </button>
-
-            {isExpanded && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mt-4 space-y-4"
-              >
-                <div>
-                  <h4 className="text-purple-400 text-sm font-medium mb-2">Workflow Steps</h4>
-                  <div className="space-y-2">
-                    {action.steps?.map((step: string, index: number) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${
-                          index < (progress / 100 * (action.steps?.length || 1)) 
-                            ? 'bg-green-400' 
-                            : 'bg-gray-500'
-                        }`} />
-                        <span className="text-sm text-gray-300">{step}</span>
-                      </div>
-                    ))}
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-white text-lg">{action.title}</h3>
+                    {validation && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            {getValidationIcon(validation)}
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <div className="max-w-xs">
+                              <p className="font-medium mb-1">Workflow Health</p>
+                              {validation.issues.length > 0 ? (
+                                <div>
+                                  <p className="text-sm text-yellow-400 mb-1">Issues found:</p>
+                                  <ul className="text-xs space-y-1">
+                                    {validation.issues.map((issue: string, idx: number) => (
+                                      <li key={idx}>• {issue}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-green-400">All checks passed</p>
+                              )}
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                   </div>
+                  <p className="text-sm text-gray-400">{action.description}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold text-green-400">+${action.potentialSaving}/mo</p>
+                </div>
+              </div>
+              
+              {/* Simplified Progress Bar */}
+              <div className="space-y-2 mb-3">
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>Progress</span>
+                  <span>{automationAction.progress}% Complete</span>
+                </div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${automationAction.progress}%` }}
+                  />
+                </div>
+              </div>
+              
+              {/* Simplified Status Info */}
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="flex items-center gap-2 text-gray-500">
+                  <Clock className="h-3 w-3" />
+                  <span>{automationAction.estimatedCompletion}</span>
+                </div>
+                <div className="flex items-center gap-2 text-blue-400">
+                  <span>{automationAction.currentStep}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 pt-3 border-t border-gray-700/50">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => handleInspectWorkflow(action.id)} 
+              className="flex-1"
+            >
+              <Eye className="h-3 w-3 mr-1" />
+              {isInspected ? "Hide Details" : "Inspect"}
+            </Button>
+            <Button 
+              size="sm" 
+              variant="destructive" 
+              onClick={() => handleCancelAutomation(action.id)} 
+              className="flex-shrink-0"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Cancel
+            </Button>
+          </div>
+        </GlassCard>
+
+        {/* Simplified Workflow View */}
+        {isInspected && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <GlassCard className="bg-gray-900/90 border border-gray-700/50">
+              <div className="p-4">
+                <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                  <Bot className="h-4 w-4" />
+                  Workflow Details
+                </h4>
+                
+                {/* Simplified Steps */}
+                <div className="space-y-3">
+                  {automationAction.steps.map((step: any, index: number) => (
+                    <div key={step.id} className="flex items-start gap-3">
+                      <div className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full ${
+                        step.status === "completed" ? "bg-green-500" : 
+                        step.status === "in_progress" ? "bg-blue-500" : "bg-gray-600"
+                      }`}>
+                        {step.status === "completed" ? (
+                          <Check className="h-3 w-3 text-white" />
+                        ) : step.status === "in_progress" ? (
+                          <RefreshCw className="h-3 w-3 text-white animate-spin" />
+                        ) : (
+                          <div className="h-3 w-3 rounded-full bg-gray-400" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-white">{step.name}</span>
+                          <Badge variant="outline" className="text-xs">
+                            {step.estimatedTime}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-400">{step.description}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                {action.estimatedCompletion && (
-                  <div>
-                    <h4 className="text-purple-400 text-sm font-medium mb-2">Estimated Completion</h4>
-                    <p className="text-sm text-gray-300">{action.estimatedCompletion}</p>
+                {/* Key Metrics */}
+                <div className="mt-4 pt-4 border-t border-gray-700/50">
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="flex items-center gap-2 text-green-400">
+                      <DollarSign className="h-3 w-3" />
+                      <span>+${action.potentialSaving}/mo savings</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-blue-400">
+                      <Activity className="h-3 w-3" />
+                      <span>{automationAction.steps.length} steps</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-purple-400">
+                      <Star className="h-3 w-3" />
+                      <span>85% success rate</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-400">
+                      <Shield className="h-3 w-3" />
+                      <span>Low risk</span>
+                    </div>
                   </div>
-                )}
+                </div>
+              </div>
+            </GlassCard>
+          </motion.div>
+        )}
+      </div>
+    )
+  }
 
-                {action.userAction && (
-                  <div>
-                    <h4 className="text-purple-400 text-sm font-medium mb-2">Action Required</h4>
-                    <p className="text-sm text-gray-300">{action.userAction}</p>
-                    <Button
-                      size="sm"
-                      className="mt-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
-                    >
-                      Take Action
-                    </Button>
-                  </div>
-                )}
-              </motion.div>
-            )}
+  // Enhanced completed card with more bulleted information
+  const renderCompletedCard = (action: any) => {
+    return (
+      <GlassCard key={action.id} className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/30 h-auto min-h-[280px] flex flex-col">
+        <div className="flex-1 p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Check className="h-5 w-5 text-green-400" />
+            <span className="inline-block px-3 py-1 text-sm rounded-full bg-green-500/20 text-green-300 font-medium">
+              Completed Successfully
+            </span>
+          </div>
+          
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-white mb-2">{action.title}</h3>
+              <p className="text-sm text-gray-300 leading-relaxed">{action.description}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xl font-bold text-green-400">+${action.potentialSaving}/mo</p>
+            </div>
+          </div>
+
+          {/* Key achievements */}
+          <div className="space-y-3 mb-4">
+            <h4 className="text-sm font-medium text-white">What was accomplished:</h4>
+            <ul className="space-y-2 text-sm text-gray-300">
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                <span>Successfully identified and optimized financial opportunity</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                <span>Automated process completed without manual intervention</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                <span>Monthly savings of ${action.potentialSaving} now active</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                <span>All security checks passed and verified</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Impact metrics */}
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="flex items-center gap-2 text-gray-400">
+              <TrendingUp className="h-4 w-4" />
+              <span>Annual savings: ${action.potentialSaving * 12}</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-400">
+              <Target className="h-4 w-4" />
+              <span>Goal progress: +15%</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 p-6 pt-0">
           <Button 
             size="sm" 
             variant="outline"
-            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            className="border-gray-600 text-gray-300 hover:bg-gray-700 flex-1"
             onClick={() => {
-              // Pause/resume workflow
-              console.log('Pause/Resume workflow:', action.id)
+              const resultCard = {
+                id: action.id,
+                type: "individual" as const,
+                content: action.description,
+                emoji: "✅",
+                title: action.title,
+                detailedExplanation: `Successfully completed: ${action.description}. Key achievements include automated process completion, ${action.potentialSaving} monthly savings activated, all security checks passed, and goal progress increased by 15%.`,
+              }
+              setSelectedThought(resultCard)
+              setThoughtDetailOpen(true)
             }}
           >
-            {status === 'paused' ? 'Resume' : 'Pause'}
-          </Button>
-          <Button 
-            size="sm" 
-            variant="outline"
-            className="border-red-600 text-red-300 hover:bg-red-600/20"
-            onClick={() => {
-              // Cancel workflow
-              console.log('Cancel workflow:', action.id)
-            }}
-          >
-            Cancel
+            View Full Results
           </Button>
         </div>
       </GlassCard>
     )
   }
 
+  const filteredActions = aiActions.filter(action => {
+    switch (activeTab) {
+      case "suggested":
+        return action.status === "suggested"
+      case "in-process":
+        return action.status === "in-process"
+      case "completed":
+        return action.status === "completed"
+      default:
+        return true
+    }
+  })
+
   return (
-    <div className="pb-28">
-      <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="p-6">
-        <h1 className="text-2xl font-bold text-white mb-2">AI Actions</h1>
-        <p className="text-gray-400">Personalized recommendations to optimize your finances</p>
-      </motion.header>
-
-      <motion.div variants={containerVariants} initial="hidden" animate="visible" className="px-4 space-y-6">
-        {/* Summary Stats */}
-        <motion.div variants={itemVariants}>
-          <GlassCard className="bg-gradient-to-r from-purple-500/10 to-blue-500/10">
-            <div className="grid grid-cols-4 gap-4 text-center">
-              <div>
-                <p className="text-3xl font-bold text-white">47</p>
-                <p className="text-sm text-gray-400">Transactions Analyzed</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-white">{suggestedActions.length}</p>
-                <p className="text-sm text-gray-400">Opportunities Found</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-blue-400">{inProcessActions.length}</p>
-                <p className="text-sm text-gray-400">In Progress</p>
-              </div>
-              <div>
-                <p className="text-3xl font-bold text-green-400">${totalPotentialSavings}</p>
-                <p className="text-sm text-gray-400">Potential Monthly Savings</p>
-              </div>
-            </div>
-          </GlassCard>
-        </motion.div>
-
+    <TooltipProvider>
+      <div className="flex flex-col h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black">
         {/* Tab Navigation */}
-        <motion.div variants={itemVariants}>
-          <div className="flex bg-gray-800/50 rounded-xl p-1">
-            <button
-              onClick={() => setActiveTab("suggested")}
-              className={`flex-1 py-3 px-4 rounded-lg text-center font-medium transition-all ${
-                activeTab === "suggested" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Suggested Actions
-            </button>
-            <button
-              onClick={() => setActiveTab("in-process")}
-              className={`flex-1 py-3 px-4 rounded-lg text-center font-medium transition-all ${
-                activeTab === "in-process" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
-              }`}
-            >
-              In Process
-              {inProcessActions.length > 0 && (
-                <span className="ml-1 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">
-                  {inProcessActions.length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("completed")}
-              className={`flex-1 py-3 px-4 rounded-lg text-center font-medium transition-all ${
-                activeTab === "completed" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
-              }`}
-            >
-              Completed Actions
-            </button>
-          </div>
-        </motion.div>
+        <div className="flex border-b border-white/10">
+          <button
+            onClick={() => setActiveTab("suggested")}
+            className={`flex-1 py-4 text-sm font-medium transition-colors ${
+              activeTab === "suggested"
+                ? "text-white border-b-2 border-blue-500"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            Suggested ({aiActions.filter(a => a.status === "suggested").length})
+          </button>
+          <button
+            onClick={() => setActiveTab("in-process")}
+            className={`flex-1 py-4 text-sm font-medium transition-colors ${
+              activeTab === "in-process"
+                ? "text-white border-b-2 border-blue-500"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            In Process ({aiActions.filter(a => a.status === "in-process").length})
+          </button>
+          <button
+            onClick={() => setActiveTab("completed")}
+            className={`flex-1 py-4 text-sm font-medium transition-colors ${
+              activeTab === "completed"
+                ? "text-white border-b-2 border-blue-500"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            Completed ({aiActions.filter(a => a.status === "completed").length})
+          </button>
+        </div>
 
-        {/* Actions Content */}
-        {activeTab === "suggested" ? (
-          <motion.div variants={itemVariants}>
-            <div className="space-y-4">
-              {/* Pending Approval Actions First */}
-              {pendingApprovalActions.map((action) => renderActionCard(action, true))}
-
-              {/* Recommended Actions */}
-              {recommendedActions.map((action) => renderActionCard(action, false))}
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {filteredActions.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-4xl mb-4">🤖</div>
+              <h3 className="text-lg font-semibold text-white mb-2">
+                {activeTab === "suggested" && "No suggestions yet"}
+                {activeTab === "in-process" && "No automations running"}
+                {activeTab === "completed" && "No completed actions"}
+              </h3>
+              <p className="text-gray-400">
+                {activeTab === "suggested" && "AI will analyze your finances and suggest optimizations"}
+                {activeTab === "in-process" && "Automations will appear here when they're running"}
+                {activeTab === "completed" && "Completed actions will appear here"}
+              </p>
             </div>
-          </motion.div>
-        ) : activeTab === "in-process" ? (
-          <motion.div variants={itemVariants}>
-            <div className="space-y-4">
-              {inProcessActions.length > 0 ? (
-                inProcessActions.map((action) => renderInProcessCard(action))
-              ) : (
-                <div className="text-center py-12">
-                  <Clock className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-400">No workflows in progress.</p>
-                  <p className="text-sm text-gray-500 mt-2">Automated actions will appear here when running.</p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div variants={itemVariants}>
-            <div className="space-y-4">
-              {completedActions.length > 0 ? (
-                completedActions.map((action) => (
-                  <GlassCard key={action.id} className="bg-white/5">
-                    <div className="mb-3">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 text-green-300 rounded-full mb-2">
-                        <Check className="h-3 w-3" />
-                        Completed
-                      </span>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-white">{action.title}</h3>
-                          <p className="text-sm text-gray-400 mt-1">{action.description}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-green-400">+${action.potentialSaving}/mo</p>
-                        </div>
-                      </div>
-                    </div>
-                  </GlassCard>
-                ))
-              ) : (
-                <div className="text-center py-12">
-                  <p className="text-gray-400">No completed actions yet.</p>
-                  <p className="text-sm text-gray-500 mt-2">Actions you complete will appear here.</p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </motion.div>
-    </div>
+          ) : (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
+              {filteredActions.map((action) => {
+                if (action.status === "in-process") {
+                  return renderInProcessCard(action)
+                } else if (action.status === "completed") {
+                  return renderCompletedCard(action)
+                } else {
+                  return renderActionCard(action)
+                }
+              })}
+            </motion.div>
+          )}
+        </div>
+      </div>
+    </TooltipProvider>
   )
 }

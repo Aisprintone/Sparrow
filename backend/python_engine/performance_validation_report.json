@@ -1,0 +1,36 @@
+{
+  "cache_performance": {
+    "total_queries": 8,
+    "unique_queries": 4,
+    "cache_hits": 4,
+    "api_calls": 4,
+    "cache_hit_rate": 0.5,
+    "avg_response_ms": 50.99049210548401,
+    "avg_cache_ms": 0.19150972366333008,
+    "avg_api_ms": 101.78947448730469,
+    "api_reduction_percent": 50.0,
+    "validation_passed": true
+  },
+  "batching_performance": {
+    "error": "type object 'QueryType' has no attribute 'FINANCIAL_PROFILE'",
+    "validation_passed": false
+  },
+  "concurrent_load": {
+    "total_requests": 20,
+    "total_time_s": 0.1028130054473877,
+    "throughput_rps": 194.5279190406953,
+    "cache_hits": 10,
+    "cache_hit_rate": 0.5,
+    "avg_response_ms": 25.568246841430664,
+    "p50_ms": 25.563478469848633,
+    "p95_ms": 51.15699768066406,
+    "validation_passed": true
+  },
+  "summary": {
+    "timestamp": "2025-08-07T10:01:14.488996",
+    "tests_passed": 2,
+    "tests_total": 3,
+    "success_rate": 0.6666666666666666,
+    "verdict": "PASSED"
+  }
+}

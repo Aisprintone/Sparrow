@@ -44,12 +44,6 @@ jobs:
           npm run lint
           npm test -- --passWithNoTests --coverage
           
-      - name: Test Cloudflare Workers
-        run: |
-          cd cloudflare-workers/financeai-backend
-          npm ci
-          npm test -- --passWithNoTests
-          
       - name: Test Python Backend
         run: |
           cd backend/python_engine
@@ -110,7 +104,7 @@ jobs:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         timeout-minutes: 5
 
-  deploy-backend:
+  deploy-railway-backend:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
@@ -123,42 +117,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: cloudflare-workers/financeai-backend/package-lock.json
           
-      - name: Install Cloudflare Workers dependencies
-        run: |
-          cd cloudflare-workers/financeai-backend
-          npm ci
-          
-      - name: Build Cloudflare Workers
-        run: |
-          cd cloudflare-workers/financeai-backend
-          npm run build
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          
-      - name: Deploy to Cloudflare Workers
-        run: |
-          cd cloudflare-workers/financeai-backend
-          npx wrangler deploy --compatibility-date 2025-01-01
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          
-      - name: Verify deployment
-        run: |
-          echo "✅ Cloudflare Workers deployment completed"
-          echo "🔗 Workers URL: https://sparrow-backend.your-subdomain.workers.dev"
-
-  deploy-python-backend:
-    needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-    environment: production
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
         
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -187,9 +148,24 @@ jobs:
           PLAID_CLIENT_SECRET: ${{ secrets.PLAID_CLIENT_SECRET }}
           CHASE_API_KEY: ${{ secrets.CHASE_API_KEY }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          
+      - name: Deploy to Railway
+        run: |
+          cd backend/python_engine
+          railway up --service
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+          
+      - name: Verify Railway deployment
+        run: |
+          echo "✅ Railway deployment completed"
+          echo "🔗 Railway URL: https://sparrow-backend-production.up.railway.app"
+          sleep 30
+          curl -f https://sparrow-backend-production.up.railway.app/health || echo "❌ Health check failed"
 
   notify:
-    needs: [deploy-frontend, deploy-backend, deploy-python-backend]
+    needs: [deploy-frontend, deploy-railway-backend]
     runs-on: ubuntu-latest
     if: always()
     steps:
@@ -198,13 +174,12 @@ jobs:
           echo "📊 Deployment Status Report"
           echo "=========================="
           echo "Frontend (Netlify): ${{ needs.deploy-frontend.result }}"
-          echo "Backend (Cloudflare): ${{ needs.deploy-backend.result }}"
-          echo "Python Backend: ${{ needs.deploy-python-backend.result }}"
+          echo "Backend (Railway): ${{ needs.deploy-railway-backend.result }}"
           
-          if [ "${{ needs.deploy-frontend.result }}" == "success" ] && [ "${{ needs.deploy-backend.result }}" == "success" ] && [ "${{ needs.deploy-python-backend.result }}" == "success" ]; then
+          if [ "${{ needs.deploy-frontend.result }}" == "success" ] && [ "${{ needs.deploy-railway-backend.result }}" == "success" ]; then
             echo "✅ All deployments successful!"
-            echo "🌐 Frontend: https://your-netlify-site.netlify.app"
-            echo "🔗 Backend: https://sparrow-backend.your-subdomain.workers.dev"
+            echo "🌐 Frontend: https://sparrow-finance-app.netlify.app"
+            echo "🔗 Backend: https://sparrow-backend-production.up.railway.app"
           else
             echo "❌ Some deployments failed"
             exit 1
@@ -231,8 +206,7 @@ jobs:
             | Service | Status |
             |--------|--------|
             | Frontend (Netlify) | ${{ needs.deploy-frontend.result == 'success' && '✅ Success' || '❌ Failed' }} |
-            | Backend (Cloudflare) | ${{ needs.deploy-backend.result == 'success' && '✅ Success' || '❌ Failed' }} |
-            | Python Backend | ${{ needs.deploy-python-backend.result == 'success' && '✅ Success' || '❌ Failed' }} |
+            | Backend (Railway) | ${{ needs.deploy-railway-backend.result == 'success' && '✅ Success' || '❌ Failed' }} |
             
             **Deployment completed at:** ${new Date().toISOString()}
             **Commit:** ${context.sha}`;

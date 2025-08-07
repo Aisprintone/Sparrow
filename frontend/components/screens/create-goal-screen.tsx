@@ -1,146 +1,391 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
+import { 
+  ArrowLeft, 
+  Target, 
+  Shield, 
+  Home, 
+  Plane, 
+  TrendingUp, 
+  GraduationCap, 
+  Briefcase, 
+  BarChart3, 
+  BookOpen,
+  Check,
+  Sparkles
+} from 'lucide-react'
+import { Goal } from '@/lib/data'
+import { GoalService } from '@/lib/services/goal-service'
+import { useToast } from '@/hooks/use-toast'
 import type { AppState } from "@/hooks/use-app-state"
-import { ChevronLeft, Shield, Home, Plane } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Slider } from "@/components/ui/slider"
 
 const goalTypes = [
-  { id: "safety", title: "Emergency Fund", icon: <Shield />, color: "green" },
-  { id: "home", title: "Buy a Home", icon: <Home />, color: "purple" },
-  { id: "experience", title: "Dream Vacation", icon: <Plane />, color: "blue" },
+  { value: 'safety', label: 'Safety', icon: Shield, color: 'green' },
+  { value: 'home', label: 'Home', icon: Home, color: 'purple' },
+  { value: 'experience', label: 'Experience', icon: Plane, color: 'blue' },
+  { value: 'retirement', label: 'Retirement', icon: TrendingUp, color: 'orange' },
+  { value: 'debt', label: 'Debt', icon: GraduationCap, color: 'red' },
+  { value: 'investment', label: 'Investment', icon: BarChart3, color: 'teal' },
+  { value: 'business', label: 'Business', icon: Briefcase, color: 'indigo' },
+  { value: 'education', label: 'Education', icon: BookOpen, color: 'cyan' }
 ]
 
-export default function CreateGoalScreen({ setCurrentScreen, addGoal }: AppState) {
-  const [step, setStep] = useState(1)
-  const [goal, setGoal] = useState({
-    type: "safety",
-    title: "Emergency Fund",
-    target: 5000,
-    deadline: "",
-    monthlyContribution: 250,
-    icon: "Shield",
-    color: "green",
-    current: 0,
-    milestones: [],
+const goalIcons = [
+  { value: 'Target', label: 'Target', icon: Target },
+  { value: 'Shield', label: 'Shield', icon: Shield },
+  { value: 'Home', label: 'Home', icon: Home },
+  { value: 'Plane', label: 'Plane', icon: Plane },
+  { value: 'TrendingUp', label: 'Trending Up', icon: TrendingUp },
+  { value: 'GraduationCap', label: 'Graduation Cap', icon: GraduationCap },
+  { value: 'Briefcase', label: 'Briefcase', icon: Briefcase },
+  { value: 'BarChart3', label: 'Bar Chart', icon: BarChart3 },
+  { value: 'BookOpen', label: 'Book Open', icon: BookOpen }
+]
+
+const goalColors = [
+  { value: 'green', label: 'Green', color: 'bg-green-500' },
+  { value: 'blue', label: 'Blue', color: 'bg-blue-500' },
+  { value: 'purple', label: 'Purple', color: 'bg-purple-500' },
+  { value: 'red', label: 'Red', color: 'bg-red-500' },
+  { value: 'orange', label: 'Orange', color: 'bg-orange-500' },
+  { value: 'indigo', label: 'Indigo', color: 'bg-indigo-500' },
+  { value: 'teal', label: 'Teal', color: 'bg-teal-500' },
+  { value: 'cyan', label: 'Cyan', color: 'bg-cyan-500' }
+]
+
+export default function CreateGoalScreen({ 
+  addGoal, 
+  setCurrentScreen 
+}: AppState) {
+  const { toast } = useToast()
+  const [goalService] = useState(() => GoalService.getInstance())
+  const [showTemplates, setShowTemplates] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
+  
+  const [formData, setFormData] = useState({
+    title: '',
+    type: '',
+    target: '',
+    current: '0',
+    deadline: '',
+    icon: 'Target',
+    color: 'blue',
+    monthlyContribution: '',
+    priority: 'medium',
+    milestones: [] as { name: string; target: number }[]
   })
 
-  const handleNext = () => setStep((s) => s + 1)
-  const handleBack = () => {
-    if (step === 1) {
-      setCurrentScreen("goals")
-    } else {
-      setStep((s) => s - 1)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!formData.title.trim()) {
+      newErrors.title = 'Goal title is required'
+    }
+
+    if (!formData.type) {
+      newErrors.type = 'Goal type is required'
+    }
+
+    if (!formData.target || parseFloat(formData.target) <= 0) {
+      newErrors.target = 'Target amount must be greater than 0'
+    }
+
+    if (!formData.deadline) {
+      newErrors.deadline = 'Deadline is required'
+    }
+
+    if (!formData.monthlyContribution || parseFloat(formData.monthlyContribution) <= 0) {
+      newErrors.monthlyContribution = 'Monthly contribution must be greater than 0'
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!validateForm()) {
+      return
+    }
+
+    try {
+      const goalData: Omit<Goal, 'id'> = {
+        title: formData.title,
+        type: formData.type as Goal['type'],
+        target: parseFloat(formData.target),
+        current: parseFloat(formData.current),
+        deadline: formData.deadline,
+        icon: formData.icon,
+        color: formData.color,
+        monthlyContribution: parseFloat(formData.monthlyContribution),
+        priority: formData.priority as Goal['priority'],
+        milestones: formData.milestones
+      }
+
+      const newGoal = await goalService.createGoal(goalData)
+      addGoal(goalData)
+      
+      toast({
+        title: 'Goal created',
+        description: `${newGoal.title} has been created successfully.`,
+      })
+      
+      setCurrentScreen('goals')
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to create goal. Please try again.',
+        variant: 'destructive',
+      })
     }
   }
 
-  const screenVariants = {
-    initial: { opacity: 0, x: 300 },
-    in: { opacity: 1, x: 0 },
-    out: { opacity: 0, x: -300 },
-    transition: { type: "spring", stiffness: 300, damping: 30 },
+  const handleTemplateSelect = (template: any) => {
+    setFormData({
+      ...formData,
+      title: template.title,
+      type: template.type,
+      icon: template.icon,
+      color: template.color,
+      priority: template.priority,
+      milestones: template.milestones || []
+    })
+    setSelectedTemplate(template)
+    setShowTemplates(false)
   }
 
-  const Step1_Category = (
-    <motion.div key="step1" initial="initial" animate="in" exit="out" variants={screenVariants}>
-      <h1 className="mb-4 text-2xl font-bold text-white">What are you saving for?</h1>
-      <div className="space-y-3">
-        {goalTypes.map((type) => (
-          <button
-            key={type.id}
-            onClick={() => {
-              setGoal({
-                ...goal,
-                type: type.id,
-                title: type.title,
-                icon: type.icon.type.displayName,
-                color: type.color,
-              })
-              handleNext()
-            }}
-            className="w-full rounded-2xl border border-white/20 bg-white/10 p-4 text-left text-white transition-colors hover:bg-white/20"
-          >
-            <div className="flex items-center gap-4">
-              <div className="text-2xl">{type.icon}</div>
-              <span className="font-semibold">{type.title}</span>
-            </div>
-          </button>
-        ))}
-      </div>
-    </motion.div>
-  )
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }))
+    }
+  }
 
-  const Step2_Target = (
-    <motion.div key="step2" initial="initial" animate="in" exit="out" variants={screenVariants}>
-      <h1 className="mb-2 text-2xl font-bold text-white">Set your target</h1>
-      <p className="mb-8 text-gray-400">How much do you need to save for your {goal.title}?</p>
-      <div className="relative text-center">
-        <p className="mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-6xl font-bold text-transparent">
-          ${goal.target.toLocaleString()}
-        </p>
-        <Slider
-          defaultValue={[goal.target]}
-          max={goal.type === "home" ? 100000 : 20000}
-          min={1000}
-          step={500}
-          onValueChange={(value) => setGoal({ ...goal, target: value[0] })}
-        />
-      </div>
-      <Button onClick={handleNext} size="lg" className="mt-12 w-full">
-        Continue
-      </Button>
-    </motion.div>
-  )
-
-  const Step3_Timeline = (
-    <motion.div key="step3" initial="initial" animate="in" exit="out" variants={screenVariants}>
-      <h1 className="mb-2 text-2xl font-bold text-white">When do you need it?</h1>
-      <p className="mb-8 text-gray-400">Enter your target date to see your required monthly savings.</p>
-      <Input
-        type="date"
-        className="bg-white/10 text-white"
-        onChange={(e) => setGoal({ ...goal, deadline: e.target.value })}
-      />
-      {goal.deadline && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 rounded-2xl bg-white/10 p-4">
-          <p className="text-gray-300">To reach your goal by this date, you'll need to save:</p>
-          <p className="text-2xl font-bold text-white">
-            $
-            {(
-              goal.target /
-              Math.max(
-                1,
-                new Date(goal.deadline).getMonth() -
-                  new Date().getMonth() +
-                  12 * (new Date(goal.deadline).getFullYear() - new Date().getFullYear()),
-              )
-            ).toFixed(0)}
-            /month
-          </p>
-        </motion.div>
-      )}
-      <Button onClick={() => addGoal(goal)} size="lg" className="mt-8 w-full">
-        Create Goal
-      </Button>
-    </motion.div>
-  )
-
-  const steps = [Step1_Category, Step2_Target, Step3_Timeline]
+  const getSelectedType = () => goalTypes.find(type => type.value === formData.type)
+  const getSelectedIcon = () => goalIcons.find(icon => icon.value === formData.icon)
+  const getSelectedColor = () => goalColors.find(color => color.value === formData.color)
 
   return (
-    <div className="flex h-[100dvh] flex-col overflow-hidden">
-      <header className="p-4 text-white">
-        <Button onClick={handleBack} variant="ghost" className="hover:bg-white/20">
-          <ChevronLeft className="mr-2 h-5 w-5" />
-          Back
+    <div className="container mx-auto p-4 space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setCurrentScreen('goals')}
+        >
+          <ArrowLeft className="h-4 w-4" />
         </Button>
-      </header>
-      <div className="flex-1 p-4">
-        <AnimatePresence mode="wait">{steps[step - 1]}</AnimatePresence>
+        <div>
+          <h1 className="text-2xl font-bold">Create Goal</h1>
+          <p className="text-muted-foreground">
+            Set up a new financial goal
+          </p>
+        </div>
       </div>
+
+      {/* Templates Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5" />
+            Quick Templates
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-3">
+            {goalService.getGoalTemplates().slice(0, 4).map((template, index) => (
+              <Button
+                key={index}
+                variant="outline"
+                className="h-auto p-3 flex-col items-start"
+                onClick={() => handleTemplateSelect(template)}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`p-1 rounded ${goalColors.find(c => c.value === template.color)?.color} text-white`}>
+                    {goalIcons.find(i => i.value === template.icon)?.icon && 
+                      React.createElement(goalIcons.find(i => i.value === template.icon)!.icon, { className: "h-3 w-3" })
+                    }
+                  </div>
+                  <span className="text-sm font-medium">{template.title}</span>
+                </div>
+                <span className="text-xs text-muted-foreground">{template.type}</span>
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Goal Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title">Goal Title</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => handleInputChange('title', e.target.value)}
+                placeholder="e.g., Emergency Fund"
+                className={errors.title ? 'border-red-500' : ''}
+              />
+              {errors.title && <p className="text-sm text-red-500">{errors.title}</p>}
+            </div>
+
+            {/* Type */}
+            <div className="space-y-2">
+              <Label>Goal Type</Label>
+              <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)}>
+                <SelectTrigger className={errors.type ? 'border-red-500' : ''}>
+                  <SelectValue placeholder="Select goal type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {goalTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value}>
+                      <div className="flex items-center gap-2">
+                        <div className={`p-1 rounded ${type.color} text-white`}>
+                          <type.icon className="h-3 w-3" />
+                        </div>
+                        {type.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.type && <p className="text-sm text-red-500">{errors.type}</p>}
+            </div>
+
+            {/* Target Amount */}
+            <div className="space-y-2">
+              <Label htmlFor="target">Target Amount</Label>
+              <Input
+                id="target"
+                type="number"
+                value={formData.target}
+                onChange={(e) => handleInputChange('target', e.target.value)}
+                placeholder="0.00"
+                className={errors.target ? 'border-red-500' : ''}
+              />
+              {errors.target && <p className="text-sm text-red-500">{errors.target}</p>}
+            </div>
+
+            {/* Current Amount */}
+            <div className="space-y-2">
+              <Label htmlFor="current">Current Amount</Label>
+              <Input
+                id="current"
+                type="number"
+                value={formData.current}
+                onChange={(e) => handleInputChange('current', e.target.value)}
+                placeholder="0.00"
+              />
+            </div>
+
+            {/* Monthly Contribution */}
+            <div className="space-y-2">
+              <Label htmlFor="monthlyContribution">Monthly Contribution</Label>
+              <Input
+                id="monthlyContribution"
+                type="number"
+                value={formData.monthlyContribution}
+                onChange={(e) => handleInputChange('monthlyContribution', e.target.value)}
+                placeholder="0.00"
+                className={errors.monthlyContribution ? 'border-red-500' : ''}
+              />
+              {errors.monthlyContribution && <p className="text-sm text-red-500">{errors.monthlyContribution}</p>}
+            </div>
+
+            {/* Deadline */}
+            <div className="space-y-2">
+              <Label htmlFor="deadline">Target Date</Label>
+              <Input
+                id="deadline"
+                type="date"
+                value={formData.deadline}
+                onChange={(e) => handleInputChange('deadline', e.target.value)}
+                className={errors.deadline ? 'border-red-500' : ''}
+              />
+              {errors.deadline && <p className="text-sm text-red-500">{errors.deadline}</p>}
+            </div>
+
+            {/* Priority */}
+            <div className="space-y-2">
+              <Label>Priority</Label>
+              <Select value={formData.priority} onValueChange={(value) => handleInputChange('priority', value)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Icon and Color */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Icon</Label>
+                <Select value={formData.icon} onValueChange={(value) => handleInputChange('icon', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {goalIcons.map((icon) => (
+                      <SelectItem key={icon.value} value={icon.value}>
+                        <div className="flex items-center gap-2">
+                          <icon.icon className="h-4 w-4" />
+                          {icon.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Color</Label>
+                <Select value={formData.color} onValueChange={(value) => handleInputChange('color', value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {goalColors.map((color) => (
+                      <SelectItem key={color.value} value={color.value}>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-4 h-4 rounded ${color.color}`} />
+                          {color.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Submit Button */}
+        <Button type="submit" className="w-full">
+          <Check className="h-4 w-4 mr-2" />
+          Create Goal
+        </Button>
+      </form>
     </div>
   )
 }

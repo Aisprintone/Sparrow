@@ -1,9 +1,10 @@
 "use client"
 
 import type { AppState } from "@/hooks/use-app-state"
-import { Sparkles, Briefcase, Home, TrendingDown, DollarSign, Star, CreditCard, Heart, Car, Building, Zap, Shield } from "lucide-react"
+import { Sparkles, Briefcase, Home, TrendingDown, DollarSign, Star, CreditCard, Heart, Car, Building, Zap, Shield, ArrowLeft, Clock, ChevronRight } from "lucide-react"
 import { motion } from "framer-motion"
 import GlassCard from "@/components/ui/glass-card"
+import { Button } from "@/components/ui/button"
 
 const recommendedSimulations = [
   {
@@ -109,6 +110,22 @@ const otherSimulations = [
   },
 ]
 
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+}
+
 export default function SimulationsScreen({ setCurrentScreen, setCurrentSimulation }: AppState) {
   const handleSimulationClick = (simulation: any) => {
     if (simulation.disabled) return
@@ -152,30 +169,62 @@ export default function SimulationsScreen({ setCurrentScreen, setCurrentSimulati
     </div>
   )
 
+  // Combine all simulations for the main list
+  const allSimulations = [
+    ...recommendedSimulations,
+    ...housingSimulations,
+    ...debtSimulations,
+    ...emergencySimulations,
+    ...otherSimulations
+  ]
+
   return (
-    <div className="flex h-[100dvh] flex-col pb-28">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="p-6 text-white">
-        <h1 className="text-2xl font-semibold mb-2">Financial Simulations</h1>
-        <p className="text-sm text-white/80">Run scenarios to understand your financial resilience</p>
+    <div className="flex h-[100dvh] flex-col">
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="p-3 text-white">
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold">Financial Simulations</h1>
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setCurrentScreen("dashboard")}
+            className="rounded-xl bg-white/20 backdrop-blur-lg hover:bg-white/30"
+            aria-label="Back to dashboard"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <p className="text-white/80">Explore different financial scenarios</p>
       </motion.div>
 
-      {/* Simulation Cards */}
-      <div className="flex-1 overflow-y-auto px-4 space-y-8">
-        {/* Recommended for You */}
-        {renderSimulationCards(recommendedSimulations, "Recommended for You", <Star className="h-5 w-5 text-yellow-400" />)}
-
-        {/* Housing Scenarios */}
-        {renderSimulationCards(housingSimulations, "Housing Scenarios", <Home className="h-5 w-5 text-blue-400" />)}
-
-        {/* Debt Management */}
-        {renderSimulationCards(debtSimulations, "Debt Management", <CreditCard className="h-5 w-5 text-green-400" />)}
-
-        {/* Emergency Planning */}
-        {renderSimulationCards(emergencySimulations, "Emergency Planning", <Shield className="h-5 w-5 text-teal-400" />)}
-
-        {/* Other Simulations */}
-        {renderSimulationCards(otherSimulations, "Coming Soon", <Sparkles className="h-5 w-5 text-purple-400" />)}
+      <div className="flex-1 overflow-y-auto p-3 space-y-4">
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-3">
+          {allSimulations.map((sim) => (
+            <motion.div key={sim.id} variants={itemVariants}>
+              <GlassCard 
+                className="cursor-pointer hover:scale-[1.02] transition-all duration-200"
+                onClick={() => handleSimulationClick(sim)}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg">
+                    {sim.icon}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold text-white mb-1">{sim.title}</h3>
+                    <p className="text-sm text-white/60 mb-2">{sim.subtitle}</p>
+                    <div className="flex items-center gap-2 text-xs text-white/40">
+                      <Clock className="h-3 w-3" />
+                      <span>5-10 min</span>
+                      <span>•</span>
+                      <span>Medium complexity</span>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-white/40" />
+                </div>
+              </GlassCard>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </div>
   )

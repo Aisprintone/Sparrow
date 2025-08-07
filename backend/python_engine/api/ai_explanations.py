@@ -12,6 +12,9 @@ from enum import Enum
 import httpx
 from datetime import datetime
 
+# Import unified API cache - PATTERN GUARDIAN ENFORCED
+from core.api_cache import api_cache, APIProvider, cached_llm_call
+
 logger = logging.getLogger(__name__)
 
 
@@ -100,19 +103,17 @@ class AIExplanationGenerator:
     """Generates personalized financial explanations using LLM APIs."""
     
     def __init__(self):
-        """Initialize the AI explanation generator."""
-        self.openai_key = os.getenv("OPENAI_API_KEY")
-        self.anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+        """Initialize the AI explanation generator with unified cache."""
+        # ENFORCED: No more duplicate API key management
         self.provider = self._determine_provider()
-        self.client = httpx.AsyncClient(timeout=30.0)
+        # Client managed by unified cache - no duplication
         
-    def _determine_provider(self) -> Optional[AIProvider]:
-        """Determine which AI provider to use based on available keys."""
-        if self.openai_key:
-            return AIProvider.OPENAI
-        elif self.anthropic_key:
-            return AIProvider.ANTHROPIC
-        else:
+    def _determine_provider(self) -> Optional[APIProvider]:
+        """Determine provider using unified cache."""
+        try:
+            # ENFORCED: Use unified provider selection
+            return api_cache._select_best_provider()
+        except ValueError:
             logger.warning("No AI API keys found in environment")
             return None
     
@@ -402,15 +403,14 @@ class AIExplanationGenerator:
                 "decision_context": f"Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
             }
     
+    @cached_llm_call(operation="completion")
     async def _call_llm(self, prompt: str) -> str:
-        """Call LLM using existing infrastructure."""
-        
-        if self.provider == AIProvider.OPENAI:
-            return await self._call_openai(prompt)
-        elif self.provider == AIProvider.ANTHROPIC:
-            return await self._call_anthropic(prompt)
-        else:
-            raise ValueError(f"Unsupported AI provider: {self.provider}")
+        """ENFORCED: Use unified cached API call - no more duplicates."""
+        return await api_cache.cached_api_call(
+            operation="completion",
+            provider=self.provider,
+            prompt=prompt
+        )
     
     def _calculate_potential_saving(
         self,
@@ -461,16 +461,19 @@ class AIExplanationGenerator:
         strategy_type: StrategyType,
         scenario_type: str
     ) -> str:
-        """Generate rationale using AI API."""
+        """Generate rationale using unified cached API."""
         
         prompt = self._build_rationale_prompt(
             profile, simulation_result, strategy_type, scenario_type
         )
         
-        if self.provider == AIProvider.OPENAI:
-            return await self._call_openai(prompt)
-        elif self.provider == AIProvider.ANTHROPIC:
-            return await self._call_anthropic(prompt)
+        if self.provider:
+            # ENFORCED: Use unified cache for all API calls
+            return await api_cache.cached_api_call(
+                operation="rationale",
+                provider=self.provider,
+                prompt=prompt
+            )
         else:
             return self._generate_fallback_rationale(
                 profile, simulation_result, strategy_type, scenario_type
@@ -483,17 +486,19 @@ class AIExplanationGenerator:
         strategy_type: StrategyType,
         scenario_type: str
     ) -> List[str]:
-        """Generate action steps using AI API."""
+        """Generate action steps using unified cached API."""
         
         prompt = self._build_steps_prompt(
             profile, simulation_result, strategy_type, scenario_type
         )
         
-        if self.provider == AIProvider.OPENAI:
-            response = await self._call_openai(prompt)
-            return self._parse_steps(response)
-        elif self.provider == AIProvider.ANTHROPIC:
-            response = await self._call_anthropic(prompt)
+        if self.provider:
+            # ENFORCED: Use unified cache for all API calls
+            response = await api_cache.cached_api_call(
+                operation="steps",
+                provider=self.provider,
+                prompt=prompt
+            )
             return self._parse_steps(response)
         else:
             return self._generate_fallback_steps(
@@ -569,67 +574,11 @@ Format as a list with each step on a new line starting with a dash:
 - Step four here
 """
     
-    async def _call_openai(self, prompt: str) -> str:
-        """Call OpenAI API for text generation."""
-        try:
-            response = await self.client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.openai_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "gpt-4o-mini",
-                    "messages": [
-                        {"role": "system", "content": "You are a financial advisor AI assistant."},
-                        {"role": "user", "content": prompt}
-                    ],
-                    "temperature": 0.7,
-                    "max_tokens": 500
-                }
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                return data["choices"][0]["message"]["content"]
-            else:
-                logger.error(f"OpenAI API error: {response.status_code}")
-                return ""
-                
-        except Exception as e:
-            logger.error(f"OpenAI API call failed: {str(e)}")
-            return ""
+    # VIOLATION REMOVED: Duplicate OpenAI call implementation deleted
+    # Now using unified api_cache.cached_api_call()
     
-    async def _call_anthropic(self, prompt: str) -> str:
-        """Call Anthropic API for text generation."""
-        try:
-            response = await self.client.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={
-                    "x-api-key": self.anthropic_key,
-                    "anthropic-version": "2023-06-01",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "claude-3-haiku-20240307",
-                    "messages": [
-                        {"role": "user", "content": prompt}
-                    ],
-                    "max_tokens": 500,
-                    "temperature": 0.7
-                }
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                return data["content"][0]["text"]
-            else:
-                logger.error(f"Anthropic API error: {response.status_code}")
-                return ""
-                
-        except Exception as e:
-            logger.error(f"Anthropic API call failed: {str(e)}")
-            return ""
+    # VIOLATION REMOVED: Duplicate Anthropic call implementation deleted
+    # Now using unified api_cache.cached_api_call()
     
     def _parse_steps(self, response: str) -> List[str]:
         """Parse steps from AI response."""
@@ -817,5 +766,6 @@ Format as a list with each step on a new line starting with a dash:
         return cards
     
     async def close(self):
-        """Clean up HTTP client."""
-        await self.client.aclose()
+        """Clean up resources - handled by unified cache."""
+        # ENFORCED: Cleanup now handled by unified cache
+        pass

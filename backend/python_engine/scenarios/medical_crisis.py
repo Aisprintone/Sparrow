@@ -79,7 +79,7 @@ class ComprehensiveMedicalCrisisSimulator:
             'fda': 'https://api.fda.gov/drug',
         }
     
-    def run_simulation(self, profile_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+    async def run_simulation(self, profile_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
         """Run comprehensive medical crisis simulation."""
         
         # Get real healthcare data
@@ -117,7 +117,8 @@ class ComprehensiveMedicalCrisisSimulator:
             'financial_impact': financial_impact,
             'recommendations': recommendations,
             'patient_profile': patient,
-            'medical_events': medical_events
+            'medical_events': medical_events,
+            'result': simulation_results  # Add this for compatibility
         }
     
     def _get_healthcare_data_for_simulation(self) -> Dict[str, Any]:
@@ -494,6 +495,170 @@ class MedicalCrisisScenario(ComprehensiveMedicalCrisisSimulator):
         super().__init__()
         self.scenario_name = "Medical Crisis Simulation"
         self.description = "Simulate medical emergencies and optimize insurance coverage"
+    
+    def run_simulation(self, profile_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Synchronous version of run_simulation for compatibility with the simulation engine.
+        Uses simplified medical crisis modeling without async API calls.
+        """
+        # Extract relevant profile information
+        monthly_income = profile_data.get('monthly_income', 5000)
+        monthly_expenses = profile_data.get('monthly_expenses', 3500)
+        emergency_fund = profile_data.get('emergency_fund', 10000)
+        age = profile_data.get('age', 35)
+        
+        # Extract configuration parameters
+        insurance_coverage = config.get('insurance_coverage', 'standard')
+        emergency_fund_months = config.get('emergency_fund_months', 6)
+        health_status = config.get('health_status', 'good')
+        
+        # Define insurance parameters based on coverage type
+        insurance_params = {
+            'basic': {'deductible': 5000, 'out_of_pocket_max': 10000, 'coverage_percent': 0.7},
+            'standard': {'deductible': 2500, 'out_of_pocket_max': 7500, 'coverage_percent': 0.8},
+            'premium': {'deductible': 1000, 'out_of_pocket_max': 5000, 'coverage_percent': 0.9}
+        }
+        
+        params = insurance_params.get(insurance_coverage, insurance_params['standard'])
+        
+        # Simulate medical event probabilities based on health status
+        event_probabilities = {
+            'excellent': 0.05,
+            'good': 0.10,
+            'fair': 0.20,
+            'poor': 0.35
+        }
+        
+        event_probability = event_probabilities.get(health_status, 0.10)
+        
+        # Age-adjusted probability
+        if age > 60:
+            event_probability *= 1.5
+        elif age > 45:
+            event_probability *= 1.25
+        
+        # Simulate potential medical costs
+        np.random.seed(42)  # For reproducibility
+        num_simulations = 1000
+        
+        medical_events = []
+        total_costs = []
+        out_of_pocket_costs = []
+        
+        for _ in range(num_simulations):
+            if np.random.random() < event_probability:
+                # Generate medical event cost
+                base_cost = np.random.lognormal(8, 1.5)  # Log-normal distribution for medical costs
+                
+                # Calculate out-of-pocket based on insurance
+                if base_cost <= params['deductible']:
+                    oop_cost = base_cost
+                else:
+                    covered_amount = (base_cost - params['deductible']) * params['coverage_percent']
+                    oop_cost = params['deductible'] + (base_cost - params['deductible'] - covered_amount)
+                    oop_cost = min(oop_cost, params['out_of_pocket_max'])
+                
+                medical_events.append(base_cost)
+                total_costs.append(base_cost)
+                out_of_pocket_costs.append(oop_cost)
+            else:
+                total_costs.append(0)
+                out_of_pocket_costs.append(0)
+        
+        # Calculate statistics
+        avg_medical_cost = np.mean(total_costs) if total_costs else 0
+        avg_oop_cost = np.mean(out_of_pocket_costs) if out_of_pocket_costs else 0
+        max_oop_cost = np.max(out_of_pocket_costs) if out_of_pocket_costs else 0
+        
+        # Calculate financial resilience score
+        monthly_savings = monthly_income - monthly_expenses
+        coverage_months = emergency_fund / monthly_expenses if monthly_expenses > 0 else 0
+        
+        # Determine if emergency fund is sufficient
+        fund_sufficiency = emergency_fund >= (emergency_fund_months * monthly_expenses)
+        
+        # Calculate resilience score (0-100)
+        resilience_score = min(100, (
+            (coverage_months / emergency_fund_months) * 30 +  # 30 points for fund coverage
+            (1 - min(1, avg_oop_cost / emergency_fund)) * 40 +  # 40 points for ability to handle avg costs
+            (monthly_savings / monthly_income) * 30  # 30 points for savings rate
+        ))
+        
+        # Generate recommendations
+        recommendations = []
+        
+        if coverage_months < emergency_fund_months:
+            recommendations.append({
+                'priority': 'high',
+                'action': 'Build Emergency Fund',
+                'description': f'Increase emergency fund to cover {emergency_fund_months} months of expenses',
+                'impact': 'Critical for medical crisis preparedness'
+            })
+        
+        if insurance_coverage == 'basic':
+            recommendations.append({
+                'priority': 'high',
+                'action': 'Upgrade Insurance Coverage',
+                'description': 'Consider upgrading to standard or premium coverage to reduce out-of-pocket exposure',
+                'impact': f'Could reduce maximum out-of-pocket from ${params["out_of_pocket_max"]:,.0f} to $5,000'
+            })
+        
+        if monthly_savings < monthly_income * 0.15:
+            recommendations.append({
+                'priority': 'medium',
+                'action': 'Increase Monthly Savings',
+                'description': 'Aim to save at least 15% of monthly income',
+                'impact': 'Improves ability to handle unexpected medical expenses'
+            })
+        
+        # Build comprehensive result
+        result = {
+            'scenario_type': 'medical_crisis',
+            'success': True,
+            'simulation_summary': {
+                'total_simulations': num_simulations,
+                'event_probability': event_probability,
+                'insurance_coverage': insurance_coverage,
+                'health_status': health_status
+            },
+            'financial_metrics': {
+                'average_medical_cost': avg_medical_cost,
+                'average_out_of_pocket': avg_oop_cost,
+                'maximum_out_of_pocket': max_oop_cost,
+                'emergency_fund': emergency_fund,
+                'monthly_income': monthly_income,
+                'monthly_expenses': monthly_expenses,
+                'monthly_savings': monthly_savings,
+                'coverage_months': coverage_months
+            },
+            'risk_assessment': {
+                'resilience_score': resilience_score,
+                'fund_sufficiency': fund_sufficiency,
+                'insurance_quality': insurance_coverage,
+                'event_likelihood': 'low' if event_probability < 0.1 else 'medium' if event_probability < 0.25 else 'high'
+            },
+            'recommendations': recommendations,
+            'projections': {
+                'year_1': {
+                    'expected_medical_costs': avg_medical_cost * 12,
+                    'expected_out_of_pocket': avg_oop_cost * 12,
+                    'emergency_fund_growth': monthly_savings * 12
+                },
+                'year_5': {
+                    'expected_medical_costs': avg_medical_cost * 60,
+                    'expected_out_of_pocket': avg_oop_cost * 60,
+                    'emergency_fund_growth': monthly_savings * 60
+                }
+            },
+            'insurance_analysis': {
+                'deductible': params['deductible'],
+                'out_of_pocket_max': params['out_of_pocket_max'],
+                'coverage_percent': params['coverage_percent'] * 100,
+                'estimated_annual_premium': 400 * 12 if insurance_coverage == 'basic' else 600 * 12 if insurance_coverage == 'standard' else 800 * 12
+            }
+        }
+        
+        return result
     
     def get_scenario_parameters(self) -> Dict[str, Any]:
         """Get scenario parameters for frontend configuration."""
