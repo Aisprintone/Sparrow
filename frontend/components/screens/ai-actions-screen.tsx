@@ -5,7 +5,7 @@ import type { AppState } from "@/hooks/use-app-state"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import GlassCard from "@/components/ui/glass-card"
-import { ChevronDown, ChevronUp, Check } from "lucide-react"
+import { ChevronDown, ChevronUp, Check, Clock, AlertCircle, Play, Pause } from "lucide-react"
 
 export default function AIActionsScreen({
   aiActions,
@@ -20,7 +20,7 @@ export default function AIActionsScreen({
   setThoughtDetailOpen,
 }: AppState) {
   const [expandedActions, setExpandedActions] = useState<string[]>([])
-  const [activeTab, setActiveTab] = useState<"suggested" | "completed">("suggested")
+  const [activeTab, setActiveTab] = useState<"suggested" | "in-process" | "completed">("suggested")
 
   const toggleActionExpansion = (actionId: string) => {
     setExpandedActions((prev) => (prev.includes(actionId) ? prev.filter((id) => id !== actionId) : [...prev, actionId]))
@@ -43,6 +43,7 @@ export default function AIActionsScreen({
 
   const suggestedActions = aiActions.filter((action) => action.status === "suggested")
   const completedActions = aiActions.filter((action) => action.status === "completed")
+  const inProcessActions = aiActions.filter((action) => action.status === "in-process")
   const totalPotentialSavings = suggestedActions.reduce((sum, action) => sum + action.potentialSaving, 0)
 
   // Separate pending approval actions (first 2) from recommended actions (rest)
@@ -158,6 +159,163 @@ export default function AIActionsScreen({
     )
   }
 
+  const renderInProcessCard = (action: any) => {
+    const isExpanded = expandedActions.includes(action.id)
+    const progress = action.progress || 0
+    const status = action.workflowStatus || 'running'
+    
+    const getStatusIcon = () => {
+      switch (status) {
+        case 'running':
+          return <Play className="h-4 w-4 text-blue-400" />
+        case 'paused':
+          return <Pause className="h-4 w-4 text-yellow-400" />
+        case 'error':
+          return <AlertCircle className="h-4 w-4 text-red-400" />
+        default:
+          return <Clock className="h-4 w-4 text-gray-400" />
+      }
+    }
+
+    const getStatusColor = () => {
+      switch (status) {
+        case 'running':
+          return "bg-blue-500/20 text-blue-300"
+        case 'paused':
+          return "bg-yellow-500/20 text-yellow-300"
+        case 'error':
+          return "bg-red-500/20 text-red-300"
+        default:
+          return "bg-gray-500/20 text-gray-300"
+      }
+    }
+
+    return (
+      <GlassCard key={action.id} className="bg-white/5">
+        <div className="mb-3">
+          <div className="flex items-center gap-2 mb-2">
+            {getStatusIcon()}
+            <span className={`inline-block px-2 py-1 text-xs rounded-full ${getStatusColor()}`}>
+              {status.charAt(0).toUpperCase() + status.slice(1)}
+            </span>
+          </div>
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-white">{action.title}</h3>
+              <p className="text-sm text-gray-400 mt-1">{action.description}</p>
+              {action.currentStep && (
+                <p className="text-xs text-blue-400 mt-1">Current: {action.currentStep}</p>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="text-lg font-bold text-green-400">+${action.potentialSaving}/mo</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="mb-4">
+          <div className="flex justify-between text-xs text-gray-400 mb-1">
+            <span>Progress</span>
+            <span>{progress}%</span>
+          </div>
+          <div className="w-full bg-gray-700 rounded-full h-2">
+            <div 
+              className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <div className="p-4 rounded-xl bg-black/20">
+            <button
+              onClick={() => toggleActionExpansion(action.id)}
+              className="flex items-center justify-between w-full text-left"
+            >
+              <span className="text-sm text-gray-400 hover:text-white transition-colors">View Details</span>
+              {isExpanded ? (
+                <ChevronUp className="h-4 w-4 text-gray-400" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-400" />
+              )}
+            </button>
+
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-4 space-y-4"
+              >
+                <div>
+                  <h4 className="text-purple-400 text-sm font-medium mb-2">Workflow Steps</h4>
+                  <div className="space-y-2">
+                    {action.steps?.map((step: string, index: number) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${
+                          index < (progress / 100 * (action.steps?.length || 1)) 
+                            ? 'bg-green-400' 
+                            : 'bg-gray-500'
+                        }`} />
+                        <span className="text-sm text-gray-300">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {action.estimatedCompletion && (
+                  <div>
+                    <h4 className="text-purple-400 text-sm font-medium mb-2">Estimated Completion</h4>
+                    <p className="text-sm text-gray-300">{action.estimatedCompletion}</p>
+                  </div>
+                )}
+
+                {action.userAction && (
+                  <div>
+                    <h4 className="text-purple-400 text-sm font-medium mb-2">Action Required</h4>
+                    <p className="text-sm text-gray-300">{action.userAction}</p>
+                    <Button
+                      size="sm"
+                      className="mt-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
+                    >
+                      Take Action
+                    </Button>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Button 
+            size="sm" 
+            variant="outline"
+            className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            onClick={() => {
+              // Pause/resume workflow
+              console.log('Pause/Resume workflow:', action.id)
+            }}
+          >
+            {status === 'paused' ? 'Resume' : 'Pause'}
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline"
+            className="border-red-600 text-red-300 hover:bg-red-600/20"
+            onClick={() => {
+              // Cancel workflow
+              console.log('Cancel workflow:', action.id)
+            }}
+          >
+            Cancel
+          </Button>
+        </div>
+      </GlassCard>
+    )
+  }
+
   return (
     <div className="pb-28">
       <motion.header initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="p-6">
@@ -169,7 +327,7 @@ export default function AIActionsScreen({
         {/* Summary Stats */}
         <motion.div variants={itemVariants}>
           <GlassCard className="bg-gradient-to-r from-purple-500/10 to-blue-500/10">
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-3xl font-bold text-white">47</p>
                 <p className="text-sm text-gray-400">Transactions Analyzed</p>
@@ -177,6 +335,10 @@ export default function AIActionsScreen({
               <div>
                 <p className="text-3xl font-bold text-white">{suggestedActions.length}</p>
                 <p className="text-sm text-gray-400">Opportunities Found</p>
+              </div>
+              <div>
+                <p className="text-3xl font-bold text-blue-400">{inProcessActions.length}</p>
+                <p className="text-sm text-gray-400">In Progress</p>
               </div>
               <div>
                 <p className="text-3xl font-bold text-green-400">${totalPotentialSavings}</p>
@@ -198,6 +360,19 @@ export default function AIActionsScreen({
               Suggested Actions
             </button>
             <button
+              onClick={() => setActiveTab("in-process")}
+              className={`flex-1 py-3 px-4 rounded-lg text-center font-medium transition-all ${
+                activeTab === "in-process" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
+              }`}
+            >
+              In Process
+              {inProcessActions.length > 0 && (
+                <span className="ml-1 bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  {inProcessActions.length}
+                </span>
+              )}
+            </button>
+            <button
               onClick={() => setActiveTab("completed")}
               className={`flex-1 py-3 px-4 rounded-lg text-center font-medium transition-all ${
                 activeTab === "completed" ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"
@@ -217,6 +392,20 @@ export default function AIActionsScreen({
 
               {/* Recommended Actions */}
               {recommendedActions.map((action) => renderActionCard(action, false))}
+            </div>
+          </motion.div>
+        ) : activeTab === "in-process" ? (
+          <motion.div variants={itemVariants}>
+            <div className="space-y-4">
+              {inProcessActions.length > 0 ? (
+                inProcessActions.map((action) => renderInProcessCard(action))
+              ) : (
+                <div className="text-center py-12">
+                  <Clock className="h-12 w-12 text-gray-500 mx-auto mb-4" />
+                  <p className="text-gray-400">No workflows in progress.</p>
+                  <p className="text-sm text-gray-500 mt-2">Automated actions will appear here when running.</p>
+                </div>
+              )}
             </div>
           </motion.div>
         ) : (

@@ -110,7 +110,19 @@ export interface AIAction {
   simulationTag?: string
   potentialSaving: number
   steps: string[]
-  status?: "suggested" | "completed"
+  status?: "suggested" | "completed" | "in-process"
+  // Workflow tracking properties
+  progress?: number
+  workflowStatus?: "running" | "paused" | "error" | "completed"
+  currentStep?: string
+  estimatedCompletion?: string
+  userAction?: string
+  detailed_insights?: {
+    mechanics_explanation: string
+    key_insights: string[]
+    scenario_nuances: string
+    decision_context: string
+  }
 }
 
 export interface Account {
@@ -644,6 +656,38 @@ export default function useAppState(): AppState {
       potentialSaving: 15,
       steps: ["Called provider", "Negotiated rate", "Confirmed new billing", "Set calendar reminder"],
       status: "completed" as const,
+    },
+    {
+      id: "bill-negotiation-in-progress",
+      title: "Negotiate Cable Bill",
+      description: "Currently negotiating with Comcast for better rates",
+      rationale:
+        "Your cable bill has increased 15% this year. We're negotiating with Comcast to match competitor rates and secure a better deal.",
+      type: "optimization" as const,
+      potentialSaving: 35,
+      steps: ["Contact Comcast retention", "Present competitor offers", "Negotiate new rate", "Confirm changes"],
+      status: "in-process" as const,
+      progress: 65,
+      workflowStatus: "running" as const,
+      currentStep: "Negotiating with retention department",
+      estimatedCompletion: "2-3 hours",
+      userAction: "Review and approve the new rate offer"
+    },
+    {
+      id: "high-yield-transfer",
+      title: "Move to High-Yield Savings",
+      description: "Transferring $5,200 to earn 4.5% APY",
+      rationale:
+        "Your savings account is earning only 0.01% APY. We're moving funds to a high-yield account to earn an additional $234 annually.",
+      type: "optimization" as const,
+      potentialSaving: 20,
+      steps: ["Open high-yield account", "Verify account details", "Initiate transfer", "Confirm completion"],
+      status: "in-process" as const,
+      progress: 40,
+      workflowStatus: "running" as const,
+      currentStep: "Verifying account details",
+      estimatedCompletion: "1-2 business days",
+      userAction: "Confirm your identity with the new bank"
     },
   ] as AIAction[]
     }

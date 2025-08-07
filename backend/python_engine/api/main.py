@@ -61,6 +61,9 @@ from ai.langgraph_dspy_agent import generate_ai_explanation_cards
 # Import streaming endpoints
 from streaming_endpoints import router as streaming_router
 
+# Import workflow endpoints
+from workflow_endpoints import router as workflow_router
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -94,6 +97,9 @@ app.add_middleware(
 
 # Include streaming router
 app.include_router(streaming_router)
+
+# Include workflow router
+app.include_router(workflow_router)
 
 # Global data loader and RAG manager
 data_loader = CSVDataLoader()
