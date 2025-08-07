@@ -1,0 +1,3130 @@
+openapi: 3.0.3
+info:
+  title: Sparrow FinanceAI API
+  description: |
+    Complete backend API specification for the Sparrow FinanceAI mobile application.
+    This API provides all endpoints necessary to support financial account aggregation,
+    transaction management, AI-driven insights, financial simulations, and automated
+    financial actions for Gen Z and Millennial users.
+  version: 1.0.0
+  contact:
+    name: Sparrow FinanceAI Team
+    email: api@sparrowfinance.ai
+  license:
+    name: Proprietary
+    url: https://sparrowfinance.ai/license
+
+servers:
+  - url: https://api.sparrowfinance.ai/v1
+    description: Production server
+  - url: https://staging-api.sparrowfinance.ai/v1
+    description: Staging server
+  - url: http://localhost:3001/v1
+    description: Development server
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Users
+    description: User profile and preferences management
+  - name: Accounts
+    description: Financial account aggregation and management
+  - name: Transactions
+    description: Transaction data and categorization
+  - name: Spending
+    description: Spending analytics and budget tracking
+  - name: AI & Analytics
+    description: AI-powered insights and chat functionality
+  - name: Simulations
+    description: Financial scenario modeling and what-if analysis
+  - name: Goals
+    description: Financial goal tracking and management
+  - name: Credit
+    description: Credit score monitoring and factors
+  - name: Bills
+    description: Bill detection, tracking, and payment
+  - name: Notifications
+    description: Push notifications and alerts
+  - name: Institutions
+    description: Financial institution management
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Authentication Endpoints
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - demographic
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: SecurePass123!
+                demographic:
+                  type: string
+                  enum: [genz, millennial]
+                  example: millennial
+                name:
+                  type: string
+                  example: John Doe
+                dateOfBirth:
+                  type: string
+                  format: date
+                  example: "1990-01-15"
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - method
+              properties:
+                method:
+                  type: string
+                  enum: [biometric, passcode, password, oauth]
+                  example: biometric
+                email:
+                  type: string
+                  format: email
+                  description: Required for password method
+                  example: user@example.com
+                password:
+                  type: string
+                  description: Required for password method
+                  example: SecurePass123!
+                passcode:
+                  type: string
+                  description: Required for passcode method
+                  example: "1234"
+                biometricToken:
+                  type: string
+                  description: Required for biometric method
+                provider:
+                  type: string
+                  enum: [google, apple]
+                  description: Required for oauth method
+                oauthToken:
+                  type: string
+                  description: Required for oauth method
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout current user
+      operationId: logoutUser
+      responses:
+        '204':
+          description: Successfully logged out
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                  expiresIn:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/session:
+    get:
+      tags:
+        - Authentication
+      summary: Get current session info
+      operationId: getSession
+      responses:
+        '200':
+          description: Current session information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # User Management
+  /users/profile:
+    get:
+      tags:
+        - Users
+      summary: Get user profile
+      operationId: getUserProfile
+      responses:
+        '200':
+          description: User profile data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    put:
+      tags:
+        - Users
+      summary: Update user profile
+      operationId: updateUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                demographic:
+                  type: string
+                  enum: [genz, millennial]
+                dateOfBirth:
+                  type: string
+                  format: date
+                phoneNumber:
+                  type: string
+                profilePhoto:
+                  type: string
+                  format: uri
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/preferences:
+    get:
+      tags:
+        - Users
+      summary: Get user preferences
+      operationId: getUserPreferences
+      responses:
+        '200':
+          description: User preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    put:
+      tags:
+        - Users
+      summary: Update user preferences
+      operationId: updateUserPreferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferences'
+      responses:
+        '200':
+          description: Preferences updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Account Management
+  /accounts:
+    get:
+      tags:
+        - Accounts
+      summary: Get all user accounts
+      operationId: getAccounts
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [asset, liability]
+          description: Filter by account type
+      responses:
+        '200':
+          description: List of connected accounts with balances
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    post:
+      tags:
+        - Accounts
+      summary: Connect a new account
+      operationId: connectAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - institutionId
+                - publicToken
+              properties:
+                institutionId:
+                  type: string
+                  example: ins_1
+                publicToken:
+                  type: string
+                  description: Plaid public token
+                  example: public-development-8ab976e6-64bc-4b38-98f7-731e7a349970
+      responses:
+        '201':
+          description: Account connected successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /accounts/{accountId}:
+    get:
+      tags:
+        - Accounts
+      summary: Get specific account details
+      operationId: getAccount
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: acc_123456
+      responses:
+        '200':
+          description: Account details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      tags:
+        - Accounts
+      summary: Disconnect an account
+      operationId: disconnectAccount
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Account disconnected successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /accounts/sync:
+    post:
+      tags:
+        - Accounts
+      summary: Sync all accounts
+      operationId: syncAccounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accountIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Specific account IDs to sync. If empty, syncs all accounts.
+      responses:
+        '200':
+          description: Sync completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  syncedAccounts:
+                    type: integer
+                  failedAccounts:
+                    type: integer
+                  lastSyncTime:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Transactions
+  /transactions:
+    get:
+      tags:
+        - Transactions
+      summary: Get transactions
+      operationId: getTransactions
+      parameters:
+        - name: accountIds
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          description: Filter by account IDs
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: Start date for transaction range
+          example: "2025-01-01"
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+          description: End date for transaction range
+          example: "2025-01-31"
+        - name: categories
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+          style: form
+          explode: true
+          description: Filter by categories
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 500
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /transactions/{transactionId}:
+    get:
+      tags:
+        - Transactions
+      summary: Get specific transaction
+      operationId: getTransaction
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Transaction details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      tags:
+        - Transactions
+      summary: Update transaction
+      operationId: updateTransaction
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                category:
+                  type: string
+                  example: Food & Dining
+                merchantName:
+                  type: string
+                  example: Starbucks
+                notes:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Transaction updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /transactions/categories:
+    get:
+      tags:
+        - Transactions
+      summary: Get transaction categories
+      operationId: getTransactionCategories
+      responses:
+        '200':
+          description: List of available categories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        icon:
+                          type: string
+                        color:
+                          type: string
+                        parentCategory:
+                          type: string
+                          nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /transactions/recurring:
+    get:
+      tags:
+        - Transactions
+      summary: Get recurring transactions
+      operationId: getRecurringTransactions
+      responses:
+        '200':
+          description: List of detected recurring transactions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                    example: 1352
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        amount:
+                          type: number
+                        frequency:
+                          type: string
+                          enum: [daily, weekly, biweekly, monthly, quarterly, annually]
+                        nextDate:
+                          type: string
+                          format: date
+                        category:
+                          type: string
+                        icon:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Spending Analytics
+  /spending/analytics:
+    get:
+      tags:
+        - Spending
+      summary: Get spending analytics
+      operationId: getSpendingAnalytics
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [daily, weekly, monthly, yearly]
+            default: monthly
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Spending analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpendingAnalytics'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /spending/budgets:
+    get:
+      tags:
+        - Spending
+      summary: Get budget tracking
+      operationId: getBudgets
+      responses:
+        '200':
+          description: Budget tracking data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  budgets:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Budget'
+                  totalBudget:
+                    type: number
+                  totalSpent:
+                    type: number
+                  remainingBudget:
+                    type: number
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    post:
+      tags:
+        - Spending
+      summary: Create or update budget
+      operationId: createBudget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Budget'
+      responses:
+        '201':
+          description: Budget created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Budget'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /spending/insights:
+    get:
+      tags:
+        - Spending
+      summary: Get spending insights
+      operationId: getSpendingInsights
+      responses:
+        '200':
+          description: AI-generated spending insights
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  insights:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          type: string
+                          enum: [overspending, saving_opportunity, unusual_activity, trend]
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        category:
+                          type: string
+                        impact:
+                          type: object
+                          properties:
+                            amount:
+                              type: number
+                            percentage:
+                              type: number
+                        actionable:
+                          type: boolean
+                        suggestedAction:
+                          type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # AI & Analytics
+  /ai/insights:
+    get:
+      tags:
+        - AI & Analytics
+      summary: Get AI insights
+      operationId: getAIInsights
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [spending, saving, investment, debt, all]
+            default: all
+      responses:
+        '200':
+          description: AI-generated financial insights
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIInsightsResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ai/chat:
+    post:
+      tags:
+        - AI & Analytics
+      summary: Send message to AI assistant
+      operationId: sendAIChatMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - message
+              properties:
+                message:
+                  type: string
+                  example: "What's my net worth?"
+                context:
+                  type: object
+                  properties:
+                    actionId:
+                      type: string
+                      description: Related AI action ID for context
+                    simulationId:
+                      type: string
+                      description: Related simulation ID for context
+                conversationId:
+                  type: string
+                  description: Existing conversation to continue
+      responses:
+        '200':
+          description: AI assistant response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reply:
+                    type: string
+                  conversationId:
+                    type: string
+                  suggestedActions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        text:
+                          type: string
+                        action:
+                          type: string
+                  visualizations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum: [chart, table, card]
+                        data:
+                          type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /ai/actions:
+    get:
+      tags:
+        - AI & Analytics
+      summary: Get AI recommended actions
+      operationId: getAIActions
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [suggested, automated, completed, all]
+            default: suggested
+      responses:
+        '200':
+          description: List of AI recommended actions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AIAction'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /ai/actions/{actionId}/execute:
+    post:
+      tags:
+        - AI & Analytics
+      summary: Execute AI action
+      operationId: executeAIAction
+      parameters:
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parameters:
+                  type: object
+                  description: Action-specific parameters
+                schedule:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum: [immediate, scheduled, recurring]
+                    startDate:
+                      type: string
+                      format: date-time
+                    frequency:
+                      type: string
+                      enum: [daily, weekly, monthly]
+      responses:
+        '200':
+          description: Action executed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  executionId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, in_progress, completed, failed]
+                  result:
+                    type: object
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /ai/actions/{actionId}/automate:
+    post:
+      tags:
+        - AI & Analytics
+      summary: Automate AI action
+      operationId: automateAIAction
+      parameters:
+        - name: actionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  default: true
+                schedule:
+                  type: object
+                  properties:
+                    frequency:
+                      type: string
+                      enum: [daily, weekly, monthly, quarterly]
+                    dayOfWeek:
+                      type: integer
+                      minimum: 0
+                      maximum: 6
+                    dayOfMonth:
+                      type: integer
+                      minimum: 1
+                      maximum: 31
+                    time:
+                      type: string
+                      format: time
+                conditions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        enum: [balance_threshold, spending_limit, date_based]
+                      operator:
+                        type: string
+                        enum: [greater_than, less_than, equals]
+                      value:
+                        type: number
+      responses:
+        '200':
+          description: Automation configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Automation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Simulations
+  /simulations/scenarios:
+    get:
+      tags:
+        - Simulations
+      summary: Get available simulation scenarios
+      operationId: getSimulationScenarios
+      responses:
+        '200':
+          description: List of available simulation scenarios
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommended:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SimulationScenario'
+                  all:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SimulationScenario'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /simulations/run:
+    post:
+      tags:
+        - Simulations
+      summary: Run financial simulation
+      operationId: runSimulation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - scenarioId
+                - parameters
+              properties:
+                scenarioId:
+                  type: string
+                  example: job_loss
+                parameters:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      value:
+                        type: number
+                timeHorizon:
+                  type: integer
+                  description: Simulation time horizon in months
+                  default: 24
+                monteCarloRuns:
+                  type: integer
+                  description: Number of Monte Carlo simulation runs
+                  default: 1000
+      responses:
+        '202':
+          description: Simulation started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  simulationId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [queued, running, completed, failed]
+                  estimatedCompletionTime:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /simulations/{simulationId}/results:
+    get:
+      tags:
+        - Simulations
+      summary: Get simulation results
+      operationId: getSimulationResults
+      parameters:
+        - name: simulationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Simulation results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResults'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /simulations/{simulationId}/apply:
+    post:
+      tags:
+        - Simulations
+      summary: Apply simulation recommendations
+      operationId: applySimulationRecommendations
+      parameters:
+        - name: simulationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                recommendations:
+                  type: array
+                  items:
+                    type: string
+                  description: IDs of recommendations to apply
+      responses:
+        '200':
+          description: Recommendations applied
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  appliedActions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        actionId:
+                          type: string
+                        status:
+                          type: string
+                        automationId:
+                          type: string
+                          nullable: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Goals
+  /goals:
+    get:
+      tags:
+        - Goals
+      summary: Get all goals
+      operationId: getGoals
+      responses:
+        '200':
+          description: List of financial goals
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  goals:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Goal'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    post:
+      tags:
+        - Goals
+      summary: Create a new goal
+      operationId: createGoal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - type
+                - targetAmount
+                - targetDate
+              properties:
+                title:
+                  type: string
+                  example: Emergency Fund
+                type:
+                  type: string
+                  enum: [safety, home, experience, retirement, education, other]
+                targetAmount:
+                  type: number
+                  example: 15000
+                targetDate:
+                  type: string
+                  format: date
+                  example: "2025-12-31"
+                monthlyContribution:
+                  type: number
+                  example: 500
+                icon:
+                  type: string
+                  example: Shield
+                color:
+                  type: string
+                  example: green
+      responses:
+        '201':
+          description: Goal created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Goal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /goals/{goalId}:
+    get:
+      tags:
+        - Goals
+      summary: Get specific goal
+      operationId: getGoal
+      parameters:
+        - name: goalId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Goal details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Goal'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      tags:
+        - Goals
+      summary: Update goal
+      operationId: updateGoal
+      parameters:
+        - name: goalId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                targetAmount:
+                  type: number
+                targetDate:
+                  type: string
+                  format: date
+                monthlyContribution:
+                  type: number
+                currentAmount:
+                  type: number
+      responses:
+        '200':
+          description: Goal updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Goal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      tags:
+        - Goals
+      summary: Delete goal
+      operationId: deleteGoal
+      parameters:
+        - name: goalId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Goal deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /goals/{goalId}/progress:
+    get:
+      tags:
+        - Goals
+      summary: Get goal progress
+      operationId: getGoalProgress
+      parameters:
+        - name: goalId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Goal progress details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  currentAmount:
+                    type: number
+                  targetAmount:
+                    type: number
+                  percentageComplete:
+                    type: number
+                  projectedCompletionDate:
+                    type: string
+                    format: date
+                  monthsRemaining:
+                    type: integer
+                  requiredMonthlyContribution:
+                    type: number
+                  milestones:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        target:
+                          type: number
+                        achieved:
+                          type: boolean
+                        achievedDate:
+                          type: string
+                          format: date
+                          nullable: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Credit
+  /credit/score:
+    get:
+      tags:
+        - Credit
+      summary: Get credit score
+      operationId: getCreditScore
+      responses:
+        '200':
+          description: Current credit score and history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditScoreResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /credit/report:
+    get:
+      tags:
+        - Credit
+      summary: Get credit report
+      operationId: getCreditReport
+      parameters:
+        - name: bureau
+          in: query
+          schema:
+            type: string
+            enum: [experian, equifax, transunion]
+            default: experian
+      responses:
+        '200':
+          description: Full credit report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditReport'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /credit/factors:
+    get:
+      tags:
+        - Credit
+      summary: Get credit score factors
+      operationId: getCreditFactors
+      responses:
+        '200':
+          description: Credit score factors and impact
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  factors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CreditFactor'
+                  recommendations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        impact:
+                          type: string
+                          enum: [high, medium, low]
+                        estimatedScoreIncrease:
+                          type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /credit/alerts:
+    post:
+      tags:
+        - Credit
+      summary: Set credit monitoring alerts
+      operationId: setCreditAlerts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                scoreChange:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    threshold:
+                      type: integer
+                      minimum: 1
+                      maximum: 50
+                newAccount:
+                  type: boolean
+                hardInquiry:
+                  type: boolean
+                missedPayment:
+                  type: boolean
+      responses:
+        '200':
+          description: Alert preferences updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Bills
+  /bills:
+    get:
+      tags:
+        - Bills
+      summary: Get all bills
+      operationId: getBills
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [upcoming, paid, overdue, all]
+            default: all
+      responses:
+        '200':
+          description: List of bills
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bills:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Bill'
+                  summary:
+                    type: object
+                    properties:
+                      totalUpcoming:
+                        type: number
+                      totalPaid:
+                        type: number
+                      nextDueDate:
+                        type: string
+                        format: date
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    post:
+      tags:
+        - Bills
+      summary: Add a bill
+      operationId: addBill
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - amount
+                - dueDate
+              properties:
+                name:
+                  type: string
+                  example: Netflix
+                amount:
+                  type: number
+                  example: 15.99
+                dueDate:
+                  type: string
+                  format: date
+                  example: "2025-02-15"
+                category:
+                  type: string
+                  example: Entertainment
+                recurring:
+                  type: boolean
+                  default: true
+                frequency:
+                  type: string
+                  enum: [weekly, biweekly, monthly, quarterly, annually]
+                  default: monthly
+                autoPay:
+                  type: boolean
+                  default: false
+                accountId:
+                  type: string
+                  description: Account ID for auto-pay
+      responses:
+        '201':
+          description: Bill created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bill'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /bills/{billId}:
+    get:
+      tags:
+        - Bills
+      summary: Get specific bill
+      operationId: getBill
+      parameters:
+        - name: billId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bill details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bill'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      tags:
+        - Bills
+      summary: Update bill
+      operationId: updateBill
+      parameters:
+        - name: billId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                amount:
+                  type: number
+                dueDate:
+                  type: string
+                  format: date
+                category:
+                  type: string
+                autoPay:
+                  type: boolean
+                accountId:
+                  type: string
+      responses:
+        '200':
+          description: Bill updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bill'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      tags:
+        - Bills
+      summary: Delete bill
+      operationId: deleteBill
+      parameters:
+        - name: billId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Bill deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /bills/{billId}/pay:
+    post:
+      tags:
+        - Bills
+      summary: Pay a bill
+      operationId: payBill
+      parameters:
+        - name: billId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accountId
+              properties:
+                accountId:
+                  type: string
+                  example: acc_123456
+                amount:
+                  type: number
+                  description: Override amount if different from bill amount
+                paymentDate:
+                  type: string
+                  format: date
+                  description: Schedule payment for future date
+                memo:
+                  type: string
+      responses:
+        '200':
+          description: Bill payment processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactionId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [pending, completed, failed]
+                  confirmationNumber:
+                    type: string
+                  processedAt:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          description: Insufficient funds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /bills/upcoming:
+    get:
+      tags:
+        - Bills
+      summary: Get upcoming bills
+      operationId: getUpcomingBills
+      parameters:
+        - name: days
+          in: query
+          schema:
+            type: integer
+            default: 30
+            minimum: 1
+            maximum: 90
+          description: Number of days to look ahead
+      responses:
+        '200':
+          description: List of upcoming bills
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bills:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Bill'
+                  totalAmount:
+                    type: number
+                  byCategory:
+                    type: object
+                    additionalProperties:
+                      type: number
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Notifications
+  /notifications/subscribe:
+    post:
+      tags:
+        - Notifications
+      summary: Subscribe to push notifications
+      operationId: subscribeToPushNotifications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - deviceToken
+                - platform
+              properties:
+                deviceToken:
+                  type: string
+                  example: "ExponentPushToken[xxxxxxxxxxxxxxxxxxxxxx]"
+                platform:
+                  type: string
+                  enum: [ios, android, web]
+                deviceId:
+                  type: string
+      responses:
+        '200':
+          description: Successfully subscribed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscriptionId:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notifications/preferences:
+    get:
+      tags:
+        - Notifications
+      summary: Get notification preferences
+      operationId: getNotificationPreferences
+      responses:
+        '200':
+          description: Current notification preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    put:
+      tags:
+        - Notifications
+      summary: Update notification preferences
+      operationId: updateNotificationPreferences
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferences'
+      responses:
+        '200':
+          description: Preferences updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferences'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /notifications/history:
+    get:
+      tags:
+        - Notifications
+      summary: Get notification history
+      operationId: getNotificationHistory
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 200
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: List of sent notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          type: string
+                          enum: [transaction, bill, goal, insight, alert]
+                        title:
+                          type: string
+                        body:
+                          type: string
+                        sentAt:
+                          type: string
+                          format: date-time
+                        read:
+                          type: boolean
+                        actionUrl:
+                          type: string
+                          nullable: true
+                  hasMore:
+                    type: boolean
+                  total:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Institutions
+  /institutions:
+    get:
+      tags:
+        - Institutions
+      summary: Get supported institutions
+      operationId: getInstitutions
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search institutions by name
+        - name: popular
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Return only popular institutions
+      responses:
+        '200':
+          description: List of supported financial institutions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  institutions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Institution'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /institutions/connect:
+    post:
+      tags:
+        - Institutions
+      summary: Initialize institution connection
+      operationId: connectInstitution
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - institutionId
+              properties:
+                institutionId:
+                  type: string
+                  example: ins_1
+      responses:
+        '200':
+          description: Connection initialization data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  linkToken:
+                    type: string
+                    description: Plaid Link token
+                  expiresAt:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+# WebSocket Events
+x-websocket-events:
+  account.balance.updated:
+    description: Real-time account balance update
+    payload:
+      type: object
+      properties:
+        accountId:
+          type: string
+        previousBalance:
+          type: number
+        currentBalance:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
+  
+  transaction.new:
+    description: New transaction detected
+    payload:
+      $ref: '#/components/schemas/Transaction'
+  
+  ai.insight.generated:
+    description: New AI insight available
+    payload:
+      type: object
+      properties:
+        insightId:
+          type: string
+        type:
+          type: string
+        priority:
+          type: string
+          enum: [high, medium, low]
+        title:
+          type: string
+  
+  simulation.progress:
+    description: Simulation progress update
+    payload:
+      type: object
+      properties:
+        simulationId:
+          type: string
+        progress:
+          type: number
+          minimum: 0
+          maximum: 100
+        status:
+          type: string
+          enum: [running, completed, failed]
+  
+  bill.reminder:
+    description: Bill payment reminder
+    payload:
+      type: object
+      properties:
+        billId:
+          type: string
+        name:
+          type: string
+        amount:
+          type: number
+        dueDate:
+          type: string
+          format: date
+        daysUntilDue:
+          type: integer
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login endpoint
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          example: validation_error
+        message:
+          type: string
+          example: Invalid request parameters
+        details:
+          type: object
+          additionalProperties: true
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        expiresIn:
+          type: integer
+          example: 3600
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: usr_123456
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        name:
+          type: string
+          example: John Doe
+        demographic:
+          type: string
+          enum: [genz, millennial]
+          example: millennial
+        createdAt:
+          type: string
+          format: date-time
+
+    Session:
+      type: object
+      properties:
+        userId:
+          type: string
+        email:
+          type: string
+        demographic:
+          type: string
+          enum: [genz, millennial]
+        lastActivity:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        demographic:
+          type: string
+          enum: [genz, millennial]
+        dateOfBirth:
+          type: string
+          format: date
+        phoneNumber:
+          type: string
+        profilePhoto:
+          type: string
+          format: uri
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserPreferences:
+      type: object
+      properties:
+        pushNotifications:
+          type: boolean
+        emailSummaries:
+          type: boolean
+        lowBalanceAlerts:
+          type: boolean
+        billReminders:
+          type: boolean
+        spendingAlerts:
+          type: boolean
+        goalProgressUpdates:
+          type: boolean
+        marketingEmails:
+          type: boolean
+        currency:
+          type: string
+          default: USD
+        theme:
+          type: string
+          enum: [light, dark, auto]
+          default: auto
+
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          example: acc_123456
+        institutionId:
+          type: string
+          example: ins_1
+        institutionName:
+          type: string
+          example: Chase
+        accountName:
+          type: string
+          example: Chase Checking
+        accountType:
+          type: string
+          enum: [checking, savings, credit, loan, investment, mortgage, other]
+        accountSubtype:
+          type: string
+          example: checking
+        balance:
+          type: number
+          example: 12847.23
+        availableBalance:
+          type: number
+          example: 12347.23
+        currency:
+          type: string
+          example: USD
+        lastSync:
+          type: string
+          format: date-time
+        logo:
+          type: string
+          format: uri
+          example: https://cdn.sparrowfinance.ai/logos/chase.png
+        accountNumber:
+          type: string
+          description: Masked account number
+          example: "****1234"
+        interestRate:
+          type: number
+          nullable: true
+        creditLimit:
+          type: number
+          nullable: true
+
+    AccountsResponse:
+      type: object
+      properties:
+        accounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
+        totalAssets:
+          type: number
+          example: 245081
+        totalLiabilities:
+          type: number
+          example: 289034
+        netWorth:
+          type: number
+          example: -43953
+        lastUpdated:
+          type: string
+          format: date-time
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          example: txn_123456
+        accountId:
+          type: string
+          example: acc_123456
+        amount:
+          type: number
+          example: -45.23
+        merchantName:
+          type: string
+          example: Starbucks
+        originalDescription:
+          type: string
+          example: "STARBUCKS #12345 NEW YORK NY"
+        category:
+          type: string
+          example: Food & Dining
+        subcategory:
+          type: string
+          example: Coffee Shops
+        date:
+          type: string
+          format: date
+          example: "2025-02-01"
+        pending:
+          type: boolean
+          example: false
+        recurring:
+          type: boolean
+          example: false
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+          nullable: true
+        location:
+          type: object
+          nullable: true
+          properties:
+            address:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            zip:
+              type: string
+            lat:
+              type: number
+            lon:
+              type: number
+
+    TransactionsResponse:
+      type: object
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        totalCount:
+          type: integer
+          example: 523
+        hasMore:
+          type: boolean
+          example: true
+        summary:
+          type: object
+          properties:
+            totalIncome:
+              type: number
+            totalExpenses:
+              type: number
+            netCashFlow:
+              type: number
+
+    SpendingAnalytics:
+      type: object
+      properties:
+        period:
+          type: string
+          example: "2025-02"
+        totalSpending:
+          type: number
+          example: 4200
+        averageDailySpending:
+          type: number
+          example: 140
+        topCategories:
+          type: array
+          items:
+            type: object
+            properties:
+              category:
+                type: string
+              amount:
+                type: number
+              percentage:
+                type: number
+              change:
+                type: number
+                description: Percentage change from previous period
+        spendingTrend:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              amount:
+                type: number
+        insights:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              message:
+                type: string
+              impact:
+                type: string
+                enum: [positive, negative, neutral]
+
+    Budget:
+      type: object
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+          example: Food & Dining
+        budgetAmount:
+          type: number
+          example: 500
+        spent:
+          type: number
+          example: 450
+        remaining:
+          type: number
+          example: 50
+        percentageUsed:
+          type: number
+          example: 90
+        period:
+          type: string
+          enum: [daily, weekly, monthly, yearly]
+          default: monthly
+        alertThreshold:
+          type: number
+          description: Percentage at which to send alert
+          default: 80
+        color:
+          type: string
+          example: red
+
+    AIInsightsResponse:
+      type: object
+      properties:
+        insights:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+                enum: [spending, saving, investment, debt]
+              priority:
+                type: string
+                enum: [high, medium, low]
+              title:
+                type: string
+              description:
+                type: string
+              actionable:
+                type: boolean
+              potentialImpact:
+                type: object
+                properties:
+                  amount:
+                    type: number
+                  timeframe:
+                    type: string
+              suggestedActions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    title:
+                      type: string
+                    automatable:
+                      type: boolean
+        generatedAt:
+          type: string
+          format: date-time
+
+    AIAction:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        rationale:
+          type: string
+        type:
+          type: string
+          enum: [optimization, saving, investment, debt_reduction]
+        status:
+          type: string
+          enum: [suggested, automated, completed, dismissed]
+        potentialSaving:
+          type: number
+        estimatedTime:
+          type: string
+          description: Estimated time to complete
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        steps:
+          type: array
+          items:
+            type: string
+        automationAvailable:
+          type: boolean
+        simulationTag:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    Automation:
+      type: object
+      properties:
+        id:
+          type: string
+        actionId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        enabled:
+          type: boolean
+        schedule:
+          type: object
+          properties:
+            frequency:
+              type: string
+              enum: [daily, weekly, monthly, quarterly]
+            nextRun:
+              type: string
+              format: date-time
+        conditions:
+          type: array
+          items:
+            type: object
+        status:
+          type: string
+          enum: [active, paused, completed]
+        lastRun:
+          type: string
+          format: date-time
+          nullable: true
+        runCount:
+          type: integer
+
+    SimulationScenario:
+      type: object
+      properties:
+        id:
+          type: string
+          example: job_loss
+        title:
+          type: string
+          example: Job Loss Scenario
+        subtitle:
+          type: string
+          example: Analyze financial runway during unemployment
+        description:
+          type: string
+        icon:
+          type: string
+          example: 💼
+        category:
+          type: string
+          enum: [income, expense, investment, major_purchase, life_event]
+        recommended:
+          type: boolean
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+              type:
+                type: string
+                enum: [number, percentage, boolean, date]
+              defaultValue:
+                type: number
+              min:
+                type: number
+              max:
+                type: number
+              step:
+                type: number
+              unit:
+                type: string
+
+    SimulationResults:
+      type: object
+      properties:
+        simulationId:
+          type: string
+        scenarioId:
+          type: string
+        status:
+          type: string
+          enum: [completed, failed]
+        completedAt:
+          type: string
+          format: date-time
+        summary:
+          type: object
+          properties:
+            financialRunway:
+              type: integer
+              description: Months of financial runway
+            netWorthImpact:
+              type: number
+            cashFlowImpact:
+              type: number
+            riskScore:
+              type: number
+              minimum: 0
+              maximum: 100
+        projections:
+          type: array
+          items:
+            type: object
+            properties:
+              month:
+                type: integer
+              netWorth:
+                type: number
+              cashFlow:
+                type: number
+              accountBalances:
+                type: object
+                additionalProperties:
+                  type: number
+        insights:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum: [opportunity, risk, optimization]
+              title:
+                type: string
+              description:
+                type: string
+              impact:
+                type: string
+                enum: [high, medium, low]
+        recommendations:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              description:
+                type: string
+              automatable:
+                type: boolean
+              estimatedImpact:
+                type: number
+              priority:
+                type: integer
+                minimum: 1
+                maximum: 10
+
+    Goal:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        type:
+          type: string
+          enum: [safety, home, experience, retirement, education, other]
+        targetAmount:
+          type: number
+        currentAmount:
+          type: number
+        targetDate:
+          type: string
+          format: date
+        monthlyContribution:
+          type: number
+        icon:
+          type: string
+        color:
+          type: string
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 10
+        automatedFunding:
+          type: boolean
+        fundingAccountId:
+          type: string
+          nullable: true
+        milestones:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              target:
+                type: number
+              achieved:
+                type: boolean
+              achievedDate:
+                type: string
+                format: date
+                nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreditScoreResponse:
+      type: object
+      properties:
+        score:
+          type: integer
+          minimum: 300
+          maximum: 850
+          example: 780
+        previousScore:
+          type: integer
+          example: 775
+        scoreDate:
+          type: string
+          format: date
+        bureau:
+          type: string
+          enum: [experian, equifax, transunion]
+        scoreRange:
+          type: object
+          properties:
+            min:
+              type: integer
+              example: 300
+            max:
+              type: integer
+              example: 850
+        category:
+          type: string
+          enum: [poor, fair, good, very_good, excellent]
+        percentile:
+          type: integer
+          minimum: 1
+          maximum: 100
+        history:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              score:
+                type: integer
+              change:
+                type: integer
+
+    CreditFactor:
+      type: object
+      properties:
+        name:
+          type: string
+          enum: [payment_history, credit_utilization, credit_age, credit_mix, new_credit]
+        displayName:
+          type: string
+        status:
+          type: string
+          enum: [excellent, good, fair, poor]
+        value:
+          type: string
+        impact:
+          type: string
+          enum: [high, medium, low]
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        description:
+          type: string
+        suggestions:
+          type: array
+          items:
+            type: string
+
+    CreditReport:
+      type: object
+      properties:
+        reportId:
+          type: string
+        bureau:
+          type: string
+          enum: [experian, equifax, transunion]
+        generatedAt:
+          type: string
+          format: date-time
+        personalInfo:
+          type: object
+          properties:
+            name:
+              type: string
+            addresses:
+              type: array
+              items:
+                type: object
+                properties:
+                  address:
+                    type: string
+                  current:
+                    type: boolean
+            employers:
+              type: array
+              items:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  current:
+                    type: boolean
+        accounts:
+          type: array
+          items:
+            type: object
+            properties:
+              creditor:
+                type: string
+              accountType:
+                type: string
+              accountStatus:
+                type: string
+              balance:
+                type: number
+              creditLimit:
+                type: number
+              paymentHistory:
+                type: array
+                items:
+                  type: string
+                  enum: [on_time, late_30, late_60, late_90, late_120]
+        inquiries:
+          type: array
+          items:
+            type: object
+            properties:
+              creditor:
+                type: string
+              date:
+                type: string
+                format: date
+              type:
+                type: string
+                enum: [hard, soft]
+        publicRecords:
+          type: array
+          items:
+            type: object
+        collections:
+          type: array
+          items:
+            type: object
+
+    Bill:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        amount:
+          type: number
+        dueDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [upcoming, paid, overdue, scheduled]
+        category:
+          type: string
+        recurring:
+          type: boolean
+        frequency:
+          type: string
+          enum: [weekly, biweekly, monthly, quarterly, annually]
+          nullable: true
+        autoPay:
+          type: boolean
+        autoPayAccountId:
+          type: string
+          nullable: true
+        lastPaidDate:
+          type: string
+          format: date
+          nullable: true
+        lastPaidAmount:
+          type: number
+          nullable: true
+        averageAmount:
+          type: number
+        merchantId:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+
+    NotificationPreferences:
+      type: object
+      properties:
+        pushNotifications:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            transactions:
+              type: boolean
+            bills:
+              type: boolean
+            goals:
+              type: boolean
+            insights:
+              type: boolean
+            security:
+              type: boolean
+        emailNotifications:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            dailySummary:
+              type: boolean
+            weeklySummary:
+              type: boolean
+            monthlyReport:
+              type: boolean
+            billReminders:
+              type: boolean
+            lowBalanceAlerts:
+              type: boolean
+            unusualActivity:
+              type: boolean
+        alertSettings:
+          type: object
+          properties:
+            lowBalanceThreshold:
+              type: number
+              example: 100
+            largeTransactionThreshold:
+              type: number
+              example: 500
+            billReminderDays:
+              type: integer
+              example: 3
+        quietHours:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            startTime:
+              type: string
+              format: time
+              example: "22:00"
+            endTime:
+              type: string
+              format: time
+              example: "08:00"
+
+    Institution:
+      type: object
+      properties:
+        id:
+          type: string
+          example: ins_1
+        name:
+          type: string
+          example: Chase
+        logo:
+          type: string
+          format: uri
+        primaryColor:
+          type: string
+          example: "#0066CC"
+        url:
+          type: string
+          format: uri
+        products:
+          type: array
+          items:
+            type: string
+            enum: [checking, savings, credit_cards, mortgages, investments, loans]
+        oauth:
+          type: boolean
+          description: Supports OAuth connection
+        status:
+          type: string
+          enum: [healthy, degraded, down]
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: validation_error
+            message: Invalid request parameters
+            details:
+              email: Invalid email format
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: unauthorized
+            message: Invalid or expired token
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: forbidden
+            message: Insufficient permissions
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: not_found
+            message: Resource not found
+
+    TooManyRequests:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: rate_limit_exceeded
+            message: Too many requests. Please try again later.
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit per hour
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when limit resets
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: internal_error
+            message: An unexpected error occurred
+
+  parameters:
+    PathAccountId:
+      name: accountId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Account ID
+
+    QueryLimit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 50
+        minimum: 1
+        maximum: 500
+      description: Maximum number of items to return
+
+    QueryOffset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
+      description: Number of items to skip
+
+x-readme:
+  explorer-enabled: true
+  proxy-enabled: true
+  samples-languages:
+    - javascript
+    - python
+    - swift
+    - kotlin
+    - curl

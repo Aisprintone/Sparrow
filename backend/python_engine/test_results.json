@@ -1,0 +1,106 @@
+{
+  "simulation_data": {
+    "scenario_name": "Emergency Fund Strategy",
+    "description": "Simulate emergency fund growth with real market data",
+    "market_data": {
+      "bond_yield": 0.0035,
+      "money_market_rate": 0.00375,
+      "stock_return": 0.008,
+      "last_updated": "2025-01-15T10:30:00Z"
+    },
+    "success_metrics": {
+      "conservative": {
+        "success_rate": 85.4,
+        "avg_time_to_target": 48.2,
+        "avg_final_amount": 18500.0
+      },
+      "moderate": {
+        "success_rate": 92.1,
+        "avg_time_to_target": 44.8,
+        "avg_final_amount": 19800.0
+      },
+      "growth": {
+        "success_rate": 94.7,
+        "avg_time_to_target": 42.1,
+        "avg_final_amount": 21200.0
+      }
+    },
+    "recommendations": [
+      {
+        "type": "priority",
+        "title": "Build Emergency Fund",
+        "description": "You need $12,000 more to reach your 6-month emergency fund target.",
+        "action": "Increase monthly savings",
+        "impact": "high"
+      },
+      {
+        "type": "strategy",
+        "title": "Consider High-Yield Savings",
+        "description": "Current money market rates are attractive for emergency funds.",
+        "action": "Open high-yield savings account",
+        "impact": "medium"
+      }
+    ],
+    "target_emergency_fund": 18000,
+    "current_emergency_fund": 6000,
+    "monthly_contribution": 500
+  },
+  "user_profile": {
+    "user_id": 2,
+    "demographic_type": "midcareer",
+    "age": 32,
+    "monthly_income": 5200,
+    "monthly_expenses": 3400,
+    "net_worth": 45000,
+    "credit_score": 720,
+    "risk_tolerance": "moderate"
+  },
+  "generated_cards": [
+    {
+      "id": "fallback_1",
+      "title": "Alternative Plan 1",
+      "description": "A reliable approach for your emergency fund strategy goals",
+      "tag": "STANDARD",
+      "tagColor": "bg-blue-500",
+      "potentialSaving": 750,
+      "rationale": "This plan provides a balanced approach to your financial goals with moderate risk and steady progress.",
+      "steps": [
+        "Assess your current situation",
+        "Implement gradual changes",
+        "Review progress monthly",
+        "Adjust strategy as needed"
+      ]
+    },
+    {
+      "id": "fallback_2",
+      "title": "Alternative Plan 2",
+      "description": "A reliable approach for your emergency fund strategy goals",
+      "tag": "STANDARD",
+      "tagColor": "bg-blue-500",
+      "potentialSaving": 750,
+      "rationale": "This plan provides a balanced approach to your financial goals with moderate risk and steady progress.",
+      "steps": [
+        "Assess your current situation",
+        "Implement gradual changes",
+        "Review progress monthly",
+        "Adjust strategy as needed"
+      ]
+    },
+    {
+      "id": "fallback_3",
+      "title": "Alternative Plan 3",
+      "description": "A reliable approach for your emergency fund strategy goals",
+      "tag": "STANDARD",
+      "tagColor": "bg-blue-500",
+      "potentialSaving": 750,
+      "rationale": "This plan provides a balanced approach to your financial goals with moderate risk and steady progress.",
+      "steps": [
+        "Assess your current situation",
+        "Implement gradual changes",
+        "Review progress monthly",
+        "Adjust strategy as needed"
+      ]
+    }
+  ],
+  "test_timestamp": "2025-01-15T10:30:00Z"
+}

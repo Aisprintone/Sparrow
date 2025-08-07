@@ -1,0 +1,24 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bank of America red background -->
+  <rect width="40" height="40" rx="8" fill="#E31837"/>
+  
+  <!-- American flag stripes -->
+  <rect x="8" y="12" width="24" height="2" fill="white"/>
+  <rect x="8" y="16" width="24" height="2" fill="white"/>
+  <rect x="8" y="20" width="24" height="2" fill="white"/>
+  <rect x="8" y="24" width="24" height="2" fill="white"/>
+  <rect x="8" y="28" width="24" height="2" fill="white"/>
+  
+  <!-- Blue canton (flag corner) -->
+  <rect x="8" y="12" width="8" height="6" fill="#002868"/>
+  
+  <!-- Stars in canton -->
+  <circle cx="10" cy="14" r="0.5" fill="white"/>
+  <circle cx="12" cy="14" r="0.5" fill="white"/>
+  <circle cx="14" cy="14" r="0.5" fill="white"/>
+  <circle cx="10" cy="16" r="0.5" fill="white"/>
+  <circle cx="12" cy="16" r="0.5" fill="white"/>
+  
+  <!-- Bank of America text -->
+  <text x="20" y="36" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="5" font-weight="bold">BANK OF AMERICA</text>
+</svg> 

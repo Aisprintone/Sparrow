@@ -1,0 +1,37 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sparrow-backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-08-06",
+  "compatibility_flags": [
+    "global_fetch_strictly_public"
+  ],
+  "routes": [
+    {
+      "pattern": "api.sparrow.io/*",
+      "zone_name": "sparrow.io"
+    }
+  ],
+  "assets": {
+    "directory": "./public"
+  },
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sparrow-profiles",
+      "database_id": "e6d30e32-e5ee-48d0-960d-660057225802"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "SPARROW_CACHE",
+      "id": "1b01ebb883a0465db6dfb2f5b7844d84"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production"
+  }
+}

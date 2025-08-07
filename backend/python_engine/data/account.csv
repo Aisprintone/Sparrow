@@ -1,0 +1,6 @@
+account_id,customer_id,institution_name,account_type,balance
+101,1,Chase,checking,5000.0
+102,1,Chase,savings,15000.0
+103,1,Ally,credit_card,-2000.0
+201,2,Wells,checking,3000.0
+301,3,BofA,savings,1000.0

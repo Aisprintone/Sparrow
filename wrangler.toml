@@ -1,0 +1,18 @@
+name = "financeai-backend"
+main = "src/index.ts"
+compatibility_date = "2025-08-06"
+
+# D1 Database for structured profile data
+[[d1_databases]]
+binding = "DB"
+database_name = "financeai-profiles"
+database_id = "bf793da0-3d98-4c3c-80c0-e5aba6892f0b"
+
+# KV Namespace for caching
+[[kv_namespaces]]
+binding = "FINANCEAI_CACHE"
+id = "866da47d04814f4a80aa162ec837ce9d"
+
+# Environment variables
+[vars]
+ENVIRONMENT = "production" 

@@ -1,0 +1,5 @@
+transaction_id,customer_id,amount,category,date,description
+1001,1,-150.0,groceries,2024-01-15,Whole Foods
+1002,1,3000.0,salary,2024-01-01,Monthly Salary
+2001,2,-200.0,gas,2024-01-10,Shell Station
+3001,3,-50.0,coffee,2024-01-05,Starbucks

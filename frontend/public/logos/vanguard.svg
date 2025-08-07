@@ -1,0 +1,14 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Vanguard blue background -->
+  <rect width="40" height="40" rx="8" fill="#1E3A8A"/>
+  
+  <!-- Ship design -->
+  <path d="M8 28L20 12L32 28H8Z" fill="white"/>
+  <rect x="18" y="20" width="4" height="8" fill="white"/>
+  
+  <!-- Ship mast -->
+  <rect x="19" y="12" width="2" height="8" fill="white"/>
+  
+  <!-- Vanguard text -->
+  <text x="20" y="36" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="5" font-weight="bold">VANGUARD</text>
+</svg> 
