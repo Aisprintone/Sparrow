@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # Initialize FastAPI
 app = FastAPI(
     title="FinanceAI RAG System", 
-    version="3.1.0",
+    version="4.0.0",
     description="Production RAG-enabled financial simulation API"
 )
 
@@ -66,9 +66,10 @@ async def root():
     """Root endpoint"""
     return {
         "message": "FinanceAI RAG System",
-        "version": "3.1.0",
+        "version": "4.0.0",
         "status": "operational",
         "rag_initialized": rag_manager is not None,
+        "deployment_id": "FORCE_DEPLOY_2025_08_07_1345",
         "timestamp": datetime.now().isoformat()
     }
 
@@ -77,7 +78,7 @@ async def health():
     """Health check"""
     return {
         "status": "healthy",
-        "version": "3.1.0",
+        "version": "4.0.0",
         "components": {
             "rag_system": "operational" if rag_manager else "not_initialized",
             "data_loader": "operational" if data_loader else "not_initialized"
