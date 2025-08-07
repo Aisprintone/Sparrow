@@ -10,8 +10,12 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 
 # Local imports
-from ..workflows.workflow_engine import WorkflowEngine
-from ..workflows.workflow_registry import WorkflowRegistry
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from workflows.workflow_engine import WorkflowEngine
+from workflows.workflow_registry import WorkflowRegistry
 
 logger = logging.getLogger(__name__)
 

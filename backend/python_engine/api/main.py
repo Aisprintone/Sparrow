@@ -56,7 +56,7 @@ from scenarios.rent_hike import RentHikeScenario
 from scenarios.auto_repair import AutoRepairScenario
 from rag.profile_rag_system import get_rag_manager
 # Import the multi-agent AI system
-from ai.langgraph_dspy_agent import generate_ai_explanation_cards
+from ai.langgraph_dspy_agent import FinancialAIAgentSystem
 
 # Import streaming endpoints
 from streaming_endpoints import router as streaming_router
@@ -131,7 +131,7 @@ simulation_scenarios = {
 }
 
 # Initialize AI agent
-ai_agent = generate_ai_explanation_cards
+ai_agent = FinancialAIAgentSystem()
 
 @app.get("/")
 async def root():

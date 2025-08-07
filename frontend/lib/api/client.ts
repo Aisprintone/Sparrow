@@ -69,7 +69,7 @@ export class ApiClient {
   constructor(config: Partial<ApiClientConfig> = {}) {
     this.config = { 
       ...DEFAULT_CONFIG, 
-      baseURL: config.baseURL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787/v1',
+      baseURL: config.baseURL || process.env.NEXT_PUBLIC_API_URL || 'https://sparrow-backend.aisprintone.workers.dev',
       ...config 
     };
     
