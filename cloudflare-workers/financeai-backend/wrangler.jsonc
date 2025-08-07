@@ -47,6 +47,15 @@
 			}
 		]
 	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": [
+				"SimulationState",
+				"ChatContext"
+			]
+		}
+	],
 	"triggers": {
 		"crons": ["0 */6 * * *"]
 	},
