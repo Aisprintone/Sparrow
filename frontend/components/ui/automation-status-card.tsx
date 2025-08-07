@@ -26,6 +26,7 @@ interface AutomationStatusCardProps {
   onResume?: () => void
   onConfigure?: () => void
   onActivate?: () => void
+  onAddAsGoal?: () => void
   isActivated?: boolean
   scenario?: string
 }
@@ -80,6 +81,7 @@ export default function AutomationStatusCard({
   onResume,
   onConfigure,
   onActivate,
+  onAddAsGoal,
   isActivated = false,
   scenario = "general"
 }: AutomationStatusCardProps) {
@@ -959,10 +961,18 @@ export default function AutomationStatusCard({
             </div>
             <div className="flex gap-2">
               {!isActivated ? (
-                <Button size="sm" onClick={onActivate} className="text-xs h-8 px-3 bg-gradient-to-r from-blue-500 to-purple-500">
-                  <Zap className="h-3 w-3 mr-1" />
-                  Activate
-                </Button>
+                <>
+                  <Button size="sm" onClick={onActivate} className="text-xs h-8 px-3 bg-gradient-to-r from-blue-500 to-purple-500">
+                    <Zap className="h-3 w-3 mr-1" />
+                    Activate
+                  </Button>
+                  {onAddAsGoal && (
+                    <Button size="sm" onClick={onAddAsGoal} className="text-xs h-8 px-3 bg-gradient-to-r from-green-500 to-emerald-500">
+                      <Target className="h-3 w-3 mr-1" />
+                      Set as Goal
+                    </Button>
+                  )}
+                </>
               ) : (
                 <>
                   <Button size="sm" variant="outline" onClick={onConfigure} className="text-xs h-8 px-3">

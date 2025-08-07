@@ -930,7 +930,7 @@ export default function useAppState(): AppState {
       console.log(`[USE-APP-STATE] 🔗 API Endpoint: ${endpoint}`)
       
       // Call backend API with simulation and explanation generation
-      const response = await fetch(`https://sparrow-backend.aisprintone.workers.dev/api${endpoint}`, {
+      const response = await fetch(`https://sparrow-backend-production.up.railway.app${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

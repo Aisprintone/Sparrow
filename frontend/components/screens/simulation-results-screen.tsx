@@ -38,12 +38,72 @@ export default function SimulationResultsScreen({
   setCurrentScreen, 
   simulationResults,
   saveAutomation,
+  addGoal,
   demographic
 }: AppState) {
   const [formattedResults, setFormattedResults] = useState<AIExplanation[]>([])
   const [loading, setLoading] = useState(true)
   const [automatingCards, setAutomatingCards] = useState<Set<string>>(new Set())
   const [automatedCards, setAutomatedCards] = useState<Set<string>>(new Set())
+
+  // Determine if a result is goal-worthy based on comprehensive category mapping
+  const isGoalWorthy = (result: AIExplanation): boolean => {
+    const category = result.category.toLowerCase()
+    const title = result.title.toLowerCase()
+    
+    // Goal-worthy categories: financial outcomes that benefit from tracking and conscious effort
+    const goalWorthyCategories = [
+      'emergency', 'fund', 'debt', 'saving', 'retirement', 'investment',
+      'insurance', 'tax', 'budget', 'income', 'education', 'home', 'mortgage',
+      'credit', 'wealth', 'portfolio', 'nest egg', 'financial independence'
+    ]
+    
+    // Check if category or title contains goal-worthy keywords
+    return goalWorthyCategories.some(keyword => 
+      category.includes(keyword) || title.includes(keyword)
+    ) || result.potential_saving >= 1000 // High-value items are usually goal-worthy
+  }
+
+  // Get appropriate goal type based on category
+  const getGoalType = (result: AIExplanation): string => {
+    const category = result.category.toLowerCase()
+    const title = result.title.toLowerCase()
+    
+    if (category.includes('emergency') || title.includes('emergency')) return 'safety'
+    if (category.includes('debt') || title.includes('debt')) return 'debt'
+    if (category.includes('retirement') || title.includes('retirement')) return 'retirement'
+    if (category.includes('investment') || category.includes('portfolio')) return 'investment'
+    if (category.includes('home') || category.includes('mortgage')) return 'home'
+    if (category.includes('education') || title.includes('education')) return 'education'
+    if (category.includes('insurance') || title.includes('insurance')) return 'insurance'
+    return 'other'
+  }
+
+  // Handle goal creation for a recommendation card
+  const handleAddAsGoal = (result: AIExplanation) => {
+    const goalData = {
+      id: `goal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      title: result.title,
+      description: result.description,
+      type: getGoalType(result),
+      target: result.potential_saving,
+      timeframe: result.timeframe,
+      monthlyContribution: Math.round(result.potential_saving / 12),
+      currentAmount: 0,
+      priority: result.impact === 'high' ? 'high' : result.impact === 'medium' ? 'medium' : 'low',
+      status: 'active' as const,
+      createdAt: new Date().toISOString(),
+      steps: result.steps,
+      confidence: result.confidence
+    }
+    
+    addGoal(goalData)
+    
+    // Navigate to goals screen to show the new goal
+    setTimeout(() => {
+      setCurrentScreen("goals")
+    }, 500)
+  }
 
   // Handle one-click automation for a recommendation card
   const handleAutomateCard = async (result: AIExplanation) => {
@@ -284,6 +344,54 @@ export default function SimulationResultsScreen({
           timeframe: "3-6 months",
           risk_level: "medium",
           implementation_difficulty: "medium"
+        },
+        {
+          title: "Retirement Savings Boost",
+          description: "Maximize your 401k contribution to get full employer match",
+          potential_saving: 7500,
+          confidence: 0.90,
+          category: "Retirement Planning",
+          steps: [
+            "Review current 401k contribution percentage",
+            "Calculate employer match opportunity",
+            "Increase contribution to maximum match"
+          ],
+          impact: "high",
+          timeframe: "immediate",
+          risk_level: "low",
+          implementation_difficulty: "easy"
+        },
+        {
+          title: "Tax Optimization Review",
+          description: "Optimize your tax strategy with better deductions and credits",
+          potential_saving: 1800,
+          confidence: 0.70,
+          category: "Tax Optimization",
+          steps: [
+            "Review eligible deductions",
+            "Organize tax documents",
+            "Consider professional tax preparation"
+          ],
+          impact: "medium",
+          timeframe: "annual",
+          risk_level: "low",
+          implementation_difficulty: "medium"
+        },
+        {
+          title: "Credit Card Rewards Optimization",
+          description: "Switch to a rewards card that matches your spending patterns",
+          potential_saving: 600,
+          confidence: 0.60,
+          category: "Credit Optimization",
+          steps: [
+            "Analyze current spending categories",
+            "Research optimal rewards cards",
+            "Apply and transfer spending"
+          ],
+          impact: "low",
+          timeframe: "3 months",
+          risk_level: "low",
+          implementation_difficulty: "easy"
         }
       ]
         
@@ -441,31 +549,68 @@ export default function SimulationResultsScreen({
                 </ul>
               </div>
 
-              {/* Automation Button */}
+              {/* Action Buttons */}
               <div className="pt-4 border-t border-white/10">
-                <Button
-                  onClick={() => handleAutomateCard(result)}
-                  disabled={automatingCards.has(`${result.title}-${result.potential_saving}`) || 
-                           automatedCards.has(`${result.title}-${result.potential_saving}`)}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {automatingCards.has(`${result.title}-${result.potential_saving}`) ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Starting Automation...
-                    </>
-                  ) : automatedCards.has(`${result.title}-${result.potential_saving}`) ? (
-                    <>
-                      <CheckCircle className="mr-2 h-4 w-4" />
-                      Automation Started!
-                    </>
-                  ) : (
-                    <>
-                      <Play className="mr-2 h-4 w-4" />
-                      Automate This Action
-                    </>
-                  )}
-                </Button>
+                {/* Check if this result is goal-worthy using comprehensive logic */}
+                {isGoalWorthy(result) ? (
+                  <div className="space-y-3">
+                    <Button
+                      onClick={() => handleAddAsGoal(result)}
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
+                    >
+                      <Target className="mr-2 h-4 w-4" />
+                      Set as Goal
+                    </Button>
+                    <Button
+                      onClick={() => handleAutomateCard(result)}
+                      disabled={automatingCards.has(`${result.title}-${result.potential_saving}`) || 
+                               automatedCards.has(`${result.title}-${result.potential_saving}`)}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {automatingCards.has(`${result.title}-${result.potential_saving}`) ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Starting Automation...
+                        </>
+                      ) : automatedCards.has(`${result.title}-${result.potential_saving}`) ? (
+                        <>
+                          <CheckCircle className="mr-2 h-4 w-4" />
+                          Automation Started!
+                        </>
+                      ) : (
+                        <>
+                          <Play className="mr-2 h-4 w-4" />
+                          Automate This Action
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  /* For non-goal-worthy items, show only automation button */
+                  <Button
+                    onClick={() => handleAutomateCard(result)}
+                    disabled={automatingCards.has(`${result.title}-${result.potential_saving}`) || 
+                             automatedCards.has(`${result.title}-${result.potential_saving}`)}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {automatingCards.has(`${result.title}-${result.potential_saving}`) ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Starting Automation...
+                      </>
+                    ) : automatedCards.has(`${result.title}-${result.potential_saving}`) ? (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Automation Started!
+                      </>
+                    ) : (
+                      <>
+                        <Play className="mr-2 h-4 w-4" />
+                        Automate This Action
+                      </>
+                    )}
+                  </Button>
+                )}
               </div>
             </GlassCard>
           ))}

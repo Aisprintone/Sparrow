@@ -13,6 +13,7 @@ export default function ResultsScreen({
   activeAutomations,
   setSelectedThought,
   setThoughtDetailOpen,
+  addGoal,
   demographic = "millennial"
 }: AppState) {
   const containerVariants = {
@@ -117,6 +118,49 @@ export default function ResultsScreen({
     },
     {
       id: "3",
+      type: "automation",
+      emoji: "🛡️",
+      title: "Emergency Fund Strategy",
+      canBeGoal: true,
+      automations: [
+        {
+          title: "Build Emergency Fund",
+          description: "Build a 6-month emergency fund for financial security",
+          steps: [
+            {
+              id: "step1",
+              name: "Calculate target amount",
+              description: "Determine 6 months of essential expenses",
+              status: "completed",
+              duration: 30,
+              estimatedTime: "30s"
+            },
+            {
+              id: "step2",
+              name: "Set up automatic transfers",
+              description: "Configure monthly automatic savings transfers",
+              status: "pending",
+              duration: 120,
+              estimatedTime: "2m"
+            }
+          ],
+          potentialSaving: 0,
+          status: "suggested",
+          progress: 0,
+          workflowStatus: "ready",
+          currentStep: "Ready to start",
+          estimatedCompletion: "Start anytime",
+          goalData: {
+            target: 18000,
+            timeframe: "12 months",
+            monthlyContribution: 1500,
+            type: "safety"
+          }
+        }
+      ]
+    },
+    {
+      id: "4",
       type: "individual",
       emoji: "📊",
       title: "Portfolio Rebalancing",
@@ -147,6 +191,26 @@ export default function ResultsScreen({
   const handleActivate = () => {
     console.log("Activating automation")
     // Activate the automation
+  }
+
+  const handleAddAsGoal = (automation: any) => {
+    console.log("Adding as goal:", automation.title)
+    if (automation.goalData && addGoal) {
+      const goal = {
+        title: automation.title,
+        target: automation.goalData.target,
+        current: 0,
+        deadline: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(), // 1 year from now
+        type: automation.goalData.type,
+        monthlyContribution: automation.goalData.monthlyContribution,
+        priority: "medium" as const,
+        status: "active" as const,
+        color: "blue",
+        icon: "target"
+      }
+      addGoal(goal)
+      setCurrentScreen("goals")
+    }
   }
 
   return (
@@ -183,7 +247,9 @@ export default function ResultsScreen({
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-white">{card.title}</h3>
-                      <p className="text-white/60">Automated financial optimizations</p>
+                      <p className="text-white/60">
+                        {card.canBeGoal ? "Choose your approach" : "Automated financial optimizations"}
+                      </p>
                     </div>
                   </div>
                   
@@ -202,6 +268,7 @@ export default function ResultsScreen({
                         onResume={handleResume}
                         onConfigure={handleConfigure}
                         onActivate={handleActivate}
+                        onAddAsGoal={card.canBeGoal ? () => handleAddAsGoal(automation) : undefined}
                       />
                     )
                   })}

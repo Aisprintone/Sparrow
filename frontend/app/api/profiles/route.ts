@@ -1,47 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const profiles = {
-  1: {
-    id: 1,
-    demographic: 'millennial',
-    name: 'Mid-Career Pro',
-    age: 33,
-    location: 'New York, NY',
-    netWorth: 6400,
-    income: 5800,
-    highlights: [
-      'Growing emergency fund',
-      'Balancing debt & savings',
-      'Career advancement focus'
-    ]
-  },
-  2: {
-    id: 2,
-    demographic: 'genx',
-    name: 'Established Professional',
-    age: 45,
-    location: 'San Francisco, CA',
-    netWorth: 125000,
-    income: 8500,
-    highlights: [
-      'Investment portfolio',
-      'Tax optimization',
-      'Retirement planning'
-    ]
-  },
-  3: {
-    id: 3,
-    demographic: 'genz',
-    name: 'Gen Z Student',
-    age: 23,
-    location: 'Austin, TX',
-    netWorth: -19000,
-    income: 3200,
-    highlights: [
-      'Building credit history',
-      'Managing student loans',
-      'Starting investment journey'
-    ]
+/**
+ * Backend Profiles Service - Single Responsibility
+ * Handles communication with Railway backend for profile data
+ */
+class BackendProfilesService {
+  private readonly baseUrl: string
+
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl || 'https://sparrow-backend-production.up.railway.app'
+  }
+
+  async getProfiles(): Promise<any[]> {
+    const response = await fetch(
+      `${this.baseUrl}/profiles`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch profiles: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return data.profiles || []
+  }
+
+  async getProfile(profileId: string): Promise<any> {
+    const response = await fetch(
+      `${this.baseUrl}/profiles/${profileId}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch profile ${profileId}: ${response.status}`)
+    }
+
+    return await response.json()
   }
 }
 
@@ -56,33 +60,34 @@ export async function GET(request: NextRequest) {
     
     console.log('[PROFILES API] Profile ID requested:', id || 'ALL')
     
+    const backendService = new BackendProfilesService()
+    
     if (id) {
-      const profile = profiles[parseInt(id) as keyof typeof profiles]
-      if (!profile) {
-        console.log('[PROFILES API] ❌ Profile not found for ID:', id)
-        return NextResponse.json(
-          { error: 'Profile not found' },
-          { status: 404 }
-        )
-      }
-      console.log('[PROFILES API] ✅ Single profile returned for ID:', id)
+      const profile = await backendService.getProfile(id)
+      console.log('[PROFILES API] ✅ Single profile from backend for ID:', id)
       return NextResponse.json({
         success: true,
-        data: profile
+        data: profile,
+        source: 'backend'
+      })
+    } else {
+      const profiles = await backendService.getProfiles()
+      console.log('[PROFILES API] ✅ All profiles from backend (count:', profiles.length, ')')
+      return NextResponse.json({
+        success: true,
+        data: profiles,
+        source: 'backend'
       })
     }
-    
-    // Return all profiles
-    console.log('[PROFILES API] ✅ All profiles returned (count:', Object.values(profiles).length, ')')
-    return NextResponse.json({
-      success: true,
-      data: Object.values(profiles)
-    })
   } catch (error) {
-    console.error('[PROFILES API] ❌ Error fetching profiles:', error)
+    console.error('[PROFILES API] ❌ Backend error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { 
+        success: false, 
+        error: 'Backend service unavailable',
+        message: 'Unable to connect to the profiles backend service'
+      },
+      { status: 503 }
     )
   }
 }

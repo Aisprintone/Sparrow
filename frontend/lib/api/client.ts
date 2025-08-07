@@ -69,7 +69,7 @@ export class ApiClient {
   constructor(config: Partial<ApiClientConfig> = {}) {
     this.config = { 
       ...DEFAULT_CONFIG, 
-      baseURL: config.baseURL || process.env.NEXT_PUBLIC_API_URL || 'https://feeble-bite-production.up.railway.app',
+      baseURL: config.baseURL || process.env.NEXT_PUBLIC_API_URL || 'https://sparrow-backend-production.up.railway.app',
       ...config 
     };
     

@@ -29,7 +29,7 @@ class BackendCacheService {
   private readonly baseUrl: string
 
   constructor(baseUrl: string) {
-    this.baseUrl = baseUrl
+    this.baseUrl = baseUrl || 'https://sparrow-backend-production.up.railway.app'
   }
 
   async get(key: string): Promise<CacheEntry | null> {

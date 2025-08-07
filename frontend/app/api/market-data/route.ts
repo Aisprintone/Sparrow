@@ -1,97 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+/**
+ * Backend Market Data Service - Single Responsibility
+ * Handles communication with Railway backend for market data
+ */
+class BackendMarketDataService {
+  private readonly baseUrl: string
+
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl || 'https://sparrow-backend-production.up.railway.app'
+  }
+
+  async getMarketData(): Promise<any> {
+    const response = await fetch(
+      `${this.baseUrl}/api/market-data`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch market data: ${response.status}`)
+    }
+
+    return await response.json()
+  }
+}
+
 export async function GET(request: NextRequest) {
   console.log('[MARKET DATA API] 🚀 Market data request received')
   console.log('[MARKET DATA API] Request URL:', request.url)
   console.log('[MARKET DATA API] User Agent:', request.headers.get('user-agent'))
   
   try {
-    // Try to fetch from external API first
-    const externalApiUrl = 'https://api.example.com/market-data' // Replace with actual API
-    console.log('[MARKET DATA API] 🔄 Attempting to fetch from external API:', externalApiUrl)
+    const backendService = new BackendMarketDataService()
+    const data = await backendService.getMarketData()
     
-    const response = await fetch(externalApiUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: AbortSignal.timeout(5000) // 5 second timeout
-    })
-    
-    console.log('[MARKET DATA API] External API response status:', response.status)
-    
-    if (response.ok) {
-      const data = await response.json()
-      console.log('[MARKET DATA API] ✅ External API data received successfully')
-      console.log('[MARKET DATA API] Data source: External API')
-      console.log('[MARKET DATA API] Symbols count:', data.length || 'N/A')
-      
-      return NextResponse.json({
-        success: true,
-        data: data,
-        meta: {
-          dataSource: 'External API',
-          timestamp: new Date().toISOString(),
-          cached: false
-        }
-      })
-    } else {
-      console.log('[MARKET DATA API] ⚠️ External API failed, using fallback data')
-      throw new Error(`External API returned ${response.status}`)
-    }
-  } catch (error) {
-    console.log('[MARKET DATA API] 🔄 Using fallback market data')
-    console.log('[MARKET DATA API] Error details:', error.message)
-    
-    // Fallback to mock data
-    const fallbackData = [
-      {
-        symbol: "^GSPC",
-        name: "S&P 500",
-        price: 4500.25,
-        change: 12.50,
-        changePercent: 0.28
-      },
-      {
-        symbol: "^IXIC",
-        name: "NASDAQ",
-        price: 14025.50,
-        change: 85.75,
-        changePercent: 0.61
-      },
-      {
-        symbol: "^RUT",
-        name: "Russell 2000",
-        price: 1850.75,
-        change: -8.25,
-        changePercent: -0.44
-      },
-      {
-        symbol: "AAPL",
-        name: "Apple Inc.",
-        price: 175.50,
-        change: 2.25,
-        changePercent: 1.30
-      },
-      {
-        symbol: "MSFT",
-        name: "Microsoft Corp.",
-        price: 320.75,
-        change: 5.50,
-        changePercent: 1.75
-      }
-    ]
-    
-    console.log('[MARKET DATA API] ✅ Fallback data returned (count:', fallbackData.length, ')')
+    console.log('[MARKET DATA API] ✅ Backend data received successfully')
+    console.log('[MARKET DATA API] Data source: Backend API')
     
     return NextResponse.json({
       success: true,
-      data: fallbackData,
+      data: data,
       meta: {
-        dataSource: 'Fallback Data',
+        dataSource: 'Backend API',
         timestamp: new Date().toISOString(),
-        cached: true
+        cached: false
       }
     })
+  } catch (error) {
+    console.error('[MARKET DATA API] ❌ Backend error:', error)
+    return NextResponse.json(
+      { 
+        success: false, 
+        error: 'Backend service unavailable',
+        message: 'Unable to connect to the market data backend service'
+      },
+      { status: 503 }
+    )
   }
 }

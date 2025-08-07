@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // Configuration abstraction - follows Open/Closed principle
 const BACKEND_CONFIG = {
-  url: process.env.BACKEND_URL || 'http://localhost:8000',
+  url: 'https://sparrow-backend-production.up.railway.app',
   timeout: 60000, // 60 seconds for simulation requests
   headers: {
     'Content-Type': 'application/json',
@@ -66,6 +66,7 @@ class BackendSimulationService {
       console.log('[SIMULATION API] 🔄 Sending request to Railway backend:', `${this.baseUrl}/simulation/${scenarioType}`)
       console.log('[SIMULATION API] Request payload:', JSON.stringify(requestBody, null, 2))
       
+      // Use Railway backend directly
       const response = await fetch(
         `${this.baseUrl}/simulation/${scenarioType}`,
         {
@@ -134,10 +135,13 @@ class SimulationErrorHandler {
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { scenarioType: string } }
+  { params }: { params: Promise<{ scenarioType: string }> }
 ) {
+  // Await params to get the actual values
+  const { scenarioType } = await params
+  
   console.log('[SIMULATION API] 🚀 Simulation request received')
-  console.log('[SIMULATION API] Scenario type:', params.scenarioType)
+  console.log('[SIMULATION API] Scenario type:', scenarioType)
   console.log('[SIMULATION API] Request URL:', request.url)
   console.log('[SIMULATION API] User Agent:', request.headers.get('user-agent'))
   
@@ -163,7 +167,7 @@ export async function POST(
     console.log('[SIMULATION API] ✅ Request validation passed')
 
     // Ensure scenario_type matches the URL parameter
-    body.scenario_type = params.scenarioType
+    body.scenario_type = scenarioType
 
     // Initialize service with configuration
     const simulationService = new BackendSimulationService(BACKEND_CONFIG)
@@ -173,7 +177,7 @@ export async function POST(
     console.log('[SIMULATION API] 🔄 Starting simulation execution...')
     const startTime = Date.now()
     const backendResponse = await simulationService.runSimulation(
-      params.scenarioType,
+      scenarioType,
       body
     )
     const executionTime = Date.now() - startTime

@@ -493,7 +493,7 @@ export default function SimulationSetupScreen({ currentSimulation, setCurrentScr
       // Use centralized scenario mapping
       const scenarioType = SCENARIO_MAPPING[currentSimulation?.id || 'emergency-fund']
       
-      const response = await fetch(`/api/simulation/${scenarioType}`, {
+      const response = await fetch(`/api/simulation/${scenarioType}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -536,7 +536,7 @@ export default function SimulationSetupScreen({ currentSimulation, setCurrentScr
       // Use centralized scenario mapping
       const scenarioType = SCENARIO_MAPPING[currentSimulation?.id || 'emergency-fund']
       
-      const response = await fetch(`/api/simulation/${scenarioType}`, {
+      const response = await fetch(`/api/simulation/${scenarioType}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

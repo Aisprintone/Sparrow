@@ -35,7 +35,7 @@ export class RAGService {
   private baseURL: string;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://feeble-bite-production.up.railway.app';
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://sparrow-backend-production.up.railway.app';
   }
 
   /**

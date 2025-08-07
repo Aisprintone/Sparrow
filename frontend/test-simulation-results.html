@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Results Test</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            color: white;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #fff;
+        }
+        .button {
+            padding: 12px 24px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 12px;
+            margin-top: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .button-goal {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        .button-goal:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+        }
+        .button-automate {
+            background: linear-gradient(135deg, #3b82f6, #7c3aed);
+            color: white;
+        }
+        .button-automate:hover {
+            background: linear-gradient(135deg, #2563eb, #6d28d9);
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            margin-right: 8px;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+        .metric {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .metric-label {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+        .steps {
+            margin: 16px 0;
+        }
+        .step {
+            padding: 8px 0;
+            display: flex;
+            align-items: start;
+        }
+        .step::before {
+            content: "•";
+            color: #3b82f6;
+            margin-right: 12px;
+        }
+        .test-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 16px;
+            border-radius: 8px;
+            max-width: 300px;
+        }
+        .test-result {
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        .test-pass {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+        .test-fail {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <div class="test-status" id="test-status">
+        <h4>Test Results</h4>
+        <div id="test-results"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // The isGoalWorthy function from the actual implementation
+        const isGoalWorthy = (result) => {
+            const category = result.category.toLowerCase();
+            const title = result.title.toLowerCase();
+            
+            const goalWorthyCategories = [
+                'emergency', 'fund', 'debt', 'saving', 'retirement', 'investment',
+                'insurance', 'tax', 'budget', 'income', 'education', 'home', 'mortgage',
+                'credit', 'wealth', 'portfolio', 'nest egg', 'financial independence'
+            ];
+            
+            return goalWorthyCategories.some(keyword => 
+                category.includes(keyword) || title.includes(keyword)
+            ) || result.potential_saving >= 1000;
+        };
+
+        const SimulationResults = () => {
+            const [testResults, setTestResults] = useState([]);
+
+            const simulationData = [
+                {
+                    title: "Emergency Fund Optimization",
+                    description: "Increase your emergency fund to cover 6 months of expenses",
+                    potential_saving: 5000,
+                    confidence: 0.85,
+                    category: "Emergency Fund",
+                    steps: [
+                        "Calculate 6 months of essential expenses",
+                        "Set up automatic transfers to savings",
+                        "Consider high-yield savings account"
+                    ],
+                    impact: "high",
+                    timeframe: "6-12 months",
+                    risk_level: "low",
+                    implementation_difficulty: "easy"
+                },
+                {
+                    title: "Debt Consolidation Strategy",
+                    description: "Consolidate high-interest debt into a lower-rate loan",
+                    potential_saving: 3000,
+                    confidence: 0.75,
+                    category: "Debt Management",
+                    steps: [
+                        "Review all current debt balances and rates",
+                        "Research consolidation loan options",
+                        "Apply for the best available rate"
+                    ],
+                    impact: "medium",
+                    timeframe: "3-6 months",
+                    risk_level: "medium",
+                    implementation_difficulty: "medium"
+                },
+                {
+                    title: "Retirement Savings Boost",
+                    description: "Maximize your 401k contribution to get full employer match",
+                    potential_saving: 7500,
+                    confidence: 0.90,
+                    category: "Retirement Planning",
+                    steps: [
+                        "Review current 401k contribution percentage",
+                        "Calculate employer match opportunity",
+                        "Increase contribution to maximum match"
+                    ],
+                    impact: "high",
+                    timeframe: "immediate",
+                    risk_level: "low",
+                    implementation_difficulty: "easy"
+                },
+                {
+                    title: "Tax Optimization Review",
+                    description: "Optimize your tax strategy with better deductions and credits",
+                    potential_saving: 1800,
+                    confidence: 0.70,
+                    category: "Tax Optimization",
+                    steps: [
+                        "Review eligible deductions",
+                        "Organize tax documents",
+                        "Consider professional tax preparation"
+                    ],
+                    impact: "medium",
+                    timeframe: "annual",
+                    risk_level: "low",
+                    implementation_difficulty: "medium"
+                },
+                {
+                    title: "Credit Card Rewards Optimization",
+                    description: "Switch to a rewards card that matches your spending patterns",
+                    potential_saving: 600,
+                    confidence: 0.60,
+                    category: "Credit Optimization",
+                    steps: [
+                        "Analyze current spending categories",
+                        "Research optimal rewards cards",
+                        "Apply and transfer spending"
+                    ],
+                    impact: "low",
+                    timeframe: "3 months",
+                    risk_level: "low",
+                    implementation_difficulty: "easy"
+                }
+            ];
+
+            useEffect(() => {
+                // Run tests
+                const results = simulationData.map((item, index) => {
+                    const shouldShowBothButtons = isGoalWorthy(item);
+                    const testNumber = index + 1;
+                    return {
+                        name: `Test ${testNumber}: ${item.title}`,
+                        expected: testNumber <= 4, // First 4 should show both buttons
+                        actual: shouldShowBothButtons,
+                        pass: shouldShowBothButtons === (testNumber <= 4)
+                    };
+                });
+                setTestResults(results);
+            }, []);
+
+            const handleSetGoal = (item) => {
+                alert(`Setting as goal: ${item.title}`);
+            };
+
+            const handleAutomate = (item) => {
+                alert(`Automating action: ${item.title}`);
+            };
+
+            return (
+                <div className="container">
+                    <h1>Simulation Results - Button Differentiation Test</h1>
+                    <p>Testing the workflow goal differentiation feature</p>
+                    
+                    {simulationData.map((result, index) => (
+                        <div key={index} className="card">
+                            <h3>{result.title}</h3>
+                            <p>{result.description}</p>
+                            
+                            <div className="badge">{result.category}</div>
+                            <span style={{ fontSize: '14px', opacity: 0.7 }}>
+                                Impact: {result.impact} | Difficulty: {result.implementation_difficulty}
+                            </span>
+                            
+                            <div className="metrics">
+                                <div className="metric">
+                                    <div className="metric-label">Potential Savings</div>
+                                    <div className="metric-value">${result.potential_saving.toLocaleString()}</div>
+                                </div>
+                                <div className="metric">
+                                    <div className="metric-label">Confidence</div>
+                                    <div className="metric-value">{(result.confidence * 100).toFixed(0)}%</div>
+                                </div>
+                            </div>
+                            
+                            <div className="steps">
+                                <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>
+                                    Implementation Steps:
+                                </div>
+                                {result.steps.map((step, stepIndex) => (
+                                    <div key={stepIndex} className="step">{step}</div>
+                                ))}
+                            </div>
+
+                            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+                                {isGoalWorthy(result) ? (
+                                    <div>
+                                        <button 
+                                            className="button button-goal"
+                                            onClick={() => handleSetGoal(result)}
+                                        >
+                                            🎯 Set as Goal
+                                        </button>
+                                        <button 
+                                            className="button button-automate"
+                                            onClick={() => handleAutomate(result)}
+                                        >
+                                            ▶️ Automate This Action
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button 
+                                        className="button button-automate"
+                                        onClick={() => handleAutomate(result)}
+                                    >
+                                        ▶️ Automate This Action
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        // Test results display
+        const TestStatus = ({ results }) => {
+            return (
+                <div id="test-results">
+                    {results.map((result, index) => (
+                        <div key={index} className={`test-result ${result.pass ? 'test-pass' : 'test-fail'}`}>
+                            <div>{result.name}</div>
+                            <div style={{ fontSize: '12px' }}>
+                                Expected both buttons: {result.expected ? 'Yes' : 'No'} | 
+                                Actual: {result.actual ? 'Yes' : 'No'}
+                            </div>
+                        </div>
+                    ))}
+                    <div style={{ marginTop: '16px', fontWeight: 'bold' }}>
+                        {results.filter(r => r.pass).length}/{results.length} Tests Passed
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [testResults, setTestResults] = useState([]);
+            
+            return (
+                <>
+                    <SimulationResults />
+                    <TestStatus results={testResults} />
+                </>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

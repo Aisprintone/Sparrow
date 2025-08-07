@@ -22,7 +22,7 @@ import ChatScreen from "@/components/screens/chat-screen"
 import GoalFeedbackDrawer from "@/components/ui/goal-feedback-drawer"
 import AIChatDrawer from "@/components/ui/ai-chat-drawer"
 import SpendTrackingScreen from "@/components/screens/spend-tracking-screen-v2"
-import AIActionsScreen from "@/components/screens/ai-actions-screen"
+import AIActionsScreen from "@/components/screens/ai-actions-screen-refactored"
 import ActionDetailScreen from "@/components/screens/action-detail-screen"
 import MarketDataScreen from "@/components/screens/market-data-screen"
 
