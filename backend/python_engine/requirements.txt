@@ -1,54 +1,22 @@
-# Core Scientific Computing
-numpy==1.24.3              # Vectorized mathematical operations
-scipy==1.11.1              # Statistical distributions and analysis
-pandas==2.0.3              # Data manipulation and CSV parsing
+# Core dependencies for deployment
+fastapi>=0.104.0
+uvicorn>=0.24.0
+pydantic>=2.5.0
+python-dotenv>=1.0.0
+httpx>=0.25.2
 
-# Data Validation & Serialization
-pydantic==2.1.1            # Data validation and serialization
-python-dateutil==2.8.2     # Date parsing utilities
+# Data processing
+numpy>=1.26.0
+pandas>=2.1.0
 
-# API Framework
-fastapi==0.100.0           # Modern API framework with automatic OpenAPI docs
-uvicorn==0.23.1            # ASGI server for FastAPI
-python-multipart==0.0.6    # Form data support
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.1
 
-# Testing & Quality
-pytest==7.4.0              # Testing framework
-pytest-cov==4.1.0          # Coverage reporting
-pytest-asyncio==0.21.1     # Async test support
-pytest-benchmark==4.0.0    # Performance testing
+# Code quality
+black>=23.7.0
+flake8>=6.0.0
 
-# Code Quality
-black==23.7.0              # Code formatting
-mypy==1.4.1                # Type checking
-bandit==1.7.5              # Security scanning
-flake8==6.0.0              # Linting
-
-# Performance & Monitoring
-memory-profiler==0.61.0    # Memory usage profiling
-line-profiler==4.0.3       # Line-by-line profiling
-
-# HTTP Client for AI APIs
-httpx==0.25.2              # Async HTTP client for API calls
-
-# Environment Variables
-python-dotenv==1.0.0       # Load environment variables from .env file
-
-# Financial Data APIs (enabled for real market data)
-yfinance==0.2.18           # Real market data for validation
-fredapi==0.35              # Federal Reserve economic data
-
-# AI/ML Libraries for Explanation Generation
-openai==1.10.0             # OpenAI GPT models
-anthropic==0.34.0          # Anthropic Claude models
-
-# LangGraph and DSPy for Multi-Agent AI Systems
-langgraph==0.6.0           # Multi-agent graph orchestration
-dspy-ai==2.4.13            # Declarative language model programming
-langchain-core==0.3.15     # LangChain core components
-langchain-community==0.3.15 # LangChain community tools
-langchain-chroma==0.1.4    # Chroma vector database integration
-langchain-text-splitters==0.3.2  # Text splitting utilities
-
-# Optional Advanced Libraries (uncomment as needed)
-# quantlib-python           # Sophisticated financial modeling
+# AI/ML (optional for deployment)
+openai>=1.10.0
+anthropic>=0.34.0

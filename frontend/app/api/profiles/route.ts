@@ -1,15 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export const dynamic = 'force-static'
-
-export async function generateStaticParams() {
-  return [
-    { id: '1' },
-    { id: '2' },
-    { id: '3' }
-  ]
-}
-
 const profiles = {
   1: {
     id: 1,
@@ -55,27 +45,32 @@ const profiles = {
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: NextRequest) {
   try {
-    const id = parseInt(params.id)
-    const profile = profiles[id as keyof typeof profiles]
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
     
-    if (!profile) {
-      return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
-      )
+    if (id) {
+      const profile = profiles[parseInt(id) as keyof typeof profiles]
+      if (!profile) {
+        return NextResponse.json(
+          { error: 'Profile not found' },
+          { status: 404 }
+        )
+      }
+      return NextResponse.json({
+        success: true,
+        data: profile
+      })
     }
-
+    
+    // Return all profiles
     return NextResponse.json({
       success: true,
-      data: profile
+      data: Object.values(profiles)
     })
   } catch (error) {
-    console.error('Error fetching profile:', error)
+    console.error('Error fetching profiles:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

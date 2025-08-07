@@ -2,36 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Fetch market data from backend
-    const response = await fetch(`${BACKEND_URL}/api/market-data`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Backend responded with status: ${response.status}`)
-    }
-
-    const data = await response.json()
-    
-    // Generate historical data based on current data
-    const yesterday = generateHistoricalData(data.data, -1)
-    const week = generateHistoricalData(data.data, -5)
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        yesterday,
-        week
-      }
-    })
-  } catch (error) {
-    console.error('Error fetching historical market data:', error)
-    
-    // Return fallback historical data
+    // Return static fallback historical data for static export
     const fallbackYesterday = [
       {
         symbol: "^GSPC",
@@ -155,6 +128,12 @@ export async function GET(request: NextRequest) {
         week: fallbackWeek
       }
     })
+  } catch (error) {
+    console.error('Error fetching historical market data:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 

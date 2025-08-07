@@ -4,6 +4,7 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  BACKEND_URL = "https://sparrow-backend.your-subdomain.workers.dev"
 
 [[edge_functions]]
   function = "cache"

@@ -2,42 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    // Fetch market data from backend
-    const response = await fetch(`${BACKEND_URL}/api/market-data`, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`Backend responded with status: ${response.status}`)
-    }
-
-    const data = await response.json()
-    
-    // Transform backend data to frontend format
-    const quotes = Object.entries(data.data).map(([symbol, quoteData]: [string, any]) => ({
-      symbol,
-      name: getIndexName(symbol),
-      price: quoteData.price || 0,
-      change: quoteData.change || 0,
-      changePercent: quoteData.changePercent || 0,
-      volume: quoteData.volume,
-      high: quoteData.high,
-      low: quoteData.low,
-      open: quoteData.open
-    }))
-
-    return NextResponse.json({
-      success: true,
-      data: quotes
-    })
-  } catch (error) {
-    console.error('Error fetching market quotes:', error)
-    
-    // Return fallback data
+    // Return static fallback data for static export
     const fallbackQuotes = [
       {
         symbol: "^GSPC",
@@ -100,6 +67,12 @@ export async function GET(request: NextRequest) {
       success: true,
       data: fallbackQuotes
     })
+  } catch (error) {
+    console.error('Error fetching market quotes:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
 
