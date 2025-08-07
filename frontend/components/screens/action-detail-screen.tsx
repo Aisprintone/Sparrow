@@ -9,7 +9,7 @@ import GlassCard from "@/components/ui/glass-card"
 export default function ActionDetailScreen({ selectedAction, setCurrentScreen }: AppState) {
   if (!selectedAction) {
     return (
-      <div className="flex h-full items-center justify-center text-white">
+      <div className="flex h-[100dvh] items-center justify-center text-white">
         <p>No action selected. Please go back.</p>
         <Button onClick={() => setCurrentScreen("ai-actions")}>Go Back</Button>
       </div>

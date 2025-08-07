@@ -6,10 +6,8 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "financeai-backend",
 	"main": "src/index.ts",
-	"compatibility_date": "2025-08-06",
-	"compatibility_flags": [
-		"global_fetch_strictly_public"
-	],
+	"compatibility_date": "2024-01-15",
+	"compatibility_flags": ["nodejs_compat"],
 	"routes": [
 		{
 			"pattern": "financeai-backend.your-subdomain.workers.dev/*",
@@ -32,12 +30,29 @@
 	],
 	"kv_namespaces": [
 		{
-			"binding": "FINANCEAI_CACHE",
-			"id": "866da47d04814f4a80aa162ec837ce9d"
+			"binding": "CACHE",
+			"id": "your-kv-namespace-id",
+			"preview_id": "your-preview-kv-namespace-id"
 		}
 	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "SIMULATION_STATE",
+				"class_name": "SimulationState"
+			},
+			{
+				"name": "CHAT_CONTEXT",
+				"class_name": "ChatContext"
+			}
+		]
+	},
+	"triggers": {
+		"crons": ["0 */6 * * *"]
+	},
 	"vars": {
-		"ENVIRONMENT": "production"
+		"ENVIRONMENT": "development",
+		"API_VERSION": "v1"
 	}
 	/**
 	 * Smart Placement

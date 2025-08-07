@@ -39,7 +39,7 @@ export default function SimulatingScreen({ selectedSimulations, simulationProgre
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center p-6 text-white">
+    <div className="flex h-[100dvh] flex-col items-center justify-center p-6 text-white">
       {/* 3D Animation Container */}
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}

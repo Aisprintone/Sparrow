@@ -3,6 +3,8 @@
  * Handles communication with the workflow automation API
  */
 
+import { cacheService, CacheCategories } from '../services/cacheService';
+
 export interface WorkflowStatus {
   execution_id: string;
   workflow_id: string;
@@ -78,13 +80,28 @@ class WorkflowService {
    */
   async getWorkflowStatus(executionId: string): Promise<WorkflowStatus> {
     try {
+      // Try to get from cache first
+      const cacheKey = `workflow_status:${executionId}`;
+      const cachedStatus = await cacheService.get<WorkflowStatus>(cacheKey);
+      
+      if (cachedStatus) {
+        console.log(`Cache hit for workflow status: ${executionId}`);
+        return cachedStatus;
+      }
+
+      // Fetch from API
       const response = await fetch(`${this.baseUrl}/status/${executionId}`);
 
       if (!response.ok) {
         throw new Error(`Failed to get workflow status: ${response.statusText}`);
       }
 
-      return await response.json();
+      const status = await response.json();
+      
+      // Cache the result for 30 seconds (workflow status changes frequently)
+      await cacheService.set(cacheKey, status, 30 * 1000);
+      
+      return status;
     } catch (error) {
       console.error('Error getting workflow status:', error);
       throw error;

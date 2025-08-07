@@ -153,7 +153,7 @@ export default function SimulationsScreen({ setCurrentScreen, setCurrentSimulati
   )
 
   return (
-    <div className="flex h-full flex-col pb-28">
+    <div className="flex h-[100dvh] flex-col pb-28">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="p-6 text-white">
         <h1 className="text-2xl font-semibold mb-2">Financial Simulations</h1>

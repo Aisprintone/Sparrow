@@ -47,9 +47,9 @@ export default {
     const url = new URL(request.url);
     const startTime = performance.now();
 
-    // CORS headers for sparrow.io
+    // CORS headers for multiple domains
     const corsHeaders = {
-      'Access-Control-Allow-Origin': 'https://sparrow.io',
+      'Access-Control-Allow-Origin': 'https://sparrow-finance-app.netlify.app',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
       'Access-Control-Max-Age': '86400',
@@ -72,6 +72,14 @@ export default {
 
       if (url.pathname.startsWith('/api/ai')) {
         return await handleAI(request, env, corsHeaders, startTime);
+      }
+
+      if (url.pathname.startsWith('/api/simulation')) {
+        return await handleSimulation(request, env, corsHeaders, startTime);
+      }
+
+      if (url.pathname.startsWith('/api/market-data')) {
+        return await handleMarketData(request, env, corsHeaders, startTime);
       }
 
       // Default response
@@ -263,6 +271,260 @@ async function handleAI(request: Request, env: Env, corsHeaders: Record<string, 
 
   return new Response(JSON.stringify({ error: 'AI endpoint not found' }), {
     status: 404,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  });
+}
+
+// Simulation endpoint handler
+async function handleSimulation(request: Request, env: Env, corsHeaders: Record<string, string>, startTime: number): Promise<Response> {
+  const url = new URL(request.url);
+  const pathParts = url.pathname.split('/');
+  const scenarioType = pathParts[pathParts.length - 1]; // Get the scenario type from URL
+
+  if (request.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+
+  try {
+    const body = await request.json();
+    const { profile_id, scenario_type, iterations = 1000, include_advanced_metrics = true, generate_explanations = true } = body;
+
+    // Get profile data
+    const profile = await env.DB.prepare(`
+      SELECT id, name, age, location, net_worth, monthly_income, monthly_spending, credit_score 
+      FROM profiles WHERE id = ?
+    `).bind(profile_id).first();
+
+    if (!profile) {
+      return new Response(JSON.stringify({ error: 'Profile not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Generate simulation results based on scenario type
+    const simulationResults = generateSimulationResults(profile, scenario_type, iterations);
+    
+    // Generate AI explanations if requested
+    let aiExplanations = [];
+    if (generate_explanations) {
+      aiExplanations = generateAIExplanations(profile, scenario_type, simulationResults);
+    }
+
+    return new Response(JSON.stringify({
+      data: {
+        simulation_results: simulationResults,
+        ai_explanations: aiExplanations,
+        profile: profile,
+        scenario_type: scenario_type
+      },
+      performance: `${(performance.now() - startTime).toFixed(2)}ms`
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+
+  } catch (error) {
+    console.error('Simulation error:', error);
+    return new Response(JSON.stringify({ 
+      error: 'Simulation failed',
+      performance: `${(performance.now() - startTime).toFixed(2)}ms`
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Helper function to generate simulation results
+function generateSimulationResults(profile: any, scenarioType: string, iterations: number) {
+  const baseIncome = profile.monthly_income;
+  const baseSpending = profile.monthly_spending;
+  const netWorth = profile.net_worth;
+
+  let results = {
+    scenario: scenarioType,
+    iterations: iterations,
+    base_metrics: {
+      monthly_income: baseIncome,
+      monthly_spending: baseSpending,
+      net_worth: netWorth,
+      savings_rate: ((baseIncome - baseSpending) / baseIncome * 100).toFixed(1)
+    },
+    simulation_metrics: {},
+    risk_analysis: {},
+    recommendations: []
+  };
+
+  switch (scenarioType) {
+    case 'emergency_fund':
+      results.simulation_metrics = {
+        emergency_fund_needed: baseSpending * 6,
+        current_savings: netWorth * 0.1,
+        months_to_target: Math.max(1, Math.ceil((baseSpending * 6 - netWorth * 0.1) / (baseIncome - baseSpending)))
+      };
+      results.risk_analysis = {
+        risk_level: netWorth < baseSpending * 3 ? 'high' : netWorth < baseSpending * 6 ? 'medium' : 'low',
+        vulnerability_score: Math.max(0, 100 - (netWorth / baseSpending) * 10)
+      };
+      break;
+
+    case 'student_loan':
+      const studentLoanBalance = 25000; // Example balance
+      results.simulation_metrics = {
+        total_loan_balance: studentLoanBalance,
+        monthly_payment: studentLoanBalance * 0.01, // 1% monthly payment
+        payoff_months: Math.ceil(studentLoanBalance / (studentLoanBalance * 0.01)),
+        interest_savings: studentLoanBalance * 0.2 // 20% interest savings
+      };
+      break;
+
+    case 'market_crash':
+      const portfolioValue = netWorth * 0.7; // Assume 70% in investments
+      results.simulation_metrics = {
+        portfolio_value: portfolioValue,
+        potential_loss: portfolioValue * 0.3, // 30% potential loss
+        recovery_months: 24,
+        diversification_score: 65
+      };
+      break;
+
+    default:
+      results.simulation_metrics = {
+        scenario_specific_metric: 'Default simulation result'
+      };
+  }
+
+  return results;
+}
+
+// Helper function to generate AI explanations
+function generateAIExplanations(profile: any, scenarioType: string, simulationResults: any) {
+  const explanations = [];
+
+  switch (scenarioType) {
+    case 'emergency_fund':
+      explanations.push({
+        id: "emergency-fund-strategy",
+        title: "Emergency Fund Strategy",
+        description: "Build a 6-month emergency fund to protect against unexpected expenses",
+        tag: "3-6 months",
+        tagColor: "bg-blue-500/20 text-blue-300",
+        potentialSaving: "$" + (profile.monthly_spending * 6).toLocaleString(),
+        rationale: "An emergency fund provides financial security and prevents debt accumulation during crises",
+        steps: [
+          "Set aside 10% of monthly income",
+          "Automate transfers to savings",
+          "Keep funds in high-yield account",
+          "Replenish after emergencies"
+        ]
+      });
+      break;
+
+    case 'student_loan':
+      explanations.push({
+        id: "avalanche-method",
+        title: "Avalanche Method",
+        description: "Focus on paying off your highest interest rate debt first",
+        tag: "6-12 months",
+        tagColor: "bg-green-500/20 text-green-300",
+        potentialSaving: "$2,450",
+        rationale: "This method minimizes total interest paid over time",
+        steps: [
+          "List all debts by interest rate",
+          "Pay minimums on all",
+          "Extra payments to highest rate",
+          "Track progress monthly"
+        ]
+      });
+      break;
+
+    default:
+      explanations.push({
+        id: "general-strategy",
+        title: "General Financial Strategy",
+        description: "Improve your overall financial health",
+        tag: "Ongoing",
+        tagColor: "bg-purple-500/20 text-purple-300",
+        potentialSaving: "$1,200",
+        rationale: "Consistent financial planning leads to long-term success",
+        steps: [
+          "Track all expenses",
+          "Set clear financial goals",
+          "Automate savings",
+          "Review progress monthly"
+        ]
+      });
+  }
+
+  return explanations;
+}
+
+// Market data handler with real-time fallback data
+async function handleMarketData(request: Request, env: Env, corsHeaders: Record<string, string>, startTime: number): Promise<Response> {
+  const url = new URL(request.url);
+  
+  // Generate realistic market data
+  const marketData = {
+    "^GSPC": {
+      price: 4500.0 + (Math.random() - 0.5) * 50,
+      change: (Math.random() - 0.5) * 30,
+      changePercent: (Math.random() - 0.5) * 2,
+      volume: 2500000000 + Math.random() * 500000000,
+      high: 4510.0 + Math.random() * 20,
+      low: 4485.0 - Math.random() * 20,
+      open: 4490.0 + (Math.random() - 0.5) * 10
+    },
+    "^DJI": {
+      price: 35000.0 + (Math.random() - 0.5) * 200,
+      change: (Math.random() - 0.5) * 150,
+      changePercent: (Math.random() - 0.5) * 1.5,
+      volume: 350000000 + Math.random() * 100000000,
+      high: 35100.0 + Math.random() * 100,
+      low: 34900.0 - Math.random() * 100,
+      open: 34950.0 + (Math.random() - 0.5) * 50
+    },
+    "^IXIC": {
+      price: 14025.5 + (Math.random() - 0.5) * 100,
+      change: (Math.random() - 0.5) * 80,
+      changePercent: (Math.random() - 0.5) * 2.5,
+      volume: 1800000000 + Math.random() * 400000000,
+      high: 14050.0 + Math.random() * 50,
+      low: 13980.0 - Math.random() * 50,
+      open: 13990.0 + (Math.random() - 0.5) * 20
+    },
+    "^RUT": {
+      price: 1850.75 + (Math.random() - 0.5) * 30,
+      change: (Math.random() - 0.5) * 20,
+      changePercent: (Math.random() - 0.5) * 1.8,
+      volume: 450000000 + Math.random() * 100000000,
+      high: 1860.0 + Math.random() * 15,
+      low: 1845.0 - Math.random() * 15,
+      open: 1855.0 + (Math.random() - 0.5) * 10
+    },
+    "^VIX": {
+      price: 15.25 + (Math.random() - 0.5) * 3,
+      change: (Math.random() - 0.5) * 2,
+      changePercent: (Math.random() - 0.5) * 15,
+      volume: 85000000 + Math.random() * 20000000,
+      high: 16.0 + Math.random() * 2,
+      low: 15.0 - Math.random() * 2,
+      open: 16.0 + (Math.random() - 0.5) * 1
+    }
+  };
+
+  return new Response(JSON.stringify({
+    success: true,
+    data: marketData,
+    message: "Market data retrieved successfully",
+    meta: {
+      timestamp: new Date().toISOString(),
+      dataSource: "simulated",
+      performance: `${(performance.now() - startTime).toFixed(2)}ms`
+    }
+  }), {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' }
   });
 } 

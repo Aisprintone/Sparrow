@@ -926,7 +926,7 @@ export default function useAppState(): AppState {
       const endpoint = SIMULATION_ENDPOINTS[currentSimulation?.id as keyof typeof SIMULATION_ENDPOINTS] || "/simulation/emergency-fund"
       
       // Call backend API with simulation and explanation generation
-      const response = await fetch(endpoint, {
+      const response = await fetch(`https://sparrow-backend.aisprintone.workers.dev/api${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

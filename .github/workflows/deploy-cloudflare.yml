@@ -1,0 +1,67 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/**'
+      - 'cloudflare-workers/**'
+      - '.github/workflows/deploy-cloudflare.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'cloudflare-workers/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: cloudflare-workers/financeai-backend/package-lock.json
+          
+      - name: Install Cloudflare Workers dependencies
+        run: |
+          cd cloudflare-workers/financeai-backend
+          npm ci
+          
+      - name: Run tests
+        run: |
+          cd cloudflare-workers/financeai-backend
+          npm test -- --passWithNoTests
+          
+      - name: Build Cloudflare Workers
+        run: |
+          cd cloudflare-workers/financeai-backend
+          npm run build
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          
+      - name: Deploy to Cloudflare Workers
+        run: |
+          cd cloudflare-workers/financeai-backend
+          npx wrangler deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          
+      - name: Deploy Python Backend (if needed)
+        run: |
+          cd backend/python_engine
+          pip install -r requirements.txt
+          # Note: This would typically deploy to a different service
+          # For now, we'll just verify the installation
+          python -c "import api.main; print('Backend modules loaded successfully')"
+        env:
+          PLAID_CLIENT_ID: ${{ secrets.PLAID_CLIENT_ID }}
+          PLAID_CLIENT_SECRET: ${{ secrets.PLAID_CLIENT_SECRET }}
+          CHASE_API_KEY: ${{ secrets.CHASE_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

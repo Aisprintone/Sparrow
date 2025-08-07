@@ -108,7 +108,7 @@ export default function DashboardScreen({ setCurrentScreen }: AppState) {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-[100dvh] flex-col">
       <header className="p-4 text-white">
         <h1 className="text-2xl font-bold">Dashboard</h1>
         <p className="text-white/80">Your financial overview</p>

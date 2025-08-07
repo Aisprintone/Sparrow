@@ -20,7 +20,10 @@ export default function BottomNav({ currentScreen, setCurrentScreen }: AppState)
       animate={{ y: 0 }}
       exit={{ y: "100%" }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      className="absolute bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-black/80 backdrop-blur-xl"
+      className="sticky bottom-0 left-0 right-0 z-20 border-t border-white/10 bg-black/80 backdrop-blur-xl min-h-[3.5rem]"
+      style={{
+        paddingBottom: `calc(env(safe-area-inset-bottom) + 0.5rem)`
+      }}
     >
       <div className="flex justify-around py-2">
         {navItems.map(({ screen, label, icon: Icon }) => {

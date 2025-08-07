@@ -25,7 +25,7 @@ export default function ResultsScreen({
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-[100dvh] flex-col">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

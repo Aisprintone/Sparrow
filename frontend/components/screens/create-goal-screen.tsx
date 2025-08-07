@@ -131,7 +131,7 @@ export default function CreateGoalScreen({ setCurrentScreen, addGoal }: AppState
   const steps = [Step1_Category, Step2_Target, Step3_Timeline]
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="flex h-[100dvh] flex-col overflow-hidden">
       <header className="p-4 text-white">
         <Button onClick={handleBack} variant="ghost" className="hover:bg-white/20">
           <ChevronLeft className="mr-2 h-5 w-5" />

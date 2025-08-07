@@ -75,7 +75,7 @@ export default function FinanceAppUI() {
     !showSimulationsButton
 
   return (
-    <main className="relative mx-auto flex h-screen max-h-[896px] w-full max-w-[414px] flex-col overflow-hidden rounded-3xl bg-black font-sans text-white shadow-2xl ring-1 ring-white/10">
+    <main className="relative mx-auto flex h-[100dvh] max-h-[896px] w-full max-w-[414px] flex-col overflow-x-hidden overflow-y-auto rounded-3xl bg-black font-sans text-white shadow-2xl ring-1 ring-white/10">
       <div className="aurora-bg" />
       <div className="relative z-10 flex-1 overflow-y-auto">
         <AnimatePresence mode="wait">

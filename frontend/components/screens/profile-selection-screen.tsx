@@ -168,7 +168,7 @@ export default function ProfileSelectionScreen({
 
 
   return (
-    <div className="relative flex h-full flex-col p-6 text-white">
+    <div className="relative flex h-[100dvh] flex-col p-6 text-white">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-radial from-purple-500/20 to-transparent animate-pulse" />

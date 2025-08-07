@@ -5,7 +5,7 @@ Handles workflow execution and status tracking
 
 import asyncio
 import logging
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from pydantic import BaseModel
 
@@ -41,8 +41,8 @@ class WorkflowStatusResponse(BaseModel):
     current_step: str
     errors: List[str]
     started_at: str
-    estimated_completion: str = None
-    user_action_required: Dict[str, Any] = None
+    estimated_completion: Optional[str] = None
+    user_action_required: Optional[Dict[str, Any]] = None
 
 # Create router
 router = APIRouter(prefix="/workflows", tags=["workflows"])
@@ -75,7 +75,16 @@ async def start_workflow(request: StartWorkflowRequest, background_tasks: Backgr
 async def get_workflow_status(execution_id: str):
     """Get status of a workflow execution"""
     try:
-        status = workflow_engine.get_workflow_status(execution_id)
+        # Try to get from cache first
+        cache_key = f"workflow_status:{execution_id}"
+        cached_status = await cache_manager.get(cache_key)
+        
+        if cached_status:
+            logger.info(f"Cache hit for workflow status: {execution_id}")
+            return WorkflowStatusResponse(**cached_status)
+        
+        # Get from workflow engine
+        status = await workflow_engine.get_workflow_status(execution_id)
         if not status:
             raise HTTPException(status_code=404, detail=f"Workflow execution {execution_id} not found")
         

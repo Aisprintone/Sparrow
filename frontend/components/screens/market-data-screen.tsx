@@ -125,7 +125,7 @@ export default function MarketDataScreen({ setCurrentScreen }: AppState) {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-[100dvh] flex-col">
       <header className="p-4 text-white">
         <div className="flex items-center justify-between">
           <div>

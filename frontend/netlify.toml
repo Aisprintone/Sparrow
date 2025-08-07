@@ -1,0 +1,47 @@
+[build]
+  publish = "out"
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+[[edge_functions]]
+  function = "cache"
+  path = "/api/cache/*"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache configuration
+[[headers]]
+  for = "/api/workflows/*"
+  [headers.values]
+    Cache-Control = "public, max-age=30, s-maxage=300"
+
+[[headers]]
+  for = "/api/simulation/*"
+  [headers.values]
+    Cache-Control = "public, max-age=60, s-maxage=600"
+
+[[headers]]
+  for = "/api/market-data/*"
+  [headers.values]
+    Cache-Control = "public, max-age=300, s-maxage=3600"
+
+# Redirects for SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

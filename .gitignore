@@ -107,3 +107,5 @@ logs
 # Build directories
 dist/
 build/
+# Local Netlify folder
+.netlify

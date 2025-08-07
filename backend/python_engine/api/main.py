@@ -379,7 +379,7 @@ async def generate_ai_explanations_with_llm(
     """
     try:
         # Use the actual AI agent to generate explanations
-        ai_explanation_cards = await generate_ai_explanation_cards(
+        ai_explanation_cards = await ai_agent.generate_explanation_cards(
             simulation_data=simulation_result,
             user_profile=profile_data,
             scenario_context=original_simulation_id

@@ -47,7 +47,7 @@ export default function ConnectAccountScreen({ setCurrentScreen }: AppState) {
     switch (plaidState) {
       case 'connecting':
         return (
-          <div className="flex h-full items-center justify-center p-4">
+          <div className="flex h-[100dvh] items-center justify-center p-4">
             <GlassCard className="w-full max-w-sm bg-white/90 text-center text-foreground">
               <div className={`mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl p-2 ${selectedInstitution.color}`}>
                 <Image src={selectedInstitution.logo} alt={selectedInstitution.name} width={48} height={48} />
@@ -90,7 +90,7 @@ export default function ConnectAccountScreen({ setCurrentScreen }: AppState) {
 
       case 'selecting_accounts':
         return (
-          <div className="flex h-full items-center justify-center p-4">
+          <div className="flex h-[100dvh] items-center justify-center p-4">
             <GlassCard className="w-full max-w-sm bg-white/90 text-center text-foreground">
               <div className={`mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl p-2 ${selectedInstitution.color}`}>
                 <Image src={selectedInstitution.logo} alt={selectedInstitution.name} width={48} height={48} />
@@ -127,7 +127,7 @@ export default function ConnectAccountScreen({ setCurrentScreen }: AppState) {
 
       case 'success':
         return (
-          <div className="flex h-full items-center justify-center p-4">
+          <div className="flex h-[100dvh] items-center justify-center p-4">
             <GlassCard className="w-full max-w-sm bg-white/90 text-center text-foreground">
               <motion.div
                 initial={{ scale: 0 }}
@@ -169,7 +169,7 @@ export default function ConnectAccountScreen({ setCurrentScreen }: AppState) {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-[100dvh] flex-col">
       <header className="flex-shrink-0 p-4 text-white">
         <Button onClick={() => setCurrentScreen("profile")} variant="ghost" className="hover:bg-white/20">
           <ChevronLeft className="mr-2 h-5 w-5" />

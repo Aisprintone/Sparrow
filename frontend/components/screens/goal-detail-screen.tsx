@@ -28,7 +28,7 @@ const goalDetailStyles = {
 export default function GoalDetailScreen({ selectedGoal, setCurrentScreen }: AppState) {
   if (!selectedGoal) {
     return (
-      <div className="flex h-full items-center justify-center text-white">
+      <div className="flex h-[100dvh] items-center justify-center text-white">
         <p>No goal selected. Please go back.</p>
         <Button onClick={() => setCurrentScreen("goals")}>Go Back</Button>
       </div>
@@ -41,7 +41,7 @@ export default function GoalDetailScreen({ selectedGoal, setCurrentScreen }: App
   const styles = goalDetailStyles[color] || goalDetailStyles.green
 
   return (
-    <div className="h-full overflow-y-auto pb-24">
+    <div className="h-[100dvh] overflow-y-auto pb-24">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

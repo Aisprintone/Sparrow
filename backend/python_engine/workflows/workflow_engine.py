@@ -18,6 +18,9 @@ from langgraph.checkpoint.memory import InMemorySaver
 from .workflow_definitions import WorkflowDefinition, WorkflowStep, WorkflowStatus, get_workflow_by_id
 from .workflow_agents import WorkflowAgentManager
 
+# Import cache manager
+from core.cache_manager import cache_manager, cached, CacheCategories
+
 logger = logging.getLogger(__name__)
 
 class WorkflowExecutionState:
@@ -299,7 +302,7 @@ class WorkflowEngine:
             workflow_info["state"].status = WorkflowStatus.FAILED
             logger.info(f"Workflow {execution_id} cancelled")
     
-    def get_workflow_status(self, execution_id: str) -> Optional[Dict[str, Any]]:
+    async def get_workflow_status(self, execution_id: str) -> Optional[Dict[str, Any]]:
         """Get status of a workflow execution"""
         if execution_id not in self.active_workflows:
             return None
@@ -307,7 +310,7 @@ class WorkflowEngine:
         workflow_info = self.active_workflows[execution_id]
         state = workflow_info["state"]
         
-        return {
+        status_data = {
             "execution_id": execution_id,
             "workflow_id": state.workflow_id,
             "status": state.status.value,
@@ -318,6 +321,12 @@ class WorkflowEngine:
             "estimated_completion": state.estimated_completion.isoformat() if state.estimated_completion else None,
             "user_action_required": state.user_action_required
         }
+        
+        # Cache the status
+        cache_key = f"workflow_status:{execution_id}"
+        await cache_manager.set(cache_key, status_data, ttl=300)
+        
+        return status_data
     
     def get_user_workflows(self, user_id: str) -> List[Dict[str, Any]]:
         """Get all workflows for a user"""
