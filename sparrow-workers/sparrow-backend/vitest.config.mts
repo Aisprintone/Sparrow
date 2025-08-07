@@ -7,5 +7,8 @@ export default defineWorkersConfig({
 				wrangler: { configPath: './wrangler.jsonc' },
 			},
 		},
+		// Fix for crypto API compatibility
+		environment: 'node',
+		globals: true,
 	},
 });

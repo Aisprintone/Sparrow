@@ -305,6 +305,78 @@ WORKFLOW_REGISTRY = {
         },
         agents=["plaid", "rate_finder", "account_manager"],
         external_dependencies=["plaid_api", "bank_apis"]
+    ),
+
+    "chase-ach-automation": WorkflowDefinition(
+        id="chase-ach-automation",
+        name="Automate ACH Transfers",
+        category=WorkflowCategory.OPTIMIZE,
+        description="Automate recurring ACH transfers using Chase APIs",
+        profile_filters={
+            "demographics": ["millennial", "gen_x"],
+            "income_ranges": [50000, 200000],
+            "debt_levels": ["low", "medium"]
+        },
+        prerequisites=["chase_account", "recurring_transfers"],
+        steps=[
+            WorkflowStep(
+                id="get_chase_balance",
+                name="Get Chase Account Balance",
+                description="Retrieve current balance from Chase checking account",
+                type="automated",
+                agent="chase",
+                inputs=["account_id"],
+                actions=["get_account_balance"],
+                outputs=["current_balance", "available_balance"],
+                validations=["balance_sufficient"],
+                retry_policy={"max_attempts": 3, "backoff": "exponential"},
+                timeout=30
+            ),
+            WorkflowStep(
+                id="initiate_ach_transfer",
+                name="Initiate ACH Transfer",
+                description="Set up automated ACH transfer to savings account",
+                type="semi-automated",
+                agent="chase",
+                inputs={
+                    "from_account": "chase_checking",
+                    "to_account": "high_yield_savings",
+                    "amount": 1000,
+                    "description": "Monthly savings transfer"
+                },
+                actions=["initiate_ach_transfer"],
+                outputs=["transfer_id", "status"],
+                validations=["transfer_successful"],
+                retry_policy={"max_attempts": 2, "backoff": "linear"},
+                timeout=60,
+                user_interaction={
+                    "type": "confirmation",
+                    "message": "Confirm $1,000 transfer to high-yield savings?",
+                    "options": ["confirm", "modify_amount", "cancel"]
+                }
+            ),
+            WorkflowStep(
+                id="verify_transfer",
+                name="Verify Transfer Status",
+                description="Confirm transfer was processed successfully",
+                type="automated",
+                agent="chase",
+                inputs=["transfer_id"],
+                actions=["get_transaction_history"],
+                outputs=["transfer_status", "confirmation"],
+                validations=["transfer_completed"],
+                retry_policy={"max_attempts": 5, "backoff": "exponential"},
+                timeout=120
+            )
+        ],
+        estimated_duration="5-10 minutes",
+        estimated_impact={
+            "monthly_savings": 1000,
+            "time_to_complete": "5-10 minutes",
+            "risk_level": "low"
+        },
+        agents=["chase"],
+        external_dependencies=["chase_api"]
     )
 }
 

@@ -382,6 +382,7 @@ class WorkflowAgentManager:
     def __init__(self):
         self.agents = {
             "plaid": PlaidAgent(),
+            "chase": ChaseAgent(),
             "subscription_analyzer": SubscriptionAnalyzerAgent(),
             "bill_analyzer": BillAnalyzerAgent(),
             "rate_researcher": RateResearcherAgent(),
@@ -557,5 +558,141 @@ class AccountManagerAgent(WorkflowAgent):
             "transfer_id": "TXN123456",
             "amount": transfer_amount,
             "status": "pending",
+            "estimated_completion": "1-2 business days"
+        }
+
+class ChaseAgent(WorkflowAgent):
+    """Agent for Chase API interactions"""
+    
+    def __init__(self):
+        super().__init__("chase")
+        # Load Chase credentials from environment
+        self.api_key = os.getenv('CHASE_API_KEY')
+        self.client_id = os.getenv('CHASE_CLIENT_ID')
+        self.client_secret = os.getenv('CHASE_CLIENT_SECRET')
+        self.environment = os.getenv('CHASE_ENV', 'sandbox')
+        
+        if not all([self.api_key, self.client_id, self.client_secret]):
+            logger.warning("Chase credentials not found in environment variables")
+        else:
+            logger.info(f"Chase credentials loaded for environment: {self.environment}")
+    
+    async def execute_action(self, action: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute Chase-related actions"""
+        logger.info(f"Chase agent executing action: {action}")
+        
+        if action == "get_account_balance":
+            return await self.get_account_balance(inputs)
+        elif action == "initiate_ach_transfer":
+            return await self.initiate_ach_transfer(inputs)
+        elif action == "get_transaction_history":
+            return await self.get_transaction_history(inputs)
+        elif action == "set_up_automatic_payment":
+            return await self.set_up_automatic_payment(inputs)
+        else:
+            raise ValueError(f"Unknown Chase action: {action}")
+    
+    async def get_account_balance(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        """Get account balance from Chase"""
+        account_id = inputs.get("account_id")
+        
+        if not all([self.api_key, self.client_id]):
+            logger.warning("Chase credentials not available, using mock data")
+            return {
+                "account_id": account_id,
+                "balance": 12500.25,
+                "available_balance": 12000.00,
+                "account_type": "checking"
+            }
+        
+        logger.info(f"Would call Chase API for account: {account_id}")
+        return {
+            "account_id": account_id,
+            "balance": 12500.25,
+            "available_balance": 12000.00,
+            "account_type": "checking"
+        }
+    
+    async def initiate_ach_transfer(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        """Initiate ACH transfer via Chase"""
+        from_account = inputs.get("from_account")
+        to_account = inputs.get("to_account")
+        amount = inputs.get("amount")
+        description = inputs.get("description", "Automated transfer")
+        
+        if not all([self.api_key, self.client_id]):
+            logger.warning("Chase credentials not available, using mock data")
+            return {
+                "transfer_id": f"chase_ach_{int(asyncio.get_event_loop().time())}",
+                "status": "pending",
+                "amount": amount,
+                "from_account": from_account,
+                "to_account": to_account,
+                "description": description,
+                "estimated_completion": "1-2 business days"
+            }
+        
+        logger.info(f"Would initiate Chase ACH transfer: ${amount} from {from_account} to {to_account}")
+        return {
+            "transfer_id": f"chase_ach_{int(asyncio.get_event_loop().time())}",
+            "status": "pending",
+            "amount": amount,
+            "from_account": from_account,
+            "to_account": to_account,
+            "description": description,
+            "estimated_completion": "1-2 business days"
+        }
+    
+    async def get_transaction_history(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        """Get transaction history from Chase"""
+        account_id = inputs.get("account_id")
+        days_back = inputs.get("days_back", 30)
+        
+        if not all([self.api_key, self.client_id]):
+            logger.warning("Chase credentials not available, using mock data")
+            return {
+                "account_id": account_id,
+                "transactions": [
+                    {"id": "chase_1", "amount": -2500.06, "description": "Mortgage Payment", "date": "2025-01-15"},
+                    {"id": "chase_2", "amount": -200.25, "description": "Utilities", "date": "2025-01-14"},
+                    {"id": "chase_3", "amount": 4499.91, "description": "Salary Deposit", "date": "2025-01-15"}
+                ]
+            }
+        
+        logger.info(f"Would get Chase transaction history for account: {account_id}")
+        return {
+            "account_id": account_id,
+            "transactions": [
+                {"id": "chase_1", "amount": -2500.06, "description": "Mortgage Payment", "date": "2025-01-15"},
+                {"id": "chase_2", "amount": -200.25, "description": "Utilities", "date": "2025-01-14"},
+                {"id": "chase_3", "amount": 4499.91, "description": "Salary Deposit", "date": "2025-01-15"}
+            ]
+        }
+    
+    async def set_up_automatic_payment(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        """Set up automatic payment via Chase"""
+        account_id = inputs.get("account_id")
+        payee = inputs.get("payee")
+        amount = inputs.get("amount")
+        frequency = inputs.get("frequency", "monthly")
+        
+        if not all([self.api_key, self.client_id]):
+            logger.warning("Chase credentials not available, using mock data")
+            return {
+                "payment_id": f"chase_auto_{int(asyncio.get_event_loop().time())}",
+                "status": "pending",
+                "payee": payee,
+                "amount": amount,
+                "frequency": frequency,
+                "estimated_completion": "1-2 business days"
+            }
+        
+        logger.info(f"Would set up Chase automatic payment: ${amount} to {payee}")
+        return {
+            "payment_id": f"chase_auto_{int(asyncio.get_event_loop().time())}",
+            "status": "pending",
+            "payee": payee,
+            "amount": amount,
+            "frequency": frequency,
             "estimated_completion": "1-2 business days"
         }
