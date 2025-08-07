@@ -220,9 +220,8 @@ export default function GoalsScreen({
               <motion.div
                 key={goal.id}
                 variants={itemVariants}
-                className="group"
               >
-                <GlassCard className="p-5 cursor-pointer hover:scale-[1.02] transition-all duration-200 relative">
+                <GlassCard className="p-5 cursor-pointer hover:scale-[1.02] transition-all duration-200 relative group">
                   {/* Header */}
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-3">
@@ -272,48 +271,45 @@ export default function GoalsScreen({
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setGoalToDelete(goal)
+                              }}
+                              title="Delete goal"
+                              className="text-red-300 hover:bg-red-500/20 hover:text-red-200"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="bg-gray-900 border-gray-700">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-white">Delete Goal</AlertDialogTitle>
+                              <AlertDialogDescription className="text-gray-300">
+                                Are you sure you want to delete "{goal.title}"? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="bg-gray-800 text-white border-gray-600 hover:bg-gray-700">
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleConfirmDelete(goal)}
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   </div>
                   
-                  {/* Quick Delete Button - Always Visible */}
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setGoalToDelete(goal)
-                          }}
-                          title="Delete goal"
-                          className="text-red-300 hover:bg-red-500/20 hover:text-red-200 p-1"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent className="bg-gray-900 border-gray-700">
-                        <AlertDialogHeader>
-                          <AlertDialogTitle className="text-white">Delete Goal</AlertDialogTitle>
-                          <AlertDialogDescription className="text-gray-300">
-                            Are you sure you want to delete "{goal.title}"? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel className="bg-gray-800 text-white border-gray-600 hover:bg-gray-700">
-                            Cancel
-                          </AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleConfirmDelete(goal)}
-                            className="bg-red-600 hover:bg-red-700 text-white"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
                   {/* Progress */}
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between text-sm">
