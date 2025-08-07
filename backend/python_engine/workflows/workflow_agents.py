@@ -31,8 +31,16 @@ class PlaidAgent(WorkflowAgent):
     
     def __init__(self):
         super().__init__("plaid")
-        # Initialize Plaid client here
-        # self.plaid_client = plaid.Client(...)
+        # Load Plaid credentials from environment
+        self.client_id = os.getenv('PLAID_CLIENT_ID')
+        self.client_secret = os.getenv('PLAID_CLIENT_SECRET')
+        self.access_token = os.getenv('PLAID_ACCESS_TOKEN')
+        self.environment = os.getenv('PLAID_ENV', 'sandbox')
+        
+        if not all([self.client_id, self.client_secret]):
+            logger.warning("Plaid credentials not found in environment variables")
+        else:
+            logger.info(f"Plaid credentials loaded for environment: {self.environment}")
     
     async def execute_action(self, action: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
         """Execute Plaid-related actions"""
@@ -51,7 +59,22 @@ class PlaidAgent(WorkflowAgent):
     
     async def get_transactions(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         """Get transactions from Plaid"""
-        # Mock implementation - would use real Plaid API
+        # Check if we have valid credentials
+        if not all([self.client_id, self.client_secret]):
+            logger.warning("Plaid credentials not available, using mock data")
+            return {
+                "transaction_list": [
+                    {"id": "1", "amount": 29.99, "merchant": "Netflix", "category": "subscription"},
+                    {"id": "2", "amount": 12.99, "merchant": "Spotify", "category": "subscription"},
+                    {"id": "3", "amount": 79.99, "merchant": "Comcast", "category": "bill"}
+                ]
+            }
+        
+        # Real Plaid API call would go here
+        # For now, log the attempt and return mock data
+        logger.info(f"Would call Plaid API with client_id: {self.client_id[:8]}...")
+        logger.info(f"Environment: {self.environment}")
+        
         return {
             "transaction_list": [
                 {"id": "1", "amount": 29.99, "merchant": "Netflix", "category": "subscription"},
