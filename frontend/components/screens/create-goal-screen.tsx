@@ -210,18 +210,18 @@ export default function CreateGoalScreen({
                 <Button
                   key={index}
                   variant="outline"
-                  className="h-auto p-3 flex-col items-start bg-white/5 border-white/20 text-white hover:bg-white/10"
+                  className="h-auto p-3 flex-col items-start bg-white/5 border-white/20 text-white hover:bg-white/10 min-h-[80px]"
                   onClick={() => handleTemplateSelect(template)}
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className={`p-1 rounded ${goalColors.find(c => c.value === template.color)?.color} text-white`}>
+                  <div className="flex items-center gap-2 mb-2 w-full">
+                    <div className={`p-1 rounded ${goalColors.find(c => c.value === template.color)?.color} text-white flex-shrink-0`}>
                       {goalIcons.find(i => i.value === template.icon)?.icon && 
                         React.createElement(goalIcons.find(i => i.value === template.icon)!.icon, { className: "h-3 w-3" })
                       }
                     </div>
-                    <span className="text-sm font-medium">{template.title}</span>
+                    <span className="text-sm font-medium truncate">{template.title}</span>
                   </div>
-                  <span className="text-xs text-white/60">{template.type}</span>
+                  <span className="text-xs text-white/60 truncate w-full">{template.type}</span>
                 </Button>
               ))}
             </div>

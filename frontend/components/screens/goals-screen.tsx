@@ -277,7 +277,7 @@ export default function GoalsScreen({
                   </div>
                   
                   {/* Quick Delete Button - Always Visible */}
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <Button
