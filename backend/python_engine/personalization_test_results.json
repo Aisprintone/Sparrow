@@ -1,0 +1,893 @@
+[
+  {
+    "profile": "Gen Z Student",
+    "scenario": "emergency_fund",
+    "cards": [
+      {
+        "id": "fallback_1",
+        "title": "Build $19,200 Emergency Shield",
+        "description": "Tailored for your $3,200/month income as a gen_z",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $3,200 monthly income and $1,500 emergency fund, this strategy optimizes your financial growth while managing your $25,000 debt obligations. Designed specifically for a gen_z professional.",
+        "steps": [
+          "Transfer $320 monthly to high-yield savings",
+          "Allocate $192 to debt reduction",
+          "Review progress when emergency fund reaches $9600",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_2",
+        "title": "Fast-Track $9,600 Safety Net",
+        "description": "Tailored for your $3,200/month income as a gen_z",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $3,200 monthly income and $1,500 emergency fund, this strategy optimizes your financial growth while managing your $25,000 debt obligations. Designed specifically for a gen_z professional.",
+        "steps": [
+          "Transfer $320 monthly to high-yield savings",
+          "Allocate $192 to debt reduction",
+          "Review progress when emergency fund reaches $9600",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_3",
+        "title": "Optimize Your $3,200/mo for Crisis Fund",
+        "description": "Tailored for your $3,200/month income as a gen_z",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $3,200 monthly income and $1,500 emergency fund, this strategy optimizes your financial growth while managing your $25,000 debt obligations. Designed specifically for a gen_z professional.",
+        "steps": [
+          "Transfer $320 monthly to high-yield savings",
+          "Allocate $192 to debt reduction",
+          "Review progress when emergency fund reaches $9600",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      }
+    ],
+    "analysis": {
+      "checks": {
+        "has_income_mention": true,
+        "has_demographic_language": true,
+        "has_specific_amounts": true,
+        "has_actionable_titles": true,
+        "has_concrete_steps": true,
+        "generic_plan_titles": false,
+        "review_language": false
+      },
+      "score": 10,
+      "positive_count": 5,
+      "negative_count": 0
+    },
+    "success": true
+  },
+  {
+    "profile": "Gen Z Student",
+    "scenario": "student_loan",
+    "cards": [
+      {
+        "id": "fallback_1",
+        "title": "Strategic Debt Elimination Roadmap",
+        "description": "Tailored for your $3,200/month income as a gen_z",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $3,200 monthly income and $1,500 emergency fund, this strategy optimizes your financial growth while managing your $25,000 debt obligations. Designed specifically for a gen_z professional.",
+        "steps": [
+          "Transfer $320 monthly to high-yield savings",
+          "Allocate $192 to debt reduction",
+          "Review progress when emergency fund reaches $9600",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_2",
+        "title": "Balanced Wealth Building Approach",
+        "description": "Tailored for your $3,200/month income as a gen_z",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $3,200 monthly income and $1,500 emergency fund, this strategy optimizes your financial growth while managing your $25,000 debt obligations. Designed specifically for a gen_z professional.",
+        "steps": [
+          "Transfer $320 monthly to high-yield savings",
+          "Allocate $192 to debt reduction",
+          "Review progress when emergency fund reaches $9600",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_3",
+        "title": "Investment-First Payoff Strategy",
+        "description": "Tailored for your $3,200/month income as a gen_z",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $3,200 monthly income and $1,500 emergency fund, this strategy optimizes your financial growth while managing your $25,000 debt obligations. Designed specifically for a gen_z professional.",
+        "steps": [
+          "Transfer $320 monthly to high-yield savings",
+          "Allocate $192 to debt reduction",
+          "Review progress when emergency fund reaches $9600",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      }
+    ],
+    "analysis": {
+      "checks": {
+        "has_income_mention": true,
+        "has_demographic_language": true,
+        "has_specific_amounts": true,
+        "has_actionable_titles": true,
+        "has_concrete_steps": true,
+        "generic_plan_titles": false,
+        "review_language": false
+      },
+      "score": 10,
+      "positive_count": 5,
+      "negative_count": 0
+    },
+    "success": true
+  },
+  {
+    "profile": "Gen Z Student",
+    "scenario": "gig_economy",
+    "cards": [
+      {
+        "id": "fallback_1",
+        "title": "Stabilize $3,200 Variable Income",
+        "description": "Tailored for your $3,200/month income as a gen_z",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $3,200 monthly income and $1,500 emergency fund, this strategy optimizes your financial growth while managing your $25,000 debt obligations. Designed specifically for a gen_z professional.",
+        "steps": [
+          "Transfer $320 monthly to high-yield savings",
+          "Allocate $192 to debt reduction",
+          "Review progress when emergency fund reaches $9600",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_2",
+        "title": "Multi-Platform Income Diversification",
+        "description": "Tailored for your $3,200/month income as a gen_z",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $3,200 monthly income and $1,500 emergency fund, this strategy optimizes your financial growth while managing your $25,000 debt obligations. Designed specifically for a gen_z professional.",
+        "steps": [
+          "Transfer $320 monthly to high-yield savings",
+          "Allocate $192 to debt reduction",
+          "Review progress when emergency fund reaches $9600",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_3",
+        "title": "Build $19,200 Gig Worker Buffer",
+        "description": "Tailored for your $3,200/month income as a gen_z",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $3,200 monthly income and $1,500 emergency fund, this strategy optimizes your financial growth while managing your $25,000 debt obligations. Designed specifically for a gen_z professional.",
+        "steps": [
+          "Transfer $320 monthly to high-yield savings",
+          "Allocate $192 to debt reduction",
+          "Review progress when emergency fund reaches $9600",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      }
+    ],
+    "analysis": {
+      "checks": {
+        "has_income_mention": true,
+        "has_demographic_language": true,
+        "has_specific_amounts": true,
+        "has_actionable_titles": true,
+        "has_concrete_steps": true,
+        "generic_plan_titles": false,
+        "review_language": false
+      },
+      "score": 10,
+      "positive_count": 5,
+      "negative_count": 0
+    },
+    "success": true
+  },
+  {
+    "profile": "Established Millennial",
+    "scenario": "emergency_fund",
+    "cards": [
+      {
+        "id": "fallback_1",
+        "title": "Build $51,000 Emergency Shield",
+        "description": "Tailored for your $8,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $8,500 monthly income and $15,000 emergency fund, this strategy optimizes your financial growth while managing your $45,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $25500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_2",
+        "title": "Fast-Track $25,500 Safety Net",
+        "description": "Tailored for your $8,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $8,500 monthly income and $15,000 emergency fund, this strategy optimizes your financial growth while managing your $45,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $25500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_3",
+        "title": "Optimize Your $8,500/mo for Crisis Fund",
+        "description": "Tailored for your $8,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $8,500 monthly income and $15,000 emergency fund, this strategy optimizes your financial growth while managing your $45,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $25500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      }
+    ],
+    "analysis": {
+      "checks": {
+        "has_income_mention": true,
+        "has_demographic_language": true,
+        "has_specific_amounts": true,
+        "has_actionable_titles": true,
+        "has_concrete_steps": true,
+        "generic_plan_titles": false,
+        "review_language": false
+      },
+      "score": 10,
+      "positive_count": 5,
+      "negative_count": 0
+    },
+    "success": true
+  },
+  {
+    "profile": "Established Millennial",
+    "scenario": "student_loan",
+    "cards": [
+      {
+        "id": "fallback_1",
+        "title": "Strategic Debt Elimination Roadmap",
+        "description": "Tailored for your $8,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $8,500 monthly income and $15,000 emergency fund, this strategy optimizes your financial growth while managing your $45,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $25500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_2",
+        "title": "Balanced Wealth Building Approach",
+        "description": "Tailored for your $8,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $8,500 monthly income and $15,000 emergency fund, this strategy optimizes your financial growth while managing your $45,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $25500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_3",
+        "title": "Investment-First Payoff Strategy",
+        "description": "Tailored for your $8,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $8,500 monthly income and $15,000 emergency fund, this strategy optimizes your financial growth while managing your $45,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $25500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      }
+    ],
+    "analysis": {
+      "checks": {
+        "has_income_mention": true,
+        "has_demographic_language": true,
+        "has_specific_amounts": true,
+        "has_actionable_titles": true,
+        "has_concrete_steps": true,
+        "generic_plan_titles": false,
+        "review_language": false
+      },
+      "score": 10,
+      "positive_count": 5,
+      "negative_count": 0
+    },
+    "success": true
+  },
+  {
+    "profile": "Established Millennial",
+    "scenario": "gig_economy",
+    "cards": [
+      {
+        "id": "fallback_1",
+        "title": "Stabilize $8,500 Variable Income",
+        "description": "Tailored for your $8,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $8,500 monthly income and $15,000 emergency fund, this strategy optimizes your financial growth while managing your $45,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $25500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_2",
+        "title": "Multi-Platform Income Diversification",
+        "description": "Tailored for your $8,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $8,500 monthly income and $15,000 emergency fund, this strategy optimizes your financial growth while managing your $45,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $25500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_3",
+        "title": "Build $51,000 Gig Worker Buffer",
+        "description": "Tailored for your $8,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $8,500 monthly income and $15,000 emergency fund, this strategy optimizes your financial growth while managing your $45,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $25500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      }
+    ],
+    "analysis": {
+      "checks": {
+        "has_income_mention": true,
+        "has_demographic_language": true,
+        "has_specific_amounts": true,
+        "has_actionable_titles": true,
+        "has_concrete_steps": true,
+        "generic_plan_titles": false,
+        "review_language": false
+      },
+      "score": 10,
+      "positive_count": 5,
+      "negative_count": 0
+    },
+    "success": true
+  },
+  {
+    "profile": "Young Professional",
+    "scenario": "emergency_fund",
+    "cards": [
+      {
+        "id": "fallback_1",
+        "title": "Build $33,000 Emergency Shield",
+        "description": "Tailored for your $5,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $5,500 monthly income and $8,000 emergency fund, this strategy optimizes your financial growth while managing your $35,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $16500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_2",
+        "title": "Fast-Track $16,500 Safety Net",
+        "description": "Tailored for your $5,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $5,500 monthly income and $8,000 emergency fund, this strategy optimizes your financial growth while managing your $35,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $16500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_3",
+        "title": "Optimize Your $5,500/mo for Crisis Fund",
+        "description": "Tailored for your $5,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $5,500 monthly income and $8,000 emergency fund, this strategy optimizes your financial growth while managing your $35,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $16500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      }
+    ],
+    "analysis": {
+      "checks": {
+        "has_income_mention": true,
+        "has_demographic_language": true,
+        "has_specific_amounts": true,
+        "has_actionable_titles": true,
+        "has_concrete_steps": true,
+        "generic_plan_titles": false,
+        "review_language": false
+      },
+      "score": 10,
+      "positive_count": 5,
+      "negative_count": 0
+    },
+    "success": true
+  },
+  {
+    "profile": "Young Professional",
+    "scenario": "student_loan",
+    "cards": [
+      {
+        "id": "fallback_1",
+        "title": "Strategic Debt Elimination Roadmap",
+        "description": "Tailored for your $5,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $5,500 monthly income and $8,000 emergency fund, this strategy optimizes your financial growth while managing your $35,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $16500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_2",
+        "title": "Balanced Wealth Building Approach",
+        "description": "Tailored for your $5,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $5,500 monthly income and $8,000 emergency fund, this strategy optimizes your financial growth while managing your $35,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $16500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_3",
+        "title": "Investment-First Payoff Strategy",
+        "description": "Tailored for your $5,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $5,500 monthly income and $8,000 emergency fund, this strategy optimizes your financial growth while managing your $35,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $16500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      }
+    ],
+    "analysis": {
+      "checks": {
+        "has_income_mention": true,
+        "has_demographic_language": true,
+        "has_specific_amounts": true,
+        "has_actionable_titles": true,
+        "has_concrete_steps": true,
+        "generic_plan_titles": false,
+        "review_language": false
+      },
+      "score": 10,
+      "positive_count": 5,
+      "negative_count": 0
+    },
+    "success": true
+  },
+  {
+    "profile": "Young Professional",
+    "scenario": "gig_economy",
+    "cards": [
+      {
+        "id": "fallback_1",
+        "title": "Stabilize $5,500 Variable Income",
+        "description": "Tailored for your $5,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $5,500 monthly income and $8,000 emergency fund, this strategy optimizes your financial growth while managing your $35,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $16500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_2",
+        "title": "Multi-Platform Income Diversification",
+        "description": "Tailored for your $5,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $5,500 monthly income and $8,000 emergency fund, this strategy optimizes your financial growth while managing your $35,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $16500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      },
+      {
+        "id": "fallback_3",
+        "title": "Build $33,000 Gig Worker Buffer",
+        "description": "Tailored for your $5,500/month income as a millennial",
+        "tag": "RECOMMENDED",
+        "tagColor": "bg-blue-500",
+        "potentialSaving": 500,
+        "rationale": "With your $5,500 monthly income and $8,000 emergency fund, this strategy optimizes your financial growth while managing your $35,000 debt obligations. Designed specifically for a millennial professional.",
+        "steps": [
+          "Transfer $500 monthly to high-yield savings",
+          "Allocate $300 to debt reduction",
+          "Review progress when emergency fund reaches $16500",
+          "Increase contributions by 10% after 6 months"
+        ],
+        "detailed_insights": {
+          "mechanics_explanation": "The simulation models your financial strategy using your current profile data and market assumptions. It accounts for various risk factors and competing priorities.",
+          "key_insights": [
+            "Your income provides a stable foundation for this strategy",
+            "Your current debt level affects your financial flexibility",
+            "Your emergency fund coverage impacts your risk tolerance",
+            "Your spending patterns support this approach"
+          ],
+          "scenario_nuances": "The simulation assumes stable income and manageable expenses. Your current financial profile supports this approach, but any significant changes to income or expenses would require strategy adjustment.",
+          "decision_context": "Monitor your key financial metrics and adjust the strategy if your income, expenses, or financial priorities change significantly. Success indicators include consistent progress toward your goals and maintaining financial stability."
+        }
+      }
+    ],
+    "analysis": {
+      "checks": {
+        "has_income_mention": true,
+        "has_demographic_language": true,
+        "has_specific_amounts": true,
+        "has_actionable_titles": true,
+        "has_concrete_steps": true,
+        "generic_plan_titles": false,
+        "review_language": false
+      },
+      "score": 10,
+      "positive_count": 5,
+      "negative_count": 0
+    },
+    "success": true
+  }
+]

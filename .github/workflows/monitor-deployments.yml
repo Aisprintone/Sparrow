@@ -1,0 +1,149 @@
+name: Monitor Deployments
+
+on:
+  workflow_dispatch:
+    inputs:
+      check_frontend:
+        description: 'Check Frontend (Netlify)'
+        required: false
+        default: true
+        type: boolean
+      check_backend:
+        description: 'Check Backend (Cloudflare)'
+        required: false
+        default: true
+        type: boolean
+      check_python:
+        description: 'Check Python Backend'
+        required: false
+        default: true
+        type: boolean
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+jobs:
+  monitor-frontend:
+    if: ${{ github.event.inputs.check_frontend != 'false' && github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Netlify deployment
+        run: |
+          echo "🔍 Checking Netlify deployment status..."
+          if [ -n "${{ secrets.NETLIFY_SITE_ID }}" ]; then
+            echo "✅ Netlify site ID configured"
+          else
+            echo "❌ Netlify site ID not configured"
+          fi
+          
+      - name: Health check frontend
+        run: |
+          FRONTEND_URL="${FRONTEND_URL:-https://your-netlify-site.netlify.app}"
+          echo "🌐 Checking frontend at: $FRONTEND_URL"
+          
+          # Try to curl the site
+          if curl -f -s "$FRONTEND_URL" > /dev/null; then
+            echo "✅ Frontend is accessible"
+          else
+            echo "❌ Frontend is not accessible"
+            exit 1
+          fi
+        env:
+          FRONTEND_URL: ${{ secrets.FRONTEND_URL }}
+
+  monitor-backend:
+    if: ${{ github.event.inputs.check_backend != 'false' && github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Cloudflare Workers deployment
+        run: |
+          echo "🔍 Checking Cloudflare Workers deployment status..."
+          if [ -n "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+            echo "✅ Cloudflare account ID configured"
+          else
+            echo "❌ Cloudflare account ID not configured"
+          fi
+          
+      - name: Health check backend
+        run: |
+          BACKEND_URL="${BACKEND_URL:-https://sparrow-backend.your-subdomain.workers.dev}"
+          echo "🔗 Checking backend at: $BACKEND_URL"
+          
+          # Try to curl the health endpoint
+          if curl -f -s "$BACKEND_URL/health" > /dev/null; then
+            echo "✅ Backend health check passed"
+          else
+            echo "⚠️ Backend health check failed, trying main endpoint..."
+            if curl -f -s "$BACKEND_URL" > /dev/null; then
+              echo "✅ Backend is accessible"
+            else
+              echo "❌ Backend is not accessible"
+              exit 1
+            fi
+          fi
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_URL }}
+
+  monitor-python:
+    if: ${{ github.event.inputs.check_python != 'false' && github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Python backend dependencies
+        run: |
+          echo "🔍 Checking Python backend dependencies..."
+          cd backend/python_engine
+          pip install -r requirements.txt
+          python -c "import api.main; print('✅ Python backend modules loaded successfully')"
+        env:
+          PLAID_CLIENT_ID: ${{ secrets.PLAID_CLIENT_ID }}
+          PLAID_CLIENT_SECRET: ${{ secrets.PLAID_CLIENT_SECRET }}
+          CHASE_API_KEY: ${{ secrets.CHASE_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+  generate-report:
+    needs: [monitor-frontend, monitor-backend, monitor-python]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate monitoring report
+        run: |
+          echo "📊 Deployment Monitoring Report"
+          echo "=============================="
+          echo "Generated at: $(date)"
+          echo ""
+          echo "Frontend (Netlify): ${{ needs.monitor-frontend.result }}"
+          echo "Backend (Cloudflare): ${{ needs.monitor-backend.result }}"
+          echo "Python Backend: ${{ needs.monitor-python.result }}"
+          echo ""
+          
+          if [ "${{ needs.monitor-frontend.result }}" == "success" ] && [ "${{ needs.monitor-backend.result }}" == "success" ] && [ "${{ needs.monitor-python.result }}" == "success" ]; then
+            echo "✅ All services are healthy!"
+          else
+            echo "❌ Some services are experiencing issues"
+            exit 1
+          fi
+          
+      - name: Create monitoring summary
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const summary = `## 📊 Deployment Monitoring Report
+            
+            **Generated at:** ${new Date().toISOString()}
+            
+            | Service | Status |
+            |--------|--------|
+            | Frontend (Netlify) | ${{ needs.monitor-frontend.result == 'success' && '✅ Healthy' || '❌ Issues' }} |
+            | Backend (Cloudflare) | ${{ needs.monitor-backend.result == 'success' && '✅ Healthy' || '❌ Issues' }} |
+            | Python Backend | ${{ needs.monitor-python.result == 'success' && '✅ Healthy' || '❌ Issues' }} |
+            
+            **Overall Status:** ${{ needs.monitor-frontend.result == 'success' && needs.monitor-backend.result == 'success' && needs.monitor-python.result == 'success' && '✅ All Services Healthy' || '❌ Some Services Have Issues' }}`;
+            
+            // Create a new issue for the monitoring report
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Deployment Monitoring Report - ${new Date().toISOString().split('T')[0]}`,
+              body: summary,
+              labels: ['monitoring', 'deployment']
+            });

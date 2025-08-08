@@ -1,0 +1,212 @@
+{
+  "profile_summaries": {
+    "1": {
+      "profile_id": 1,
+      "data_types": {
+        "accounts": {
+          "record_count": 6,
+          "columns": [
+            "account_id",
+            "customer_id",
+            "institution_name",
+            "account_number",
+            "account_type",
+            "balance",
+            "created_at",
+            "credit_limit"
+          ]
+        },
+        "transactions": {
+          "record_count": 1022,
+          "columns": [
+            "transaction_id",
+            "account_id",
+            "timestamp",
+            "amount",
+            "description",
+            "category_id",
+            "is_debit",
+            "is_bill",
+            "is_subscription",
+            "due_date",
+            "account_type"
+          ]
+        },
+        "demographics": {
+          "record_count": 0,
+          "columns": []
+        },
+        "goals": {
+          "record_count": 1,
+          "columns": [
+            "goal_id",
+            "customer_id",
+            "name",
+            "description",
+            "target_amount",
+            "target_date"
+          ]
+        },
+        "investments": {
+          "record_count": 0,
+          "columns": []
+        }
+      },
+      "total_documents": 1000,
+      "available_tools": [
+        "query_accounts",
+        "query_transactions",
+        "query_demographics",
+        "query_goals",
+        "query_investments",
+        "query_all_data"
+      ]
+    },
+    "2": {
+      "profile_id": 2,
+      "data_types": {
+        "accounts": {
+          "record_count": 4,
+          "columns": [
+            "account_id",
+            "customer_id",
+            "institution_name",
+            "account_number",
+            "account_type",
+            "balance",
+            "created_at",
+            "credit_limit"
+          ]
+        },
+        "transactions": {
+          "record_count": 1022,
+          "columns": [
+            "transaction_id",
+            "account_id",
+            "timestamp",
+            "amount",
+            "description",
+            "category_id",
+            "is_debit",
+            "is_bill",
+            "is_subscription",
+            "due_date",
+            "account_type"
+          ]
+        },
+        "demographics": {
+          "record_count": 0,
+          "columns": []
+        },
+        "goals": {
+          "record_count": 0,
+          "columns": []
+        },
+        "investments": {
+          "record_count": 0,
+          "columns": []
+        }
+      },
+      "total_documents": 1000,
+      "available_tools": [
+        "query_accounts",
+        "query_transactions",
+        "query_demographics",
+        "query_goals",
+        "query_investments",
+        "query_all_data"
+      ]
+    },
+    "3": {
+      "profile_id": 3,
+      "data_types": {
+        "accounts": {
+          "record_count": 5,
+          "columns": [
+            "account_id",
+            "customer_id",
+            "institution_name",
+            "account_number",
+            "account_type",
+            "balance",
+            "created_at",
+            "credit_limit"
+          ]
+        },
+        "transactions": {
+          "record_count": 1022,
+          "columns": [
+            "transaction_id",
+            "account_id",
+            "timestamp",
+            "amount",
+            "description",
+            "category_id",
+            "is_debit",
+            "is_bill",
+            "is_subscription",
+            "due_date",
+            "account_type"
+          ]
+        },
+        "demographics": {
+          "record_count": 0,
+          "columns": []
+        },
+        "goals": {
+          "record_count": 3,
+          "columns": [
+            "goal_id",
+            "customer_id",
+            "name",
+            "description",
+            "target_amount",
+            "target_date"
+          ]
+        },
+        "investments": {
+          "record_count": 0,
+          "columns": []
+        }
+      },
+      "total_documents": 1000,
+      "available_tools": [
+        "query_accounts",
+        "query_transactions",
+        "query_demographics",
+        "query_goals",
+        "query_investments",
+        "query_all_data"
+      ]
+    }
+  },
+  "test_profile_id": 1,
+  "available_tools": {
+    "query_accounts": {
+      "name": "query_accounts",
+      "description": "Query account information including balances, types, and institutions"
+    },
+    "query_transactions": {
+      "name": "query_transactions",
+      "description": "Query transaction history including expenses, income, and spending patterns"
+    },
+    "query_demographics": {
+      "name": "query_demographics",
+      "description": "Query user demographic and profile information"
+    },
+    "query_goals": {
+      "name": "query_goals",
+      "description": "Query financial goals and progress tracking"
+    },
+    "query_investments": {
+      "name": "query_investments",
+      "description": "Query investment portfolio and performance"
+    },
+    "query_all_data": {
+      "name": "query_all_data",
+      "description": "Query across all financial data types for comprehensive analysis"
+    }
+  },
+  "test_timestamp": "2025-01-15T12:00:00Z",
+  "system_status": "operational"
+}

@@ -1,0 +1,3 @@
+simulation_id,customer_id,related_txn_id,scenario_type,model_context,llm_output,llm_action_json
+10001,1,,job_loss,"{""salary"":4500,""savings"":32000}",You have 7 months of runway.,"{""action"":""suggest_emergency_budget""}"
+10002,3,6002.0,student_loan_rate_hike,"{""loan_balance"":25000}",Rate hike would increase payment by $35/mo.,"{""action"":""recommend_refinance""}"

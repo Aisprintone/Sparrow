@@ -1,0 +1,63 @@
+{
+  "url": "https://feeble-bite-production.up.railway.app",
+  "timestamp": "2025-08-07T12:57:21.493159",
+  "results": {
+    "endpoint_checks": [
+      {
+        "endpoint": "/rag/profiles/summary",
+        "status": 404,
+        "success": false,
+        "data": null,
+        "error": null
+      },
+      {
+        "endpoint": "/rag/profiles/1/summary",
+        "status": 404,
+        "success": false,
+        "data": null,
+        "error": null
+      },
+      {
+        "endpoint": "/rag/profiles/1/tools",
+        "status": 404,
+        "success": false,
+        "data": null,
+        "error": null
+      }
+    ],
+    "rag_queries": [
+      {
+        "endpoint": "/rag/query/1",
+        "status": 404,
+        "success": false,
+        "data": null,
+        "error": null
+      },
+      {
+        "endpoint": "/rag/query/1",
+        "status": 404,
+        "success": false,
+        "data": null,
+        "error": null
+      },
+      {
+        "endpoint": "/rag/query/2",
+        "status": 404,
+        "success": false,
+        "data": null,
+        "error": null
+      }
+    ],
+    "simulation_tests": [
+      {
+        "endpoint": "/simulation/emergency_fund",
+        "status": 404,
+        "success": false,
+        "data": null,
+        "error": null
+      }
+    ],
+    "evidence": []
+  },
+  "success_rate": 0.0
+}

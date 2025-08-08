@@ -1,0 +1,5 @@
+goal_id,customer_id,name,description,target_amount,target_date
+9001,1,Buy First House,20% down payment fund,80000,2027-06-01
+9002,3,Pay College Debt,Eliminate student loan balance,25000,2028-12-31
+9003,3,Increase Credit Score,Push score to 750+,0,2026-12-31
+9004,3,Start Investing,Build initial ETF portfolio,5000,2026-06-30

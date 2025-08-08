@@ -1,0 +1,4 @@
+action_id,name,description
+1,transfer_funds,Move money between accounts
+2,cancel_subscription,Terminate recurring subscription
+3,create_goal,Create a new financial goal

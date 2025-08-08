@@ -1,0 +1,95 @@
+name: Deploy to Netlify
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-netlify.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+          
+      - name: Run linting
+        run: |
+          cd frontend
+          npm run lint
+          
+      - name: Run tests
+        run: |
+          cd frontend
+          npm test -- --passWithNoTests --coverage
+          
+      - name: Build application
+        run: |
+          cd frontend
+          npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NODE_ENV: production
+          
+      - name: Verify build output
+        run: |
+          cd frontend
+          if [ ! -d "out" ]; then
+            echo "❌ Build output directory 'out' not found"
+            exit 1
+          fi
+          echo "✅ Build output verified"
+          echo "📁 Build contents:"
+          ls -la out/
+          echo "📄 Total files: $(find out -type f | wc -l)"
+          
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v2.0
+        with:
+          publish-dir: './frontend/out'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "🚀 Frontend Deploy from GitHub Actions - $(date)"
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 5
+        id: deploy
+        
+      - name: Get deployment URL
+        run: |
+          echo "🌐 Deployment URL: ${{ steps.deploy.outputs.url }}"
+          echo "🔗 Preview URL: ${{ steps.deploy.outputs.preview_url }}"
+          
+      - name: Health check
+        run: |
+          if [ -n "${{ steps.deploy.outputs.url }}" ]; then
+            echo "🔍 Performing health check..."
+            sleep 10
+            curl -f "${{ steps.deploy.outputs.url }}" || echo "⚠️ Health check failed, but deployment may still be processing"
+          fi

@@ -1,0 +1,228 @@
+name: Deploy All Services
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '18'
+  PYTHON_VERSION: '3.11'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/python_engine/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            
+      - name: Test Frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run lint
+          npm test -- --passWithNoTests --coverage
+          
+      - name: Test Python Backend
+        run: |
+          cd backend/python_engine
+          pip install -r requirements.txt
+          python -c "import api.main; print('✅ Backend modules loaded successfully')"
+
+  deploy-frontend:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+          
+      - name: Build application
+        run: |
+          cd frontend
+          npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NODE_ENV: production
+          
+      - name: Verify build output
+        run: |
+          cd frontend
+          if [ ! -d "out" ]; then
+            echo "❌ Build output directory 'out' not found"
+            exit 1
+          fi
+          echo "✅ Build output verified"
+          ls -la out/
+          
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v2.0
+        with:
+          publish-dir: './frontend/out'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "🚀 Deploy from GitHub Actions - $(date)"
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 5
+
+  deploy-railway-backend:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Cache Python dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/python_engine/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            
+      - name: Install Python dependencies
+        run: |
+          cd backend/python_engine
+          pip install -r requirements.txt
+          
+      - name: Test Python backend
+        run: |
+          cd backend/python_engine
+          python -c "import api.main; print('✅ Python backend modules loaded successfully')"
+        env:
+          PLAID_CLIENT_ID: ${{ secrets.PLAID_CLIENT_ID }}
+          PLAID_CLIENT_SECRET: ${{ secrets.PLAID_CLIENT_SECRET }}
+          CHASE_API_KEY: ${{ secrets.CHASE_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          
+      - name: Deploy to Railway
+        run: |
+          cd backend/python_engine
+          railway up --service
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+          RAILWAY_PROJECT_ID: ${{ secrets.RAILWAY_PROJECT_ID }}
+          
+      - name: Verify Railway deployment
+        run: |
+          echo "✅ Railway deployment completed"
+          echo "🔗 Railway URL: https://sparrow-backend-production.up.railway.app"
+          sleep 30
+          curl -f https://sparrow-backend-production.up.railway.app/health || echo "❌ Health check failed"
+
+  notify:
+    needs: [deploy-frontend, deploy-railway-backend]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check deployment status
+        run: |
+          echo "📊 Deployment Status Report"
+          echo "=========================="
+          echo "Frontend (Netlify): ${{ needs.deploy-frontend.result }}"
+          echo "Backend (Railway): ${{ needs.deploy-railway-backend.result }}"
+          
+          if [ "${{ needs.deploy-frontend.result }}" == "success" ] && [ "${{ needs.deploy-railway-backend.result }}" == "success" ]; then
+            echo "✅ All deployments successful!"
+            echo "🌐 Frontend: https://sparrow-finance-app.netlify.app"
+            echo "🔗 Backend: https://sparrow-backend-production.up.railway.app"
+          else
+            echo "❌ Some deployments failed"
+            exit 1
+          fi
+          
+      - name: Create deployment summary
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('Deployment Status')
+            );
+            
+            const summary = `## 🚀 Deployment Status
+            
+            | Service | Status |
+            |--------|--------|
+            | Frontend (Netlify) | ${{ needs.deploy-frontend.result == 'success' && '✅ Success' || '❌ Failed' }} |
+            | Backend (Railway) | ${{ needs.deploy-railway-backend.result == 'success' && '✅ Success' || '❌ Failed' }} |
+            
+            **Deployment completed at:** ${new Date().toISOString()}
+            **Commit:** ${context.sha}`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: summary
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: summary
+              });
+            }

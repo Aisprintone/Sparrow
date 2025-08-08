@@ -1,0 +1,683 @@
+{
+  "timestamp": "2025-08-07T11:58:45.377704",
+  "summary": {
+    "overall_score": 7.508937198067633,
+    "trust_score": 9.27536231884058,
+    "total_evaluations": 69
+  },
+  "metrics": {
+    "Actionability": 7.397101449275363,
+    "Personalization": 5.021739130434782,
+    "Nuance": 9.217391304347826,
+    "Info Balance": 6.260869565217392,
+    "Financial Logic": 7.881159420289855,
+    "Automation Theatre": 9.27536231884058
+  },
+  "scoring_details": {
+    "1_emergency_fund_conservative": {
+      "actionability": 7.9,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 8.0,
+      "financial_logic": 6.8,
+      "automation_theatre": 10.0,
+      "overall": 7.95
+    },
+    "1_emergency_fund_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 8.0,
+      "financial_logic": 8.2,
+      "automation_theatre": 10.0,
+      "overall": 8.083333333333334
+    },
+    "1_emergency_fund_growth": {
+      "actionability": 7.6,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 8.0,
+      "financial_logic": 7.6,
+      "automation_theatre": 10.0,
+      "overall": 8.033333333333333
+    },
+    "1_student_loan_payoff_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.533333333333334
+    },
+    "1_student_loan_payoff_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.616666666666667
+    },
+    "1_student_loan_payoff_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.583333333333333
+    },
+    "1_home_purchase_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "1_home_purchase_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "1_home_purchase_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "1_market_crash_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "1_market_crash_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "1_market_crash_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "1_medical_crisis_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "1_medical_crisis_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "1_medical_crisis_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "1_gig_economy_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "1_gig_economy_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "1_gig_economy_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "1_rent_hike_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "1_rent_hike_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "1_rent_hike_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "1_auto_repair_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "1_auto_repair_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "1_auto_repair_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "2_emergency_fund_conservative": {
+      "actionability": 7.9,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 8.0,
+      "financial_logic": 6.8,
+      "automation_theatre": 10.0,
+      "overall": 7.95
+    },
+    "2_emergency_fund_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 8.0,
+      "financial_logic": 8.2,
+      "automation_theatre": 10.0,
+      "overall": 8.083333333333334
+    },
+    "2_emergency_fund_growth": {
+      "actionability": 7.6,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 8.0,
+      "financial_logic": 7.6,
+      "automation_theatre": 10.0,
+      "overall": 8.033333333333333
+    },
+    "2_home_purchase_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "2_home_purchase_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "2_home_purchase_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "2_market_crash_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "2_market_crash_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "2_market_crash_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "2_medical_crisis_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "2_medical_crisis_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "2_medical_crisis_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "2_gig_economy_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "2_gig_economy_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "2_gig_economy_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "2_rent_hike_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "2_rent_hike_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "2_rent_hike_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "2_auto_repair_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "2_auto_repair_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "2_auto_repair_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "3_emergency_fund_conservative": {
+      "actionability": 7.9,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 8.0,
+      "financial_logic": 6.8,
+      "automation_theatre": 10.0,
+      "overall": 7.95
+    },
+    "3_emergency_fund_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 8.0,
+      "financial_logic": 8.2,
+      "automation_theatre": 10.0,
+      "overall": 8.083333333333334
+    },
+    "3_emergency_fund_growth": {
+      "actionability": 7.6,
+      "personalization": 6.5,
+      "nuance": 10.0,
+      "information_balance": 8.0,
+      "financial_logic": 7.6,
+      "automation_theatre": 10.0,
+      "overall": 8.283333333333333
+    },
+    "3_student_loan_payoff_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.533333333333334
+    },
+    "3_student_loan_payoff_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.616666666666667
+    },
+    "3_student_loan_payoff_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 10.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.583333333333333
+    },
+    "3_home_purchase_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "3_home_purchase_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "3_home_purchase_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "3_market_crash_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "3_market_crash_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "3_market_crash_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "3_medical_crisis_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "3_medical_crisis_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "3_medical_crisis_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "3_gig_economy_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "3_gig_economy_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "3_gig_economy_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "3_rent_hike_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "3_rent_hike_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "3_rent_hike_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    },
+    "3_auto_repair_conservative": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 7.3,
+      "automation_theatre": 9.5,
+      "overall": 7.366666666666667
+    },
+    "3_auto_repair_balanced": {
+      "actionability": 7.3,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.4,
+      "automation_theatre": 9.0,
+      "overall": 7.45
+    },
+    "3_auto_repair_aggressive": {
+      "actionability": 7.4,
+      "personalization": 5.0,
+      "nuance": 9.0,
+      "information_balance": 6.0,
+      "financial_logic": 8.1,
+      "automation_theatre": 9.0,
+      "overall": 7.416666666666667
+    }
+  },
+  "excellent_examples": [
+    {
+      "profile": "Gen Z Student",
+      "scenario": "emergency_fund",
+      "strategy": "Balanced",
+      "title": "Balanced Emergency Plan",
+      "rationale": "Your simulation indicates 26 months runway at the 75th percentile. This balanced strategy splits your emergency fund between high-yield savings (60%) and short-term bond funds (40%), targeting 5.2% ov...",
+      "score": 8.083333333333334
+    },
+    {
+      "profile": "Gen Z Student",
+      "scenario": "emergency_fund",
+      "strategy": "Growth",
+      "title": "Growth-Focused Emergency Fund",
+      "rationale": "Simulation shows potential for 32 months runway at the 90th percentile. This growth-focused approach allocates 40% to high-yield savings, 30% to bond ETFs, and 30% to dividend stocks, targeting 7% ann...",
+      "score": 8.033333333333333
+    },
+    {
+      "profile": "Mid-Career Professional",
+      "scenario": "emergency_fund",
+      "strategy": "Balanced",
+      "title": "Balanced Emergency Plan",
+      "rationale": "Your simulation indicates 47 months runway at the 75th percentile. This balanced strategy splits your emergency fund between high-yield savings (60%) and short-term bond funds (40%), targeting 5.2% ov...",
+      "score": 8.083333333333334
+    },
+    {
+      "profile": "Mid-Career Professional",
+      "scenario": "emergency_fund",
+      "strategy": "Growth",
+      "title": "Growth-Focused Emergency Fund",
+      "rationale": "Simulation shows potential for 58 months runway at the 90th percentile. This growth-focused approach allocates 40% to high-yield savings, 30% to bond ETFs, and 30% to dividend stocks, targeting 7% ann...",
+      "score": 8.033333333333333
+    },
+    {
+      "profile": "Established Millennial",
+      "scenario": "emergency_fund",
+      "strategy": "Balanced",
+      "title": "Balanced Emergency Plan",
+      "rationale": "Your simulation indicates 39 months runway at the 75th percentile. This balanced strategy splits your emergency fund between high-yield savings (60%) and short-term bond funds (40%), targeting 5.2% ov...",
+      "score": 8.083333333333334
+    }
+  ],
+  "poor_examples": [],
+  "findings": []
+}

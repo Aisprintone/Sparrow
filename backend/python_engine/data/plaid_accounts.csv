@@ -1,0 +1,16 @@
+plaid_account_id,customer_id,institution_name,account_name,account_type,subtype,balance,available_balance,credit_limit,iso_currency_code,last_updated_datetime
+plaid_101,1,Chase,Plaid Checking,depository,checking,12500.25,12000.00,,USD,2025-01-15T10:30:00Z
+plaid_102,1,Chase,Plaid Savings,depository,savings,32000.00,32000.00,,USD,2025-01-15T10:30:00Z
+plaid_103,1,Chase,Plaid Credit Card,credit,credit card,-3750.00,,15000.00,USD,2025-01-15T10:30:00Z
+plaid_104,1,Chase,Plaid Mortgage,loan,mortgage,-400000.00,,,USD,2025-01-15T10:30:00Z
+plaid_105,1,Fidelity,Plaid 401k,investment,401k,20000.00,5000.00,,USD,2025-01-15T10:30:00Z
+plaid_106,1,Real Estate,Plaid Home Equity,investment,real_estate,550000.00,,,USD,2025-01-15T10:30:00Z
+plaid_201,2,Chase,Plaid Checking,depository,checking,8600.75,8000.00,,USD,2025-01-15T10:30:00Z
+plaid_202,2,Chase,Plaid Credit Card,credit,credit card,-1400.00,,7000.00,USD,2025-01-15T10:30:00Z
+plaid_203,2,Chase Auto,Plaid Auto Loan,loan,auto,-15000.00,,,USD,2025-01-15T10:30:00Z
+plaid_204,2,Auto Asset,Plaid Vehicle,investment,vehicle,22000.00,,,USD,2025-01-15T10:30:00Z
+plaid_301,3,Chase,Plaid Checking,depository,checking,2400.10,2000.00,,USD,2025-01-15T10:30:00Z
+plaid_302,3,Ally,Plaid Savings,depository,savings,650.35,650.35,,USD,2025-01-15T10:30:00Z
+plaid_303,3,Amex,Plaid Credit Card,credit,credit card,-2500.00,,10000.00,USD,2025-01-15T10:30:00Z
+plaid_304,3,Moov,Plaid Student Loan,loan,student,-25000.00,,,USD,2025-01-15T10:30:00Z
+plaid_305,3,Robinhood,Plaid Investment,investment,brokerage,3000.00,3000.00,,USD,2025-01-15T10:30:00Z 

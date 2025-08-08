@@ -1,0 +1,36 @@
+plaid_transaction_id,plaid_account_id,amount,iso_currency_code,description,category,primary_category,detailed_category,date,datetime,pending,merchant_name,payment_channel,location
+plaid_5001,plaid_101,4499.91,USD,August Salary Direct Deposit,income,salary,payroll,2025-01-15,2025-01-15T09:00:00Z,false,Employer Inc.,in_store,
+plaid_5002,plaid_103,-155.23,USD,Whole Foods Market,food_and_drink,groceries,supermarkets,2025-01-15,2025-01-15T12:30:00Z,false,Whole Foods Market,in_store,New York NY
+plaid_5003,plaid_102,-1999.63,USD,Transfer to House Down‑Payment Goal,transfer,transfers,internal_transfer,2025-01-15,2025-01-15T08:00:00Z,false,Internal Transfer,online,
+plaid_6001,plaid_201,2800.23,USD,Salary Direct Deposit,income,salary,payroll,2025-01-15,2025-01-15T09:05:00Z,false,Employer Inc.,in_store,
+plaid_6002,plaid_201,-150.16,USD,Student Loan Payment,payment,loan_payment,student_loan_payment,2025-01-15,2025-01-15T11:00:00Z,false,Moov,online,
+plaid_6003,plaid_303,-13.02,USD,Spotify Subscription,shopping,subscriptions,streaming_services,2025-01-15,2025-01-15T13:00:00Z,false,Spotify,online,
+plaid_6004,plaid_101,4499.56,USD,Monthly Salary Direct Deposit,income,salary,payroll,2025-01-14,2025-01-14T09:00:00Z,false,Employer Inc.,in_store,
+plaid_6005,plaid_101,-2500.06,USD,Monthly Mortgage Payment,payment,loan_payment,mortgage_payment,2025-01-14,2025-01-14T08:00:00Z,false,Chase,online,
+plaid_6006,plaid_101,-2000.42,USD,Transfer to Savings,transfer,transfers,internal_transfer,2025-01-14,2025-01-14T08:00:00Z,false,Internal Transfer,online,
+plaid_6007,plaid_102,1999.90,USD,Transfer from Checking,transfer,transfers,internal_transfer,2025-01-14,2025-01-14T08:01:00Z,false,Internal Transfer,online,
+plaid_6008,plaid_101,-200.25,USD,Utilities Payment,payment,bills,utilities,2025-01-14,2025-01-14T11:00:00Z,false,ConEdison,online,
+plaid_6009,plaid_103,-12.67,USD,Spotify Subscription,shopping,subscriptions,streaming_services,2025-01-14,2025-01-14T06:00:00Z,false,Spotify,online,
+plaid_6010,plaid_102,39.91,USD,Monthly Interest,income,interest,interest_income,2025-01-14,2025-01-14T23:00:00Z,false,Chase,online,
+plaid_6011,plaid_103,-157.02,USD,Grocery Store,food_and_drink,groceries,supermarkets,2025-01-14,2025-01-14T18:00:00Z,false,Trader Joe's,in_store,New York NY
+plaid_6012,plaid_103,-82.20,USD,Dinner Out,food_and_drink,restaurants,restaurants,2025-01-14,2025-01-14T20:00:00Z,false,Local Restaurant,in_store,New York NY
+plaid_6013,plaid_103,-45.47,USD,Gas Station,transportation,gas_stations,gas_stations,2025-01-14,2025-01-14T17:00:00Z,false,Shell,in_store,New York NY
+plaid_6014,plaid_103,-153.20,USD,Grocery Store,food_and_drink,groceries,supermarkets,2025-01-13,2025-01-13T18:00:00Z,false,Whole Foods Market,in_store,New York NY
+plaid_6015,plaid_103,-71.21,USD,Dinner Out,food_and_drink,restaurants,restaurants,2025-01-13,2025-01-13T20:00:00Z,false,Local Restaurant,in_store,New York NY
+plaid_6016,plaid_103,-39.80,USD,Gas Station,transportation,gas_stations,gas_stations,2025-01-13,2025-01-13T17:00:00Z,false,Exxon,in_store,New York NY
+plaid_6017,plaid_103,-145.23,USD,Grocery Store,food_and_drink,groceries,supermarkets,2025-01-12,2025-01-12T18:00:00Z,false,Trader Joe's,in_store,New York NY
+plaid_6018,plaid_103,-68.79,USD,Dinner Out,food_and_drink,restaurants,restaurants,2025-01-12,2025-01-12T20:00:00Z,false,Local Restaurant,in_store,New York NY
+plaid_6019,plaid_103,-35.26,USD,Gas Station,transportation,gas_stations,gas_stations,2025-01-12,2025-01-12T17:00:00Z,false,Shell,in_store,New York NY
+plaid_6020,plaid_103,-176.96,USD,Grocery Store,food_and_drink,groceries,supermarkets,2025-01-11,2025-01-11T18:00:00Z,false,Whole Foods Market,in_store,New York NY
+plaid_6021,plaid_103,-40.41,USD,Dinner Out,food_and_drink,restaurants,restaurants,2025-01-11,2025-01-11T20:00:00Z,false,Local Restaurant,in_store,New York NY
+plaid_6022,plaid_103,-37.63,USD,Gas Station,transportation,gas_stations,gas_stations,2025-01-11,2025-01-11T17:00:00Z,false,Exxon,in_store,New York NY
+plaid_6023,plaid_101,4499.55,USD,Monthly Salary Direct Deposit,income,salary,payroll,2025-01-10,2025-01-10T09:00:00Z,false,Employer Inc.,in_store,
+plaid_6024,plaid_101,-2500.35,USD,Monthly Mortgage Payment,payment,loan_payment,mortgage_payment,2025-01-10,2025-01-10T08:00:00Z,false,Chase,online,
+plaid_6025,plaid_101,-1999.91,USD,Transfer to Savings,transfer,transfers,internal_transfer,2025-01-10,2025-01-10T08:00:00Z,false,Internal Transfer,online,
+plaid_6026,plaid_102,1999.91,USD,Transfer from Checking,transfer,transfers,internal_transfer,2025-01-10,2025-01-10T08:01:00Z,false,Internal Transfer,online,
+plaid_6027,plaid_101,-199.57,USD,Utilities Payment,payment,bills,utilities,2025-01-10,2025-01-10T11:00:00Z,false,ConEdison,online,
+plaid_6028,plaid_103,-13.14,USD,Spotify Subscription,shopping,subscriptions,streaming_services,2025-01-10,2025-01-10T06:00:00Z,false,Spotify,online,
+plaid_6029,plaid_102,39.51,USD,Monthly Interest,income,interest,interest_income,2025-01-10,2025-01-10T23:00:00Z,false,Chase,online,
+plaid_6030,plaid_103,-133.77,USD,Grocery Store,food_and_drink,groceries,supermarkets,2025-01-09,2025-01-09T18:00:00Z,false,Trader Joe's,in_store,New York NY
+plaid_6031,plaid_103,-72.31,USD,Dinner Out,food_and_drink,restaurants,restaurants,2025-01-09,2025-01-09T20:00:00Z,false,Local Restaurant,in_store,New York NY
+plaid_6032,plaid_103,-36.81,USD,Gas Station,transportation,gas_stations,gas_stations,2025-01-09,2025-01-09T17:00:00Z,false,Shell,in_store,New York NY 

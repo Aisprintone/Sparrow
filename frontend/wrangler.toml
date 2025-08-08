@@ -1,0 +1,9 @@
+name = "sparrow-frontend"
+compatibility_date = "2025-08-06"
+
+[pages]
+directory = "out"
+
+[env.production]
+name = "sparrow-frontend"
+compatibility_date = "2025-08-06"

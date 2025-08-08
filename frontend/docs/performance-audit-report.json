@@ -1,0 +1,63 @@
+{
+  "timestamp": "2025-08-06T01:41:04.321Z",
+  "summary": {
+    "apiPerformance": "FAIL",
+    "memoryUsage": "PASS",
+    "cachePerformance": "PASS",
+    "bundleSize": "PASS"
+  },
+  "metrics": {
+    "api": {
+      "profiles": {
+        "p50": 203.83066599999984,
+        "p95": 205.227083,
+        "p99": 210.44845799999985,
+        "min": 201.67062500000065,
+        "max": 210.44845799999985,
+        "avg": 203.9237062499999
+      },
+      "spending": {
+        "p50": 1.7632919999996375,
+        "p95": 2.5284580000006827,
+        "p99": 347.6423329999998,
+        "min": 1.3767079999997804,
+        "max": 347.6423329999998,
+        "avg": 5.269793310000059
+      },
+      "profileSwitch": {
+        "p50": 19.13666699999885,
+        "p95": 20.794165999999677,
+        "p99": 688.6188750000001,
+        "min": 18.532541000000492,
+        "max": 688.6188750000001,
+        "avg": 32.62848746000025
+      }
+    },
+    "memory": {
+      "avg": 10278692,
+      "max": 11438840
+    },
+    "cacheHitRates": {
+      "hitRate": 0.8,
+      "cacheHits": 40,
+      "totalRequests": 50
+    },
+    "bundleSize": {
+      "total": 168946,
+      "bundles": [
+        {
+          "name": "polyfills.js",
+          "size": 112594
+        },
+        {
+          "name": "webpack.js",
+          "size": 56352
+        }
+      ]
+    },
+    "loadTimes": []
+  },
+  "recommendations": [
+    "⚠️  API response times exceed targets. Consider optimizing database queries and implementing better caching."
+  ]
+}
