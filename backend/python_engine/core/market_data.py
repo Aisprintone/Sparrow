@@ -27,8 +27,9 @@ class FMPMarketDataService:
     """Enhanced market data service with FMP API integration."""
     
     def __init__(self):
-        self.api_key = os.getenv('FMP_API_KEY', 'demo')
+        self.api_key = os.getenv('FMP_API_KEY')
         self.base_url = "https://financialmodelingprep.com/api/v3"
+        self.api_enabled = bool(self.api_key and self.api_key != 'demo')
         self.cache: Dict[str, MarketDataCache] = {}
         self.cache_duration = 3600  # 1 hour cache
         self.last_known_values: Dict[str, Any] = {}
@@ -46,7 +47,8 @@ class FMPMarketDataService:
         load_dotenv()
         
         # Update API key from environment
-        self.api_key = os.getenv('FMP_API_KEY', self.api_key)
+        self.api_key = os.getenv('FMP_API_KEY')
+        self.api_enabled = bool(self.api_key and self.api_key != 'demo')
         
         # Common symbols for financial planning scenarios
         self.common_symbols = [
@@ -166,6 +168,10 @@ class FMPMarketDataService:
     
     def _make_api_call(self, url: str) -> Optional[Dict]:
         """Make an API call with rate limiting."""
+        if not self.api_enabled:
+            logger.info("FMP API not configured, using cached/fallback data")
+            return None
+            
         if not self._check_rate_limits():
             return None
         
@@ -178,13 +184,15 @@ class FMPMarketDataService:
             return response.json()
             
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
+            if e.response.status_code == 403:
+                logger.warning("FMP API key is invalid or expired, using cached/fallback data")
+                self.api_enabled = False  # Disable further attempts
+            elif e.response.status_code == 429:
                 logger.warning("Rate limit exceeded, using cached data")
-                # Don't set daily_call_count to limit - let it reset naturally
             else:
-                logger.error(f"HTTP error in API call: {e}")
+                logger.warning(f"HTTP error in API call: {e}, using cached/fallback data")
         except Exception as e:
-            logger.error(f"Error in API call: {e}")
+            logger.warning(f"API call failed: {e}, using cached/fallback data")
         
         return None
     

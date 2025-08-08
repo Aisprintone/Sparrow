@@ -38,7 +38,7 @@ class PlaidAgent(WorkflowAgent):
         self.environment = os.getenv('PLAID_ENV', 'sandbox')
         
         if not all([self.client_id, self.client_secret]):
-            logger.warning("Plaid credentials not found in environment variables")
+            logger.info("Plaid integration disabled - credentials not configured")
         else:
             logger.info(f"Plaid credentials loaded for environment: {self.environment}")
     
@@ -573,7 +573,7 @@ class ChaseAgent(WorkflowAgent):
         self.environment = os.getenv('CHASE_ENV', 'sandbox')
         
         if not all([self.api_key, self.client_id, self.client_secret]):
-            logger.warning("Chase credentials not found in environment variables")
+            logger.info("Chase integration disabled - credentials not configured")
         else:
             logger.info(f"Chase credentials loaded for environment: {self.environment}")
     
