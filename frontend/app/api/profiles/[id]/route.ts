@@ -1,83 +1,83 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export const dynamic = 'force-static'
+// Dynamic route for local development
+export const dynamic = 'force-dynamic'
 
-export async function generateStaticParams() {
-  return [
-    { id: '1' },
-    { id: '2' },
-    { id: '3' }
-  ]
-}
-
-const profiles = {
-  1: {
-    id: 1,
-    demographic: 'millennial',
-    name: 'Mid-Career Pro',
-    age: 33,
-    location: 'New York, NY',
-    netWorth: 6400,
-    income: 5800,
-    highlights: [
-      'Growing emergency fund',
-      'Balancing debt & savings',
-      'Career advancement focus'
-    ]
-  },
-  2: {
-    id: 2,
-    demographic: 'genx',
-    name: 'Established Professional',
-    age: 45,
-    location: 'San Francisco, CA',
-    netWorth: 125000,
-    income: 8500,
-    highlights: [
-      'Investment portfolio',
-      'Tax optimization',
-      'Retirement planning'
-    ]
-  },
-  3: {
-    id: 3,
-    demographic: 'genz',
-    name: 'Gen Z Student',
-    age: 23,
-    location: 'Austin, TX',
-    netWorth: -19000,
-    income: 3200,
-    highlights: [
-      'Building credit history',
-      'Managing student loans',
-      'Starting investment journey'
-    ]
+// Configuration for backend connection
+const BACKEND_CONFIG = {
+  url: process.env.RAILWAY_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
   }
 }
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id)
-    const profile = profiles[id as keyof typeof profiles]
+    const { id } = await params
+    const profileId = parseInt(id)
     
-    if (!profile) {
+    console.log('[PROFILES API] 🔄 Fetching profile:', profileId)
+    console.log('[PROFILES API] Backend URL:', BACKEND_CONFIG.url)
+    
+    // Proxy request to backend
+    const backendUrl = `${BACKEND_CONFIG.url}/profiles/${profileId}`
+    console.log('[PROFILES API] Requesting:', backendUrl)
+    
+    const response = await fetch(backendUrl, {
+      method: 'GET',
+      headers: BACKEND_CONFIG.headers,
+      signal: AbortSignal.timeout(BACKEND_CONFIG.timeout)
+    })
+    
+    // Add a small delay to prevent rapid successive calls in development
+    if (process.env.NODE_ENV === 'development') {
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+    
+    console.log('[PROFILES API] Backend response status:', response.status)
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      console.log('[PROFILES API] ❌ Backend error:', errorData)
       return NextResponse.json(
-        { error: 'Profile not found' },
-        { status: 404 }
+        { 
+          success: false,
+          error: errorData.detail || 'Profile not found',
+          message: `Backend returned status ${response.status}`
+        },
+        { status: response.status }
       )
     }
-
-    return NextResponse.json({
-      success: true,
-      data: profile
-    })
+    
+    const profileData = await response.json()
+    console.log('[PROFILES API] ✅ Profile fetched successfully')
+    
+    return NextResponse.json(profileData)
+    
   } catch (error) {
-    console.error('Error fetching profile:', error)
+    console.error('[PROFILES API] ❌ Error:', error)
+    
+    if (error.name === 'TimeoutError') {
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Request timeout',
+          message: 'Profile request took too long'
+        },
+        { status: 504 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        success: false,
+        error: 'Internal server error',
+        message: error.message || 'An unexpected error occurred'
+      },
       { status: 500 }
     )
   }

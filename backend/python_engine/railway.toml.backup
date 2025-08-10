@@ -1,0 +1,54 @@
+[build]
+builder = "dockerfile"
+
+[deploy]
+startCommand = "uvicorn app:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+numReplicas = 1
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 15
+
+# Pre-deploy command disabled for RAG deployment
+# preDeployCommand = ["python", "scripts/setup_railway_db.py"]
+
+[env]
+NODE_ENV = "production"
+PYTHON_VERSION = "3.11"
+ENVIRONMENT = "production"
+RAILWAY_ENVIRONMENT = "production"
+LOG_LEVEL = "INFO"
+CORS_ORIGINS = "*"
+PORT = "8000"
+HOST = "0.0.0.0"
+
+# Database configuration - will be set by Railway
+DATABASE_URL = ""
+
+# Railway-specific database settings with improved timeouts
+RAILWAY_DATABASE_TIMEOUT = "120"
+RAILWAY_DATABASE_RETRIES = "10"
+RAILWAY_DATABASE_CONNECT_TIMEOUT = "120"
+RAILWAY_DATABASE_STATEMENT_TIMEOUT = "120000"
+RAILWAY_DATABASE_IDLE_TIMEOUT = "600000"
+
+# API Keys (set these in Railway dashboard)
+OPENAI_API_KEY = ""
+ANTHROPIC_API_KEY = ""
+PLAID_CLIENT_ID = ""
+PLAID_CLIENT_SECRET = ""
+CHASE_API_KEY = ""
+
+# Application settings
+CACHE_TTL_SECONDS = "3600"
+
+# Railway PostgreSQL optimizations
+PGSSLMODE = "require"
+PGPOOL_SIZE = "3"
+PGMAX_OVERFLOW = "5"
+PGPOOL_TIMEOUT = "60"
+PGPOOL_RECYCLE = "600"
+
+# Railway deployment optimizations
+RAILWAY_DEPLOYMENT_OVERLAP_SECONDS = "30"
+RAILWAY_BETA_ENABLE_RUNTIME_V2 = "1"

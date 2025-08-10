@@ -55,6 +55,11 @@ class WorkflowDefinition:
     # Dependencies
     agents: List[str]
     external_dependencies: List[str]
+    
+    # Evidence-based selection criteria (optional fields must come last)
+    evidence_patterns: Optional[Dict[str, Any]] = None
+    confidence_thresholds: Optional[Dict[str, float]] = None
+    trust_requirements: Optional[Dict[str, Any]] = None
 
 # Workflow Registry
 WORKFLOW_REGISTRY = {
@@ -67,6 +72,20 @@ WORKFLOW_REGISTRY = {
             "demographics": ["genz", "millennial"],
             "income_ranges": [20000, 100000],
             "debt_levels": ["low", "medium", "high"]
+        },
+        evidence_patterns={
+            "subscription_charges_detected": {"required": True, "weight": 0.4},
+            "low_usage_pattern": {"threshold": 5.0, "metric": "hours_per_month", "weight": 0.4},
+            "high_cost_per_usage": {"threshold": 15.0, "metric": "cost_per_hour", "weight": 0.2}
+        },
+        confidence_thresholds={
+            "minimum_confidence": 0.75,
+            "auto_execute_threshold": 0.90
+        },
+        trust_requirements={
+            "evidence_sources": ["plaid_transactions", "usage_tracking"],
+            "verification_period_days": 60,
+            "minimum_evidence_points": 3
         },
         prerequisites=[
             "plaid_account_access",
@@ -151,6 +170,21 @@ WORKFLOW_REGISTRY = {
             "income_ranges": [20000, 150000],
             "debt_levels": ["low", "medium", "high"]
         },
+        evidence_patterns={
+            "high_bills_detected": {"required": True, "weight": 0.3},
+            "rate_increases_found": {"threshold": 10.0, "metric": "percent_increase", "weight": 0.3},
+            "competitor_rates_available": {"required": True, "weight": 0.2},
+            "negotiation_opportunity": {"threshold": 25.0, "metric": "monthly_savings", "weight": 0.2}
+        },
+        confidence_thresholds={
+            "minimum_confidence": 0.70,
+            "auto_execute_threshold": 0.85
+        },
+        trust_requirements={
+            "evidence_sources": ["plaid_transactions", "rate_research", "bill_analysis"],
+            "verification_period_days": 90,
+            "minimum_evidence_points": 2
+        },
         prerequisites=[
             "plaid_account_access",
             "bill_payment_history"
@@ -234,6 +268,20 @@ WORKFLOW_REGISTRY = {
             "income_ranges": [20000, 200000],
             "debt_levels": ["low", "medium"]
         },
+        evidence_patterns={
+            "low_yield_savings_detected": {"required": True, "weight": 0.4},
+            "significant_balance": {"threshold": 5000, "metric": "savings_balance", "weight": 0.3},
+            "apy_gap_opportunity": {"threshold": 2.0, "metric": "apy_difference", "weight": 0.3}
+        },
+        confidence_thresholds={
+            "minimum_confidence": 0.80,
+            "auto_execute_threshold": 0.95
+        },
+        trust_requirements={
+            "evidence_sources": ["plaid_accounts", "rate_analysis"],
+            "verification_period_days": 30,
+            "minimum_evidence_points": 2
+        },
         prerequisites=[
             "plaid_account_access",
             "savings_account_balance"
@@ -316,6 +364,20 @@ WORKFLOW_REGISTRY = {
             "demographics": ["millennial", "gen_x"],
             "income_ranges": [50000, 200000],
             "debt_levels": ["low", "medium"]
+        },
+        evidence_patterns={
+            "excess_checking_balance": {"threshold": 2000, "metric": "checking_balance_above_buffer", "weight": 0.4},
+            "consistent_cash_flow": {"required": True, "weight": 0.3},
+            "savings_goal_identified": {"required": True, "weight": 0.3}
+        },
+        confidence_thresholds={
+            "minimum_confidence": 0.85,
+            "auto_execute_threshold": 0.95
+        },
+        trust_requirements={
+            "evidence_sources": ["chase_api", "cash_flow_analysis"],
+            "verification_period_days": 60,
+            "minimum_evidence_points": 2
         },
         prerequisites=["chase_account", "recurring_transfers"],
         steps=[

@@ -1,0 +1,37 @@
+{
+  "local": {
+    "available": true,
+    "tests": {
+      "rag_system": {
+        "status": "operational",
+        "profiles": 0
+      },
+      "rag_queries": {
+        "status": "operational"
+      },
+      "ai_simulation": {
+        "status": "operational",
+        "execution_time": 1.26,
+        "explanation_count": 3
+      }
+    }
+  },
+  "cloud": {
+    "available": true,
+    "tests": {
+      "rag_system": {
+        "status": "failed",
+        "error": 404
+      },
+      "rag_queries": {
+        "status": "http_error",
+        "code": 404
+      }
+    }
+  },
+  "proof": [
+    "local: RAG system operational with 0 profiles",
+    "local: RAG queries executing successfully",
+    "local: AI generates 3 personalized explanation cards"
+  ]
+}

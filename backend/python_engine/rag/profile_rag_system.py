@@ -6,6 +6,7 @@ Loads CSV data into vector databases per profile with query tools
 import os
 import pandas as pd
 import logging
+import time
 from typing import Dict, List, Any, Optional
 from pathlib import Path
 import json

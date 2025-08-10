@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import type { AppState } from "@/hooks/use-app-state"
-import { ChevronLeft, TrendingUp, TrendingDown, Plus } from "lucide-react"
+import { ChevronLeft, TrendingUp, TrendingDown, Plus, User, MapPin, DollarSign, GraduationCap, Home } from "lucide-react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import GlassCard from "@/components/ui/glass-card"
@@ -44,7 +44,7 @@ const getLiabilityDistribution = (accounts: any[], demographic: string) => {
   }
 }
 
-export default function NetWorthDetailScreen({ setCurrentScreen, accounts, demographic }: AppState) {
+export default function NetWorthDetailScreen({ setCurrentScreen, accounts, demographic, profileData }: AppState) {
   const [activeTab, setActiveTab] = useState<"assets" | "liabilities">("assets")
 
   const assets = accounts.filter((acc) => acc.type === "asset")
@@ -59,6 +59,50 @@ export default function NetWorthDetailScreen({ setCurrentScreen, accounts, demog
   const liabilityDistribution = getLiabilityDistribution(accounts, demographic)
   const currentDistribution = activeTab === "assets" ? assetDistribution : liabilityDistribution
 
+  // Get demographic-specific profile info
+  const getProfileInfo = () => {
+    switch (demographic) {
+      case "genz":
+        return {
+          name: "Gen Z Student",
+          age: 23,
+          location: "Austin, TX",
+          income: profileData?.metrics?.monthlyIncome * 12 || 38400,
+          education: "Bachelor's Degree",
+          housing: "Renting"
+        }
+      case "millennial":
+        return {
+          name: "Established Millennial", 
+          age: 34,
+          location: "New York, NY",
+          income: profileData?.metrics?.monthlyIncome * 12 || 102000,
+          education: "Bachelor's Degree",
+          housing: "Homeowner"
+        }
+      case "midcareer":
+        return {
+          name: "Mid-Career Professional",
+          age: 42,
+          location: "San Francisco, CA", 
+          income: profileData?.metrics?.monthlyIncome * 12 || 69600,
+          education: "Master's Degree",
+          housing: "Homeowner"
+        }
+      default:
+        return {
+          name: "User",
+          age: 30,
+          location: "Unknown",
+          income: profileData?.metrics?.monthlyIncome * 12 || 60000,
+          education: "Bachelor's Degree",
+          housing: "Renting"
+        }
+    }
+  }
+
+  const profileInfo = getProfileInfo()
+
   return (
     <div className="pb-24">
       <header className="p-4">
@@ -67,6 +111,52 @@ export default function NetWorthDetailScreen({ setCurrentScreen, accounts, demog
           Dashboard
         </Button>
       </header>
+
+      {/* Profile Information Section */}
+      <div className="px-4 mb-6">
+        <GlassCard className="p-4 mb-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+              <User className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-white">{profileInfo.name}</h2>
+              <p className="text-white/60 text-sm">{profileInfo.age} years old • {profileInfo.location}</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-green-400" />
+              <div>
+                <p className="text-white/60 text-xs">Annual Income</p>
+                <p className="text-white text-sm font-medium">${profileInfo.income.toLocaleString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Home className="h-4 w-4 text-blue-400" />
+              <div>
+                <p className="text-white/60 text-xs">Housing</p>
+                <p className="text-white text-sm font-medium">{profileInfo.housing}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <GraduationCap className="h-4 w-4 text-purple-400" />
+              <div>
+                <p className="text-white/60 text-xs">Education</p>
+                <p className="text-white text-sm font-medium">{profileInfo.education}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-orange-400" />
+              <div>
+                <p className="text-white/60 text-xs">Location</p>
+                <p className="text-white text-sm font-medium">{profileInfo.location}</p>
+              </div>
+            </div>
+          </div>
+        </GlassCard>
+      </div>
 
       <div className="p-6 text-center">
         <p className="text-sm text-gray-400">Total Net Worth</p>

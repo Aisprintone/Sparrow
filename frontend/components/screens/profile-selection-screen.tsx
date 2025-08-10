@@ -57,24 +57,7 @@ const profiles: ProfileData[] = [
     icon: GraduationCap,
     borderGlow: "shadow-purple-500/50"
   },
-  {
-    id: "midcareer",
-    name: "Mid-Career Pro",
-    age: 33,
-    location: "New York, NY", 
-    netWorth: 6400, // Small savings minus auto loan
-    income: 5800,
-    emoji: "💼",
-    gradient: "from-blue-500 to-cyan-500",
-    tagline: "Mid-Career Professional",
-    highlights: [
-      "Growing emergency fund",
-      "Balancing debt & savings",
-      "Career advancement focus"
-    ],
-    icon: Briefcase,
-    borderGlow: "shadow-blue-500/50"
-  },
+
   {
     id: "millennial",
     name: "Established Millennial",

@@ -56,11 +56,13 @@ class BatchedRAGService(IRAGBatchExecutor):
         Single responsibility: coordinate batch execution
         """
         start_time = time.time()
+        logger.info(f"🔍 BatchedRAGService: Starting batch for profile {request.profile_id} with {len(request.queries)} queries")
         results = {}
         
         # Create tasks for parallel execution
         tasks = []
-        for query in request.queries:
+        for i, query in enumerate(request.queries):
+            logger.info(f"🔍 BatchedRAGService: Creating task {i} for query type {query.query_type}")
             task = self._execute_single_query_with_cache(
                 request.profile_id,
                 query
@@ -68,11 +70,14 @@ class BatchedRAGService(IRAGBatchExecutor):
             tasks.append(task)
         
         # Execute all queries in parallel
+        logger.info(f"🔍 BatchedRAGService: Executing {len(tasks)} tasks in parallel")
         query_results = await asyncio.gather(*tasks, return_exceptions=True)
+        logger.info(f"🔍 BatchedRAGService: Got {len(query_results)} results")
         
         # Process results
         successful_count = 0
-        for query, result in zip(request.queries, query_results):
+        for i, (query, result) in enumerate(zip(request.queries, query_results)):
+            logger.info(f"🔍 BatchedRAGService: Processing result {i}: {type(result)}, exception={isinstance(result, Exception)}")
             if isinstance(result, Exception):
                 # Handle error through error handler
                 if self._error_handler:
@@ -128,18 +133,22 @@ class BatchedRAGService(IRAGBatchExecutor):
         """
         Execute single query with caching support
         """
+        logger.info(f"🔍 _execute_single_query_with_cache: profile_id={profile_id}, query_type={query.query_type}")
+        
         # Check cache first
         if self._cache:
             cache_key = f"{profile_id}:{query.query_type.value}:{hash(query.query_text)}"
-            cached_result = await self._cache.get(cache_key)
+            cached_result = self._cache.get(cache_key)
             if cached_result:
                 logger.debug(f"Cache hit for query: {query.query_type.value}")
                 return cached_result
         
         # Execute query
         start_time = time.time()
+        logger.info(f"🔍 _execute_single_query_with_cache: Calling query executor")
         try:
             result = await self._query_executor.execute_query(profile_id, query)
+            logger.info(f"🔍 _execute_single_query_with_cache: Got result success={result.success}, length={len(result.result)}")
             
             # Record metrics
             if self._metrics:
@@ -153,7 +162,7 @@ class BatchedRAGService(IRAGBatchExecutor):
             # Cache successful result
             if self._cache and result.success:
                 cache_key = f"{profile_id}:{query.query_type.value}:{hash(query.query_text)}"
-                await self._cache.set(cache_key, result, ttl_seconds=300)
+                self._cache.set(cache_key, result, ttl=300)
             
             return result
             

@@ -24,7 +24,6 @@ import AIChatDrawer from "@/components/ui/ai-chat-drawer"
 import SpendTrackingScreen from "@/components/screens/spend-tracking-screen-v2"
 import AIActionsScreen from "@/components/screens/ai-actions-screen-refactored"
 import ActionDetailScreen from "@/components/screens/action-detail-screen"
-import MarketDataScreen from "@/components/screens/market-data-screen"
 
 import BottomNav from "@/components/nav/bottom-nav"
 import ThoughtDetailDrawer from "@/components/ui/thought-detail-drawer"
@@ -52,7 +51,6 @@ export default function FinanceAppUI() {
     "spend-tracking": <SpendTrackingScreen {...appState} />,
     "ai-actions": <AIActionsScreen {...appState} />,
     "action-detail": <ActionDetailScreen {...appState} />,
-    "market-data": <MarketDataScreen {...appState} />,
   }
 
   const screenVariants = {

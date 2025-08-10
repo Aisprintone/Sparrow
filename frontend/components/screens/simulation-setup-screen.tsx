@@ -66,6 +66,37 @@ const SIMULATION_PARAMETERS = {
     description: 'How long can you survive without income?',
     parameters: [
       {
+        id: 'termination_type',
+        label: 'How did you lose your job?',
+        type: 'select' as const,
+        options: [
+          { value: 'fired', label: 'Fired (with severance)' },
+          { value: 'quit', label: 'Quit (no severance)' },
+          { value: 'layoff', label: 'Layoff (company downsizing)' }
+        ],
+        default: 'fired',
+        description: 'Different termination types have different benefits'
+      },
+      {
+        id: 'severance_weeks',
+        label: 'Severance Package (Weeks)',
+        type: 'slider' as const,
+        min: 0,
+        max: 52,
+        default: 8,
+        step: 1,
+        description: 'Weeks of pay in severance (0 if quit)',
+        conditional: { field: 'termination_type', values: ['fired', 'layoff'] }
+      },
+      {
+        id: 'unemployment_eligible',
+        label: 'Eligible for Unemployment Benefits',
+        type: 'toggle' as const,
+        default: true,
+        description: 'Usually true if fired/laid off, false if quit',
+        conditional: { field: 'termination_type', values: ['fired', 'layoff'] }
+      },
+      {
         id: 'emergency_fund_months',
         label: 'Emergency Fund Coverage (Months)',
         type: 'slider' as const,
@@ -484,51 +515,19 @@ export default function SimulationSetupScreen({ currentSimulation, setCurrentScr
     }))
   }
 
-  const runSimulationWithCurrentProfile = async () => {
-    setIsRunningSimulation(true)
-    try {
-      // Use current profile data without parameter adjustments
-      const profileId = demographicToProfileId(demographic)
-      
-      // Use centralized scenario mapping
-      const scenarioType = SCENARIO_MAPPING[currentSimulation?.id || 'emergency-fund']
-      
-      const response = await fetch(`/api/simulation/${scenarioType}/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          profile_id: profileId,
-          use_current_profile: true,
-          parameters: {}, // Empty parameters to use current profile
-          scenario_type: scenarioType,
-          original_simulation_id: currentSimulation?.id // Pass original ID for context
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Simulation failed')
-      }
-
-      const result = await response.json()
-      
-      // Store the simulation results in app state
-      setSimulationResults(result.data)
-      
-      // Navigate to results screen
-      setCurrentScreen('simulation-results')
-      
-    } catch (error) {
-      toast({
-        title: "Simulation Error",
-        description: "Failed to run simulation. Please try again.",
-        variant: "destructive"
-      })
-    } finally {
-      setIsRunningSimulation(false)
-    }
+  // Check if user has modified any parameters from defaults
+  const hasModifiedParameters = () => {
+    if (!simulationConfig) return false
+    
+    return simulationConfig.parameters.some(param => {
+      const currentValue = parameters[param.id]
+      const defaultValue = param.default
+      return currentValue !== undefined && currentValue !== defaultValue
+    })
   }
 
-  const runSimulationWithParameters = async () => {
+  // Unified simulation function that intelligently uses current profile or parameters
+  const runSimulation = async () => {
     setIsRunningSimulation(true)
     try {
       const profileId = demographicToProfileId(demographic)
@@ -536,16 +535,50 @@ export default function SimulationSetupScreen({ currentSimulation, setCurrentScr
       // Use centralized scenario mapping
       const scenarioType = SCENARIO_MAPPING[currentSimulation?.id || 'emergency-fund']
       
+      // Determine if we should use current profile based on parameter modifications
+      const useCurrentProfile = !hasModifiedParameters()
+      
+      let finalParameters = {}
+      
+      if (useCurrentProfile) {
+        // Use current profile data without parameter adjustments - same as runSimulationWithCurrentProfile
+        if (currentSimulation?.id === 'job-loss') {
+          finalParameters = {
+            emergency_type: 'job_loss',
+            termination_type: 'fired', // Default for current profile
+            severance_weeks: 8,
+            unemployment_eligible: true
+          }
+        }
+      } else {
+        // Use user-adjusted parameters - same as runSimulationWithParameters
+        finalParameters = { ...parameters }
+        if (currentSimulation?.id === 'job-loss') {
+          finalParameters.emergency_type = 'job_loss'
+          
+          // Set defaults for termination-specific parameters if not provided
+          if (!finalParameters.termination_type) finalParameters.termination_type = 'fired'
+          if (!finalParameters.severance_weeks) finalParameters.severance_weeks = finalParameters.termination_type === 'quit' ? 0 : 8
+          if (finalParameters.unemployment_eligible === undefined) {
+            finalParameters.unemployment_eligible = finalParameters.termination_type !== 'quit'
+          }
+        }
+      }
+      
+      const requestBody = {
+        profile_id: profileId,
+        use_current_profile: useCurrentProfile,
+        parameters: finalParameters,
+        scenario_type: scenarioType,
+        original_simulation_id: currentSimulation?.id // Pass original ID for context
+      }
+      
+      console.log(`[SIMULATION] Request body (${useCurrentProfile ? 'current profile' : 'custom parameters'}):`, JSON.stringify(requestBody, null, 2))
+      
       const response = await fetch(`/api/simulation/${scenarioType}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          profile_id: profileId,
-          use_current_profile: false,
-          parameters: parameters,
-          scenario_type: scenarioType,
-          original_simulation_id: currentSimulation?.id // Pass original ID for context
-        })
+        body: JSON.stringify(requestBody)
       })
 
       if (!response.ok) {
@@ -610,46 +643,17 @@ export default function SimulationSetupScreen({ currentSimulation, setCurrentScr
         animate={{ opacity: 1, y: 0 }}
         className="p-6 space-y-6"
       >
-        {/* Quick Run Option */}
-        <Card className="bg-white/10 border-white/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Run with Current Profile
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button
-              onClick={runSimulationWithCurrentProfile}
-              disabled={isRunningSimulation}
-              className="w-full bg-green-600 hover:bg-green-700"
-            >
-              {isRunningSimulation ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Running...
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4 mr-2" />
-                  Run with Current Profile
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Parameter Adjustment */}
+        {/* Unified Simulation Card */}
         <Card className="bg-white/10 border-white/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5" />
-              Adjust Parameters
+              Run Simulation
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-gray-300 mb-4">
-              Customize the simulation parameters to explore different scenarios.
+              Adjust parameters below or leave defaults to use your current profile data.
             </p>
             
             {simulationConfig.parameters.map((param) => (
@@ -701,7 +705,7 @@ export default function SimulationSetupScreen({ currentSimulation, setCurrentScr
             ))}
             
             <Button
-              onClick={runSimulationWithParameters}
+              onClick={runSimulation}
               disabled={isRunningSimulation}
               className="w-full bg-blue-600 hover:bg-blue-700"
             >

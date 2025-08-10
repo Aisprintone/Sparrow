@@ -1,14 +1,16 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
+// Import dev config to suppress common warnings in local development
+import "@/lib/utils/dev-config"
 
-const fontSans = Inter({
-  subsets: ["latin"],
+// Self-hosted font configuration - enterprise-safe
+const fontSans = {
   variable: "--font-sans",
-})
+  className: "font-sans"
+}
 
 export const metadata: Metadata = {
   title: "FinanceAI",

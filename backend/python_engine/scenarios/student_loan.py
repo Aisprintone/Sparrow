@@ -402,7 +402,7 @@ class ComprehensiveStudentLoanSimulator:
         mean_investment_final = investment_stats.get('statistics', {}).get('mean_final_balance', 0)
         
         if mean_investment_final <= total_loan_balance:
-            return float('inf')  # Investment never catches up
+            return 999999  # Investment never catches up (JSON-safe large number)
         
         # Simplified break-even calculation
         investment_growth = mean_investment_final - total_loan_balance
@@ -416,7 +416,7 @@ class ComprehensiveStudentLoanSimulator:
             if monthly_investment_growth > monthly_interest_cost:
                 return (mean_payoff_interest - investment_growth) / (monthly_investment_growth - monthly_interest_cost)
             else:
-                return float('inf')
+                return 999999  # Investment never breaks even (JSON-safe large number)
     
     def _generate_recommendations(
         self,

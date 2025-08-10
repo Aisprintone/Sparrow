@@ -194,7 +194,6 @@ export default function SimulationsScreen({ setCurrentScreen, setCurrentSimulati
           </Button>
         </div>
 
-        <p className="text-white/80">Explore different financial scenarios</p>
       </motion.div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-4">

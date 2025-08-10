@@ -19,11 +19,11 @@ logging.basicConfig(
 
 if __name__ == "__main__":
     # Import the app
-    from python_engine.api.main import app
+    from app import app
     
     # Run the server
     uvicorn.run(
-        "api.main:app",
+        "app:app",
         host="0.0.0.0",
         port=8000,
         reload=False,

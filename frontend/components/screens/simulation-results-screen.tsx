@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { aiActionsService } from "@/lib/api/ai-actions-service"
+import { simulationIntegrationService, UnifiedSimulationResult } from "@/lib/services/simulation-integration-service"
 
 interface SimulationResult {
   scenario_name: string
@@ -39,29 +40,54 @@ export default function SimulationResultsScreen({
   simulationResults,
   saveAutomation,
   addGoal,
-  demographic
+  demographic,
+  aiActions,
+  setAiActions,
+  selectedProfile
 }: AppState) {
   const [formattedResults, setFormattedResults] = useState<AIExplanation[]>([])
   const [loading, setLoading] = useState(true)
   const [automatingCards, setAutomatingCards] = useState<Set<string>>(new Set())
   const [automatedCards, setAutomatedCards] = useState<Set<string>>(new Set())
+  const [goalCreatedCards, setGoalCreatedCards] = useState<Set<string>>(new Set())
 
-  // Determine if a result is goal-worthy based on comprehensive category mapping
-  const isGoalWorthy = (result: AIExplanation): boolean => {
+  // Determine the single action type for each result (mutually exclusive)
+  const getActionType = (result: AIExplanation): 'goal' | 'automate' => {
     const category = result.category.toLowerCase()
     const title = result.title.toLowerCase()
     
-    // Goal-worthy categories: financial outcomes that benefit from tracking and conscious effort
-    const goalWorthyCategories = [
-      'emergency', 'fund', 'debt', 'saving', 'retirement', 'investment',
-      'insurance', 'tax', 'budget', 'income', 'education', 'home', 'mortgage',
-      'credit', 'wealth', 'portfolio', 'nest egg', 'financial independence'
+    // Goal categories: Long-term, high-value outcomes that benefit from conscious tracking
+    const goalPriorityCategories = [
+      'emergency', 'fund', 'debt', 'retirement', 'investment', 'home', 'education'
     ]
     
-    // Check if category or title contains goal-worthy keywords
-    return goalWorthyCategories.some(keyword => 
-      category.includes(keyword) || title.includes(keyword)
-    ) || result.potential_saving >= 1000 // High-value items are usually goal-worthy
+    // Automation categories: Quick optimizations that can be set-and-forget
+    const automationPriorityCategories = [
+      'tax', 'credit', 'subscription', 'bill', 'cashback', 'rewards'
+    ]
+    
+    // Priority 1: Explicit automation categories
+    if (automationPriorityCategories.some(keyword => 
+        category.includes(keyword) || title.includes(keyword))) {
+      return 'automate'
+    }
+    
+    // Priority 2: High-value or long-term outcomes → Goals
+    if (result.potential_saving >= 3000 || 
+        result.timeframe.includes('year') ||
+        goalPriorityCategories.some(keyword => 
+          category.includes(keyword) || title.includes(keyword))) {
+      return 'goal'
+    }
+    
+    // Priority 3: Simple, quick wins → Automation  
+    if (result.implementation_difficulty === 'easy' && 
+        result.potential_saving < 2000) {
+      return 'automate'
+    }
+    
+    // Default: Goals for conscious decision-making
+    return 'goal'
   }
 
   // Get appropriate goal type based on category
@@ -79,38 +105,145 @@ export default function SimulationResultsScreen({
     return 'other'
   }
 
-  // Handle goal creation for a recommendation card
-  const handleAddAsGoal = (result: AIExplanation) => {
-    const goalData = {
-      id: `goal_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      title: result.title,
-      description: result.description,
-      type: getGoalType(result),
-      target: result.potential_saving,
-      timeframe: result.timeframe,
-      monthlyContribution: Math.round(result.potential_saving / 12),
-      currentAmount: 0,
-      priority: result.impact === 'high' ? 'high' : result.impact === 'medium' ? 'medium' : 'low',
-      status: 'active' as const,
-      createdAt: new Date().toISOString(),
-      steps: result.steps,
-      confidence: result.confidence
+  // Handle goal creation for a recommendation card using unified service
+  const handleAddAsGoal = async (result: AIExplanation) => {
+    const cardId = `${result.title}-${result.potential_saving}`
+    
+    // Prevent duplicate goal creation
+    if (goalCreatedCards.has(cardId)) {
+      return
     }
     
+    // Create unified simulation result
+    const unifiedResult: UnifiedSimulationResult = {
+      id: cardId,
+      type: result.impact === 'high' ? 'aggressive' : 'on-track',
+      title: result.title,
+      subtitle: result.category,
+      description: result.description,
+      impact: {
+        monthly: Math.round(result.potential_saving / 12),
+        total: result.potential_saving,
+        percentage: Math.round(result.confidence * 100)
+      },
+      recommendations: result.steps || [],
+      canAddToGoals: true,
+      canAddToAutomation: false
+    }
+    
+    // Use unified service
+    const success = await simulationIntegrationService.addSimulationToGoals(unifiedResult, addGoal)
+    if (success) {
+      setGoalCreatedCards(prev => new Set(prev).add(cardId))
+      console.log('Goal created via unified service:', result.title)
+      return
+    }
+    
+    const goalType = getGoalType(result)
+    
+    // Calculate a realistic deadline based on timeframe
+    const calculateDeadline = (timeframe: string): string => {
+      const now = new Date()
+      if (timeframe.includes('year')) {
+        now.setFullYear(now.getFullYear() + 1)
+      } else if (timeframe.includes('month')) {
+        const months = parseInt(timeframe) || 12
+        now.setMonth(now.getMonth() + months)
+      } else {
+        now.setMonth(now.getMonth() + 6) // Default 6 months
+      }
+      return now.toISOString().split('T')[0]
+    }
+    
+    // Get appropriate icon and color based on goal type
+    const getGoalDisplay = (type: string) => {
+      switch (type) {
+        case 'safety': return { icon: '🛡️', color: 'bg-green-500' }
+        case 'debt': return { icon: '💳', color: 'bg-red-500' }
+        case 'retirement': return { icon: '🏖️', color: 'bg-blue-500' }
+        case 'investment': return { icon: '📈', color: 'bg-purple-500' }
+        case 'home': return { icon: '🏠', color: 'bg-orange-500' }
+        case 'education': return { icon: '🎓', color: 'bg-indigo-500' }
+        case 'insurance': return { icon: '☂️', color: 'bg-cyan-500' }
+        default: return { icon: '🎯', color: 'bg-gray-500' }
+      }
+    }
+    
+    const display = getGoalDisplay(goalType)
+    
+    const goalData = {
+      title: result.title,
+      type: goalType as "safety" | "home" | "experience" | "retirement" | "debt" | "investment" | "education" | "business",
+      target: result.potential_saving,
+      current: 0, // Fixed: use 'current' not 'currentAmount'
+      deadline: calculateDeadline(result.timeframe),
+      icon: display.icon,
+      color: display.color,
+      monthlyContribution: Math.round(result.potential_saving / 12),
+      milestones: [
+        { name: '25% Complete', target: Math.round(result.potential_saving * 0.25) },
+        { name: '50% Complete', target: Math.round(result.potential_saving * 0.50) },
+        { name: '75% Complete', target: Math.round(result.potential_saving * 0.75) },
+        { name: 'Goal Complete', target: result.potential_saving }
+      ],
+      priority: (result.impact === 'high' ? 'high' : result.impact === 'medium' ? 'medium' : 'low') as "high" | "medium" | "low",
+      status: 'active' as const,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      userId: 1,
+      aiInsights: {
+        lastUpdated: new Date().toISOString(),
+        recommendations: result.steps,
+        riskAssessment: result.risk_level,
+        optimizationOpportunities: [`Confidence: ${Math.round(result.confidence * 100)}%`]
+      },
+      simulationImpact: []
+    }
+    
+    // Add goal to app state
     addGoal(goalData)
     
-    // Navigate to goals screen to show the new goal
-    setTimeout(() => {
-      setCurrentScreen("goals")
-    }, 500)
+    // Mark this card as having goal created (for UI state)
+    setGoalCreatedCards(prev => new Set(prev).add(cardId))
+    
+    console.log('Goal created successfully:', goalData.title)
   }
 
-  // Handle one-click automation for a recommendation card
+  // Handle one-click automation for a recommendation card using unified service
   const handleAutomateCard = async (result: AIExplanation) => {
     const cardId = `${result.title}-${result.potential_saving}`
     
     if (automatingCards.has(cardId) || automatedCards.has(cardId)) {
       return
+    }
+    
+    // Create unified simulation result
+    const unifiedResult: UnifiedSimulationResult = {
+      id: cardId,
+      type: result.implementation_difficulty === 'easy' ? 'on-track' : 'aggressive',
+      title: result.title,
+      subtitle: result.category,
+      description: result.description,
+      impact: {
+        monthly: result.potential_saving,
+        total: result.potential_saving * 12,
+        percentage: Math.round(result.confidence * 100)
+      },
+      recommendations: result.steps || [],
+      canAddToGoals: false,
+      canAddToAutomation: true
+    }
+    
+    // Use unified service first
+    const success = await simulationIntegrationService.addSimulationToAutomation(
+      unifiedResult,
+      setAiActions,
+      aiActions
+    )
+    
+    if (success) {
+      setAutomatedCards(prev => new Set(prev).add(cardId))
+      console.log('Automation added via unified service:', result.title)
     }
 
     setAutomatingCards(prev => new Set(prev).add(cardId))
@@ -171,10 +304,7 @@ export default function SimulationResultsScreen({
       // Mark as automated
       setAutomatedCards(prev => new Set(prev).add(cardId))
 
-      // Navigate to AI Actions screen to show the automation in progress
-      setTimeout(() => {
-        setCurrentScreen("ai-actions")
-      }, 1500)
+      console.log('Automation started successfully:', automationAction.title)
 
     } catch (error) {
       console.error('Failed to start automation for card:', result.title, error)
@@ -208,16 +338,17 @@ export default function SimulationResultsScreen({
             // Handle both potential_saving formats (number or string like "$1,200")
             // Backend returns camelCase fields
             let savingAmount = 0
-            if (typeof explanation.potentialSaving === 'number') {
+            
+            // Check both camelCase and snake_case field names
+            if (typeof explanation.potential_saving === 'number') {
+              savingAmount = explanation.potential_saving
+            } else if (typeof explanation.potential_saving === 'string') {
+              savingAmount = parseFloat(explanation.potential_saving.replace(/[$,]/g, '')) || 0
+            } else if (typeof explanation.potentialSaving === 'number') {
               savingAmount = explanation.potentialSaving
             } else if (typeof explanation.potentialSaving === 'string') {
               // Remove $ and commas, then parse
               savingAmount = parseFloat(explanation.potentialSaving.replace(/[$,]/g, '')) || 0
-            } else if (typeof explanation.potential_saving === 'number') {
-              // Also check snake_case for backwards compatibility
-              savingAmount = explanation.potential_saving
-            } else if (typeof explanation.potential_saving === 'string') {
-              savingAmount = parseFloat(explanation.potential_saving.replace(/[$,]/g, '')) || 0
             }
             
             // Extract detailed insights if available
@@ -244,7 +375,7 @@ export default function SimulationResultsScreen({
           setFormattedResults(formatted)
           setLoading(false)
           
-          console.log('[SIMULATION RESULTS] 📊 Using AI-generated explanations:', formattedResults)
+          console.log('[SIMULATION RESULTS] 📊 Setting formatted results:', formatted)
         } catch (error) {
           console.error('[SIMULATION RESULTS] ❌ Error processing results:', error)
           setLoading(false)
@@ -278,7 +409,12 @@ export default function SimulationResultsScreen({
           const explanations = recovered.ai_explanations
           const formatted = explanations.map((explanation: any, index: number) => {
             let savingAmount = 0
-            if (typeof explanation.potentialSaving === 'number') {
+            // Check both camelCase and snake_case field names
+            if (typeof explanation.potential_saving === 'number') {
+              savingAmount = explanation.potential_saving
+            } else if (typeof explanation.potential_saving === 'string') {
+              savingAmount = parseFloat(explanation.potential_saving.replace(/[$,]/g, '')) || 0
+            } else if (typeof explanation.potentialSaving === 'number') {
               savingAmount = explanation.potentialSaving
             } else if (typeof explanation.potentialSaving === 'string') {
               savingAmount = parseFloat(explanation.potentialSaving.replace(/[$,]/g, '')) || 0
@@ -307,102 +443,10 @@ export default function SimulationResultsScreen({
         return
       }
       
-      console.log('[SIMULATION RESULTS] 📋 Using intelligent fallback data')
-      
-      // SOLID Principle: Strategy Pattern for fallback generation
-      const generateContextualFallback = (): AIExplanation[] => {
-        // Generate contextual fallback based on common financial scenarios
-        const fallbackTemplates: AIExplanation[] = [
-        {
-          title: "Emergency Fund Optimization",
-          description: "Increase your emergency fund to cover 6 months of expenses",
-          potential_saving: 5000,
-          confidence: 0.85,
-          category: "Emergency Fund",
-          steps: [
-            "Calculate 6 months of essential expenses",
-            "Set up automatic transfers to savings",
-            "Consider high-yield savings account"
-          ],
-          impact: "high",
-          timeframe: "6-12 months",
-          risk_level: "low",
-          implementation_difficulty: "easy"
-        },
-        {
-          title: "Debt Consolidation Strategy",
-          description: "Consolidate high-interest debt into a lower-rate loan",
-          potential_saving: 3000,
-          confidence: 0.75,
-          category: "Debt Management",
-          steps: [
-            "Review all current debt balances and rates",
-            "Research consolidation loan options",
-            "Apply for the best available rate"
-          ],
-          impact: "medium",
-          timeframe: "3-6 months",
-          risk_level: "medium",
-          implementation_difficulty: "medium"
-        },
-        {
-          title: "Retirement Savings Boost",
-          description: "Maximize your 401k contribution to get full employer match",
-          potential_saving: 7500,
-          confidence: 0.90,
-          category: "Retirement Planning",
-          steps: [
-            "Review current 401k contribution percentage",
-            "Calculate employer match opportunity",
-            "Increase contribution to maximum match"
-          ],
-          impact: "high",
-          timeframe: "immediate",
-          risk_level: "low",
-          implementation_difficulty: "easy"
-        },
-        {
-          title: "Tax Optimization Review",
-          description: "Optimize your tax strategy with better deductions and credits",
-          potential_saving: 1800,
-          confidence: 0.70,
-          category: "Tax Optimization",
-          steps: [
-            "Review eligible deductions",
-            "Organize tax documents",
-            "Consider professional tax preparation"
-          ],
-          impact: "medium",
-          timeframe: "annual",
-          risk_level: "low",
-          implementation_difficulty: "medium"
-        },
-        {
-          title: "Credit Card Rewards Optimization",
-          description: "Switch to a rewards card that matches your spending patterns",
-          potential_saving: 600,
-          confidence: 0.60,
-          category: "Credit Optimization",
-          steps: [
-            "Analyze current spending categories",
-            "Research optimal rewards cards",
-            "Apply and transfer spending"
-          ],
-          impact: "low",
-          timeframe: "3 months",
-          risk_level: "low",
-          implementation_difficulty: "easy"
-        }
-      ]
-        
-        return fallbackTemplates
-      }
-      
-      const fallbackExplanations = generateContextualFallback()
-      console.log('[SIMULATION RESULTS] 🔄 Loading fallback explanations')
-      setFormattedResults(fallbackExplanations)
+      // If no data can be recovered, show empty state instead of hardcoded fallback
+      console.log('[SIMULATION RESULTS] ❌ No data available - showing empty state')
+      setFormattedResults([])
       setLoading(false)
-      console.log('[SIMULATION RESULTS] ✅ Fallback data loaded')
     }
   }, [simulationResults])
 
@@ -460,47 +504,36 @@ export default function SimulationResultsScreen({
             <ArrowLeft className="h-5 w-5" />
           </button>
           <h1 className="text-xl font-semibold text-white">
-            Simulation Results
+            {simulationResults?.scenario_name ? `${simulationResults.scenario_name} Results` : 'Emergency Fund Results'}
           </h1>
           <div className="w-9" />
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Summary Card */}
-        <GlassCard className="p-6 bg-gradient-to-br from-blue-500/20 to-purple-500/20">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-white/10 rounded-lg mr-3">
-              <BarChart3 className="h-5 w-5 text-white" />
-            </div>
-            <h2 className="text-xl font-semibold text-white">AI Financial Insights</h2>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-4">
-              <div className="text-sm text-white/60 font-medium mb-1">Total Potential Savings</div>
-              <div className="text-xl font-bold text-white">
-                {formatCurrency(formattedResults.reduce((sum, result) => sum + result.potential_saving, 0))}
-              </div>
-            </div>
-            <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-xl p-4">
-              <div className="text-sm text-white/60 font-medium mb-1">Insights Generated</div>
-              <div className="text-xl font-bold text-white">{formattedResults.length}</div>
-            </div>
-          </div>
-        </GlassCard>
-
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* AI Explanations */}
         <div className="space-y-4">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-white/10 rounded-lg mr-3">
-              <Lightbulb className="h-5 w-5 text-white" />
+          {formattedResults.length === 0 ? (
+            /* Empty State */
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mb-4">
+                <BarChart3 className="w-8 h-8 text-white/60" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">No Analysis Available</h3>
+              <p className="text-white/70 mb-6 max-w-md">
+                No simulation data or AI analysis could be loaded. Please try running a new simulation.
+              </p>
+              <Button
+                onClick={() => setCurrentScreen('simulations')}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-6 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
+              >
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Run New Simulation
+              </Button>
             </div>
-            <h2 className="text-xl font-semibold text-white">Personalized Recommendations</h2>
-          </div>
-          
-          {formattedResults.map((result, index) => (
+          ) : (
+            formattedResults.map((result, index) => (
             <GlassCard key={index} className="p-6 bg-gradient-to-br from-gray-500/20 to-gray-600/20">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
@@ -549,49 +582,34 @@ export default function SimulationResultsScreen({
                 </ul>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Button - Single button based on action type */}
               <div className="pt-4 border-t border-white/10">
-                {/* Check if this result is goal-worthy using comprehensive logic */}
-                {isGoalWorthy(result) ? (
-                  <div className="space-y-3">
-                    <Button
-                      onClick={() => handleAddAsGoal(result)}
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
-                    >
-                      <Target className="mr-2 h-4 w-4" />
-                      Set as Goal
-                    </Button>
-                    <Button
-                      onClick={() => handleAutomateCard(result)}
-                      disabled={automatingCards.has(`${result.title}-${result.potential_saving}`) || 
-                               automatedCards.has(`${result.title}-${result.potential_saving}`)}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {automatingCards.has(`${result.title}-${result.potential_saving}`) ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Starting Automation...
-                        </>
-                      ) : automatedCards.has(`${result.title}-${result.potential_saving}`) ? (
-                        <>
-                          <CheckCircle className="mr-2 h-4 w-4" />
-                          Automation Started!
-                        </>
-                      ) : (
-                        <>
-                          <Play className="mr-2 h-4 w-4" />
-                          Automate This Action
-                        </>
-                      )}
-                    </Button>
-                  </div>
+                {getActionType(result) === 'goal' ? (
+                  /* Goal-worthy items get green "Set as Goal" button */
+                  <Button
+                    onClick={() => handleAddAsGoal(result)}
+                    disabled={goalCreatedCards.has(`${result.title}-${result.potential_saving}`)}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-75 disabled:cursor-not-allowed"
+                  >
+                    {goalCreatedCards.has(`${result.title}-${result.potential_saving}`) ? (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Goal Created!
+                      </>
+                    ) : (
+                      <>
+                        <Target className="mr-2 h-4 w-4" />
+                        Set as Goal
+                      </>
+                    )}
+                  </Button>
                 ) : (
-                  /* For non-goal-worthy items, show only automation button */
+                  /* Automation-worthy items get blue "Automate" button */
                   <Button
                     onClick={() => handleAutomateCard(result)}
                     disabled={automatingCards.has(`${result.title}-${result.potential_saving}`) || 
                              automatedCards.has(`${result.title}-${result.potential_saving}`)}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-4 rounded-xl transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-75 disabled:cursor-not-allowed"
                   >
                     {automatingCards.has(`${result.title}-${result.potential_saving}`) ? (
                       <>
@@ -613,7 +631,7 @@ export default function SimulationResultsScreen({
                 )}
               </div>
             </GlassCard>
-          ))}
+          )))}
         </div>
 
         {/* Action Buttons */}

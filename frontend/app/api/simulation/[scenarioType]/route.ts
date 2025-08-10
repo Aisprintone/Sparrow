@@ -13,7 +13,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // Configuration abstraction - follows Open/Closed principle
 const BACKEND_CONFIG = {
-  url: 'https://sparrow-backend-production.up.railway.app',
+  url: process.env.RAILWAY_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'https://sparrow-backend-production.up.railway.app',
   timeout: 60000, // 60 seconds for simulation requests
   headers: {
     'Content-Type': 'application/json',
@@ -63,15 +63,21 @@ class BackendSimulationService {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout)
 
     try {
-      console.log('[SIMULATION API] 🔄 Sending request to Railway backend:', `${this.baseUrl}/simulation/${scenarioType}`)
+      console.log('[SIMULATION API] 🔄 Sending request to backend:', `${this.baseUrl}/simulation/${scenarioType}`)
       console.log('[SIMULATION API] Request payload:', JSON.stringify(requestBody, null, 2))
       
-      // Use Railway backend directly
+      // Add service key for backend authentication
+      const headers = {
+        ...this.headers,
+        'X-Service-Key': process.env.NETLIFY_SERVICE_KEY || 'netlify-service-key-change-in-production'
+      }
+      
+      // Use backend directly
       const response = await fetch(
         `${this.baseUrl}/simulation/${scenarioType}`,
         {
           method: 'POST',
-          headers: this.headers,
+          headers,
           body: JSON.stringify(requestBody),
           signal: controller.signal,
         }
@@ -166,8 +172,26 @@ export async function POST(
 
     console.log('[SIMULATION API] ✅ Request validation passed')
 
-    // Ensure scenario_type matches the URL parameter
-    body.scenario_type = scenarioType
+    // Map frontend scenario types to backend scenario types following DRY principles
+    const scenarioMapping: Record<string, string> = {
+      'emergency_fund': 'emergency_fund',
+      'student_loan': 'student_loan', 
+      'home_purchase': 'home_purchase',
+      'market_crash': 'market_crash',
+      'medical_crisis': 'medical_crisis',
+      'gig_economy': 'gig_economy',
+      'rent_hike': 'rent_hike',
+      'auto_repair': 'auto_repair',
+      // Map frontend-only scenarios to backend scenarios
+      'job_loss': 'emergency_fund',
+      'debt_payoff': 'student_loan'
+    }
+
+    // Get the correct backend scenario type
+    const backendScenarioType = scenarioMapping[scenarioType] || scenarioType
+    body.scenario_type = backendScenarioType
+
+    console.log('[SIMULATION API] Scenario mapping:', scenarioType, '→', backendScenarioType)
 
     // Initialize service with configuration
     const simulationService = new BackendSimulationService(BACKEND_CONFIG)
@@ -177,7 +201,7 @@ export async function POST(
     console.log('[SIMULATION API] 🔄 Starting simulation execution...')
     const startTime = Date.now()
     const backendResponse = await simulationService.runSimulation(
-      scenarioType,
+      backendScenarioType,
       body
     )
     const executionTime = Date.now() - startTime

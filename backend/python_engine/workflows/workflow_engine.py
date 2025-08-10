@@ -17,6 +17,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 # Local imports
 from .workflow_definitions import WorkflowDefinition, WorkflowStep, WorkflowStatus, get_workflow_by_id
 from .workflow_agents import WorkflowAgentManager
+from .workflow_registry import WorkflowRegistry, WorkflowMatch
 
 # Import cache manager
 from core.cache_manager import cache_manager, cached, CacheCategories
@@ -40,12 +41,14 @@ class WorkflowExecutionState:
         self.user_action_required = None
 
 class WorkflowEngine:
-    """Main workflow execution engine"""
+    """Main workflow execution engine with evidence-based selection"""
     
     def __init__(self):
         self.agent_manager = WorkflowAgentManager()
         self.execution_graphs = {}
         self.active_workflows = {}
+        self.workflow_registry = WorkflowRegistry()
+        self.evidence_cache = {}
         
     def build_workflow_graph(self, workflow_id: str) -> StateGraph:
         """Build LangGraph for specific workflow"""
@@ -359,3 +362,219 @@ class WorkflowEngine:
         
         # Continue execution
         asyncio.create_task(self.execute_workflow(execution_id))
+    
+    # Evidence-based workflow selection methods
+    
+    async def get_personalized_workflows(self, user_data: Dict[str, Any]) -> List[WorkflowMatch]:
+        """Get personalized workflow recommendations based on evidence analysis"""
+        try:
+            logger.info(f"Getting personalized workflows for user data")
+            
+            # Use workflow registry for evidence-based selection
+            workflow_matches = await self.workflow_registry.get_evidence_based_workflows(user_data)
+            
+            # Cache the results for performance
+            cache_key = f"personalized_workflows:{hash(str(user_data))}"
+            await cache_manager.set(cache_key, [match.__dict__ for match in workflow_matches], ttl=3600)
+            
+            logger.info(f"Found {len(workflow_matches)} personalized workflow matches")
+            return workflow_matches
+            
+        except Exception as e:
+            logger.error(f"Error getting personalized workflows: {str(e)}")
+            return []
+    
+    async def validate_workflow_evidence(self, workflow_id: str, user_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate evidence requirements for a specific workflow"""
+        try:
+            workflow_def = get_workflow_by_id(workflow_id)
+            if not workflow_def or not workflow_def.evidence_patterns:
+                return {"valid": False, "reason": "No evidence patterns defined"}
+            
+            # Extract evidence from user data
+            evidence_list = await self.workflow_registry._extract_evidence(user_data)
+            
+            # Check evidence requirements
+            validation_result = {
+                "valid": True,
+                "confidence": 0.0,
+                "missing_evidence": [],
+                "evidence_summary": []
+            }
+            
+            required_sources = workflow_def.trust_requirements.get("evidence_sources", [])
+            available_sources = {e.source for e in evidence_list}
+            
+            missing_sources = set(required_sources) - available_sources
+            if missing_sources:
+                validation_result["valid"] = False
+                validation_result["missing_evidence"] = list(missing_sources)
+            
+            # Calculate confidence based on evidence patterns
+            pattern_match_scores = []
+            for pattern_name, pattern in workflow_def.evidence_patterns.items():
+                score = self._evaluate_evidence_pattern(pattern, evidence_list)
+                pattern_match_scores.append(score)
+            
+            if pattern_match_scores:
+                validation_result["confidence"] = sum(pattern_match_scores) / len(pattern_match_scores)
+            
+            validation_result["evidence_summary"] = [e.description for e in evidence_list[:5]]
+            
+            return validation_result
+            
+        except Exception as e:
+            logger.error(f"Error validating workflow evidence: {str(e)}")
+            return {"valid": False, "reason": f"Validation error: {str(e)}"}
+    
+    def _evaluate_evidence_pattern(self, pattern: Dict[str, Any], evidence_list: List) -> float:
+        """Evaluate how well evidence matches a pattern"""
+        if pattern.get("required", False):
+            # Check if required evidence exists
+            return 1.0 if any(e for e in evidence_list) else 0.0
+        
+        # For threshold-based patterns, check if threshold is met
+        threshold = pattern.get("threshold")
+        metric = pattern.get("metric")
+        
+        if threshold and metric:
+            # Find evidence with matching metric
+            for evidence in evidence_list:
+                if metric in evidence.data:
+                    value = evidence.data[metric]
+                    if isinstance(value, (int, float)) and value >= threshold:
+                        return 1.0
+            return 0.0
+        
+        return 0.5  # Default partial match
+    
+    async def get_workflow_execution_plan(self, workflow_id: str, user_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate detailed execution plan for a workflow with evidence context"""
+        try:
+            workflow_def = get_workflow_by_id(workflow_id)
+            if not workflow_def:
+                raise ValueError(f"Workflow {workflow_id} not found")
+            
+            # Validate evidence
+            evidence_validation = await self.validate_workflow_evidence(workflow_id, user_data)
+            
+            # Generate execution plan
+            execution_plan = {
+                "workflow_id": workflow_id,
+                "workflow_name": workflow_def.name,
+                "description": workflow_def.description,
+                "estimated_duration": workflow_def.estimated_duration,
+                "estimated_impact": workflow_def.estimated_impact,
+                "evidence_validation": evidence_validation,
+                "steps": [],
+                "prerequisites": workflow_def.prerequisites,
+                "risk_level": workflow_def.estimated_impact.get("risk_level", "medium"),
+                "automation_level": self._determine_automation_level(evidence_validation.get("confidence", 0))
+            }
+            
+            # Add step details with evidence context
+            for i, step in enumerate(workflow_def.steps):
+                step_info = {
+                    "step_number": i + 1,
+                    "id": step.id,
+                    "name": step.name,
+                    "description": step.description,
+                    "type": step.type,
+                    "agent": step.agent,
+                    "estimated_duration": self._estimate_step_duration(step),
+                    "user_interaction_required": step.user_interaction is not None,
+                    "validation_requirements": step.validations
+                }
+                execution_plan["steps"].append(step_info)
+            
+            return execution_plan
+            
+        except Exception as e:
+            logger.error(f"Error generating execution plan: {str(e)}")
+            raise
+    
+    def _determine_automation_level(self, confidence: float) -> str:
+        """Determine automation level based on confidence score"""
+        if confidence >= 0.90:
+            return "full"
+        elif confidence >= 0.75:
+            return "assisted"
+        else:
+            return "manual"
+    
+    def _estimate_step_duration(self, step: WorkflowStep) -> str:
+        """Estimate duration for a workflow step"""
+        base_durations = {
+            "automated": "30-60 seconds",
+            "semi-automated": "2-5 minutes", 
+            "manual": "5-15 minutes"
+        }
+        return base_durations.get(step.type, "2-5 minutes")
+    
+    async def get_workflow_safety_analysis(self, workflow_id: str, user_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze safety and risk factors for workflow execution"""
+        try:
+            workflow_def = get_workflow_by_id(workflow_id)
+            if not workflow_def:
+                raise ValueError(f"Workflow {workflow_id} not found")
+            
+            safety_analysis = {
+                "workflow_id": workflow_id,
+                "overall_risk_level": workflow_def.estimated_impact.get("risk_level", "medium"),
+                "safety_measures": [],
+                "risk_factors": [],
+                "mitigation_strategies": [],
+                "approval_requirements": []
+            }
+            
+            # Analyze risk factors based on workflow type
+            if "cancel_subscriptions" in workflow_id:
+                safety_analysis["safety_measures"].extend([
+                    "Preview all cancellations before execution",
+                    "Account remains active until end of billing cycle", 
+                    "Easy reactivation process available",
+                    "Backup of subscription data maintained"
+                ])
+                safety_analysis["risk_factors"].extend([
+                    "Accidental cancellation of wanted services",
+                    "Loss of promotional pricing"
+                ])
+            
+            elif "high_yield_savings" in workflow_id:
+                safety_analysis["safety_measures"].extend([
+                    "FDIC insured institutions only",
+                    "No lock-in periods required",
+                    "Maintain emergency fund buffer",
+                    "Gradual transfer option available"
+                ])
+                safety_analysis["risk_factors"].extend([
+                    "Temporary loss of funds access during transfer",
+                    "Potential rate changes after opening"
+                ])
+            
+            elif "negotiate_bills" in workflow_id:
+                safety_analysis["safety_measures"].extend([
+                    "Preview all negotiation communications",
+                    "No binding commitments without approval",
+                    "Backup plan if negotiation fails",
+                    "Service continuity guaranteed"
+                ])
+                safety_analysis["risk_factors"].extend([
+                    "Temporary service disruption if negotiation fails",
+                    "Potential for worse terms than current"
+                ])
+            
+            # Add approval requirements based on risk and confidence
+            evidence_validation = await self.validate_workflow_evidence(workflow_id, user_data)
+            confidence = evidence_validation.get("confidence", 0)
+            
+            if confidence < 0.85:
+                safety_analysis["approval_requirements"].append("Manual review required before execution")
+            if workflow_def.estimated_impact.get("risk_level") == "high":
+                safety_analysis["approval_requirements"].append("Additional confirmation required for high-risk workflow")
+            
+            return safety_analysis
+            
+        except Exception as e:
+            logger.error(f"Error analyzing workflow safety: {str(e)}")
+            return {"error": str(e)}

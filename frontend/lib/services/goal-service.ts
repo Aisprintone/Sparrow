@@ -1,4 +1,5 @@
 import { Goal } from '@/lib/data'
+import { GoalProgressCalculator } from '@/lib/utils/goal-progress-calculator'
 
 // SOLID: Single Responsibility - Goal management operations
 export class GoalService {
@@ -170,7 +171,12 @@ export class GoalService {
 
   // Goal Analytics
   getGoalProgress(goal: Goal): number {
-    return (goal.current / goal.target) * 100
+    // PATTERN GUARDIAN ENFORCED: Using unified calculator
+    const result = GoalProgressCalculator.calculate({
+      current: goal.current,
+      target: goal.target
+    })
+    return result.percentage
   }
 
   getGoalStatus(goal: Goal): 'on-track' | 'behind' | 'ahead' {

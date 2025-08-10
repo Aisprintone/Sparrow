@@ -361,6 +361,7 @@ class ComprehensiveMarketCrashSimulator:
                 'median': np.median(portfolio_values),
                 'std': np.std(portfolio_values),
                 'percentiles': {
+                    '10': np.percentile(portfolio_values, 10),
                     '25': np.percentile(portfolio_values, 25),
                     '50': np.percentile(portfolio_values, 50),
                     '75': np.percentile(portfolio_values, 75),

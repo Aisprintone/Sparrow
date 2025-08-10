@@ -502,3 +502,66 @@ class CSVDataLoader:
         except (FileNotFoundError, pd.errors.EmptyDataError) as e:
             logger.error(f"Failed to load customer data: {e}")
             raise ValueError("Cannot load profiles from CSV data")
+    
+    def load_goals(self, customer_id: int) -> List[Dict[str, Any]]:
+        """
+        Load customer goals from goal.csv.
+        
+        Args:
+            customer_id: Customer ID to load goals for
+            
+        Returns:
+            List of goal dictionaries
+        """
+        try:
+            goals_df = pd.read_csv(os.path.join(self.data_dir, 'goal.csv'))
+            customer_goals = goals_df[goals_df['customer_id'] == customer_id]
+            
+            goals = []
+            for _, row in customer_goals.iterrows():
+                goals.append({
+                    'id': str(row['goal_id']),
+                    'title': row['name'],
+                    'description': row['description'],
+                    'target_amount': float(row['target_amount']) if pd.notna(row['target_amount']) else None,
+                    'target_date': row['target_date'] if pd.notna(row['target_date']) else None,
+                    'current_amount': 0.0,  # Default - can be updated from account tracking
+                    'progress_percentage': 0.0,
+                    'status': 'active',
+                    'customer_id': int(row['customer_id'])
+                })
+            
+            return goals
+            
+        except (FileNotFoundError, pd.errors.EmptyDataError) as e:
+            # If no goals file exists, return empty list
+            return []
+    
+    def get_all_goals(self) -> List[Dict[str, Any]]:
+        """
+        Get all goals from goal.csv.
+        
+        Returns:
+            List of all goal dictionaries
+        """
+        try:
+            goals_df = pd.read_csv(os.path.join(self.data_dir, 'goal.csv'))
+            
+            goals = []
+            for _, row in goals_df.iterrows():
+                goals.append({
+                    'id': str(row['goal_id']),
+                    'title': row['name'],
+                    'description': row['description'],
+                    'target_amount': float(row['target_amount']) if pd.notna(row['target_amount']) else None,
+                    'target_date': row['target_date'] if pd.notna(row['target_date']) else None,
+                    'current_amount': 0.0,
+                    'progress_percentage': 0.0,
+                    'status': 'active',
+                    'customer_id': int(row['customer_id'])
+                })
+            
+            return goals
+            
+        except (FileNotFoundError, pd.errors.EmptyDataError) as e:
+            return []

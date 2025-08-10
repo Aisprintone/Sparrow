@@ -30,9 +30,11 @@ class DatabaseConfig:
             database_url = os.getenv('DATABASE_URL')
             
             if not database_url:
-                # Fallback for local development
-                database_url = os.getenv('LOCAL_DATABASE_URL', 'postgresql://localhost/sparrow')
-                logger.warning("Using local database URL - not suitable for production")
+                # For local development without database, just skip database setup
+                logger.info("No DATABASE_URL found - running in CSV-only mode for local development")
+                self.engine = None
+                self.SessionLocal = None
+                return
             
             # Enhanced connection configuration for Railway
             # Railway-specific optimizations with more aggressive timeouts
@@ -44,23 +46,18 @@ class DatabaseConfig:
                 "keepalives_count": 5,
                 "options": "-c statement_timeout=120000 -c idle_in_transaction_session_timeout=600000",  # 2min statement, 10min idle
                 "tcp_user_timeout": 120000,  # 2 minutes TCP timeout
-                "server_side_cursor": False,  # Disable server-side cursors for Railway
             }
             
             # Create SQLAlchemy engine with Railway-optimized settings
+            # Use StaticPool for Railway to avoid connection pool issues
             self.engine = create_engine(
                 database_url,
                 poolclass=StaticPool,
                 pool_pre_ping=True,
-                pool_recycle=600,  # Increased to 10 minutes
                 echo=False,  # Set to True for SQL debugging
                 connect_args=connect_args,
-                # Add retry logic for connection failures
-                pool_reset_on_return='commit',
-                # Railway-specific pool settings
-                pool_size=3,  # Reduced pool size for Railway
-                max_overflow=5,  # Reduced overflow for Railway
-                pool_timeout=60,  # Increased timeout
+                # StaticPool doesn't support pool_size, max_overflow, pool_timeout
+                # These are handled by the StaticPool implementation
             )
             
             # Create session factory
@@ -122,8 +119,8 @@ class DatabaseConfig:
     def test_connection(self) -> bool:
         """Test database connection with Railway-optimized retry logic"""
         if not self.engine:
-            logger.error("Database engine not available")
-            return False
+            logger.info("Database engine not available - running in CSV-only mode")
+            return True  # Return True for CSV-only mode
             
         # Railway-optimized retry logic with longer timeouts and more attempts
         max_retries = 10  # Increased from 5 to 10

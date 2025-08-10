@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import GlassCard from "@/components/ui/glass-card"
 
-export default function ProfileScreen({ setCurrentScreen }: AppState) {
+export default function ProfileScreen({ setCurrentScreen, profileData, demographic, accounts }: AppState) {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
@@ -37,6 +37,55 @@ export default function ProfileScreen({ setCurrentScreen }: AppState) {
     hidden: { y: 20, opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { type: "spring" } },
   }
+
+  // Calculate financial metrics from real data
+  const totalAssets = accounts.filter(acc => acc.type === "asset").reduce((sum, acc) => sum + acc.balance, 0)
+  const totalLiabilities = Math.abs(accounts.filter(acc => acc.type === "liability").reduce((sum, acc) => sum + acc.balance, 0))
+  const netWorth = totalAssets - totalLiabilities
+
+  // Get demographic-specific profile info
+  const getProfileInfo = () => {
+    switch (demographic) {
+      case "genz":
+        return {
+          name: "Gen Z Student",
+          age: 23,
+          location: "Austin, TX",
+          income: profileData?.metrics?.monthlyIncome * 12 || 38400,
+          education: "Bachelor's Degree",
+          housing: "Renting"
+        }
+      case "millennial":
+        return {
+          name: "Established Millennial", 
+          age: 34,
+          location: "New York, NY",
+          income: profileData?.metrics?.monthlyIncome * 12 || 102000,
+          education: "Bachelor's Degree",
+          housing: "Homeowner"
+        }
+      case "midcareer":
+        return {
+          name: "Mid-Career Professional",
+          age: 42,
+          location: "San Francisco, CA", 
+          income: profileData?.metrics?.monthlyIncome * 12 || 69600,
+          education: "Master's Degree",
+          housing: "Homeowner"
+        }
+      default:
+        return {
+          name: "User",
+          age: 30,
+          location: "Unknown",
+          income: profileData?.metrics?.monthlyIncome * 12 || 60000,
+          education: "Bachelor's Degree",
+          housing: "Renting"
+        }
+    }
+  }
+
+  const profileInfo = getProfileInfo()
 
   return (
     <div className="flex h-[100dvh] flex-col">
@@ -55,7 +104,7 @@ export default function ProfileScreen({ setCurrentScreen }: AppState) {
                 <User className="h-4 w-4 text-blue-400" />
                 <div>
                   <p className="text-sm font-medium text-white">Name</p>
-                  <p className="text-xs text-white/60">John Doe</p>
+                  <p className="text-xs text-white/60">{profileInfo.name}</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-white/40" />
@@ -66,7 +115,7 @@ export default function ProfileScreen({ setCurrentScreen }: AppState) {
                 <Mail className="h-4 w-4 text-green-400" />
                 <div>
                   <p className="text-sm font-medium text-white">Email</p>
-                  <p className="text-xs text-white/60">john.doe@example.com</p>
+                  <p className="text-xs text-white/60">user@financeai.com</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-white/40" />
@@ -94,7 +143,7 @@ export default function ProfileScreen({ setCurrentScreen }: AppState) {
                 <DollarSign className="h-4 w-4 text-green-400" />
                 <div>
                   <p className="text-sm font-medium text-white">Annual Income</p>
-                  <p className="text-xs text-white/60">$85,000</p>
+                  <p className="text-xs text-white/60">${profileInfo.income.toLocaleString()}</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-white/40" />
@@ -105,7 +154,7 @@ export default function ProfileScreen({ setCurrentScreen }: AppState) {
                 <Home className="h-4 w-4 text-blue-400" />
                 <div>
                   <p className="text-sm font-medium text-white">Housing Status</p>
-                  <p className="text-xs text-white/60">Renting</p>
+                  <p className="text-xs text-white/60">{profileInfo.housing}</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-white/40" />
@@ -116,7 +165,7 @@ export default function ProfileScreen({ setCurrentScreen }: AppState) {
                 <GraduationCap className="h-4 w-4 text-purple-400" />
                 <div>
                   <p className="text-sm font-medium text-white">Education Level</p>
-                  <p className="text-xs text-white/60">Bachelor's Degree</p>
+                  <p className="text-xs text-white/60">{profileInfo.education}</p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-white/40" />
@@ -127,7 +176,20 @@ export default function ProfileScreen({ setCurrentScreen }: AppState) {
                 <MapPin className="h-4 w-4 text-orange-400" />
                 <div>
                   <p className="text-sm font-medium text-white">Location</p>
-                  <p className="text-xs text-white/60">San Francisco, CA</p>
+                  <p className="text-xs text-white/60">{profileInfo.location}</p>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-white/40" />
+            </div>
+
+            <div className="flex items-center justify-between p-3">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 text-green-400" />
+                <div>
+                  <p className="text-sm font-medium text-white">Net Worth</p>
+                  <p className={`text-xs ${netWorth >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    ${netWorth.toLocaleString()}
+                  </p>
                 </div>
               </div>
               <ChevronRight className="h-4 w-4 text-white/40" />

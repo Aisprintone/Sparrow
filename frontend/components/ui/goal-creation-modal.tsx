@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format, addMonths } from "date-fns"
+import { GoalProgressCalculator } from '@/lib/utils/goal-progress-calculator'
 
 interface GoalConfig {
   title: string
@@ -72,7 +73,12 @@ export default function GoalCreationModal({
   )
   const projectedCompletionDate = addMonths(new Date(), monthsToGoal)
   const totalContributions = monthsToGoal * goalConfig.monthlyContribution
-  const progressPercentage = (goalConfig.current / goalConfig.target) * 100
+  // PATTERN GUARDIAN ENFORCED: Using unified calculator
+  const progressResult = GoalProgressCalculator.calculate({
+    current: goalConfig.current,
+    target: goalConfig.target
+  })
+  const progressPercentage = progressResult.percentage
 
   // Generate automatic milestones
   useEffect(() => {

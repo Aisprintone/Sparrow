@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import GlassCard from "@/components/ui/glass-card"
 import { ChevronDown, ChevronUp, Check, Clock, AlertCircle, Play, Pause, Eye, Settings, Info, Shield, Zap, TrendingUp, DollarSign, Activity, Target, Star, AlertTriangle, User, Bot, RefreshCw, BarChart3, Timer, Lock, Unlock, Sparkles, ArrowRight, ArrowDown, Users, Globe, Smartphone, Monitor, CreditCard, PiggyBank, Home, Car, Plane, X } from "lucide-react"
 import { aiActionsService } from "@/lib/api/ai-actions-service"
+import { aiActionsDataService, PersonalizedAIAction } from "@/lib/services/ai-actions-data-service"
 import AutomationStatusCard from "@/components/ui/automation-status-card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -24,12 +25,52 @@ export default function AIActionsScreen({
   setSelectedThought,
   setThoughtDetailOpen,
   setAiActions,
+  selectedProfile,
 }: AppState) {
   const [expandedActions, setExpandedActions] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<"suggested" | "in-process" | "completed">("suggested")
   const [workflowStatuses, setWorkflowStatuses] = useState<Record<string, any>>({})
   const [inspectedWorkflow, setInspectedWorkflow] = useState<string | null>(null)
   const [workflowValidation, setWorkflowValidation] = useState<Record<string, any>>({})
+  const [personalizedActions, setPersonalizedActions] = useState<PersonalizedAIAction[]>([])
+  const [isLoadingActions, setIsLoadingActions] = useState(true)
+
+  // Load personalized actions based on profile
+  useEffect(() => {
+    const loadPersonalizedActions = async () => {
+      if (!selectedProfile?.id) {
+        setIsLoadingActions(false)
+        return
+      }
+
+      setIsLoadingActions(true)
+      try {
+        const actions = await aiActionsDataService.getPersonalizedActions(selectedProfile.id)
+        setPersonalizedActions(actions)
+        
+        // Merge with existing AI actions, preferring personalized ones
+        const mergedActions = actions.map(action => ({
+          ...action,
+          status: aiActions.find(a => a.id === action.id)?.status || action.status
+        }))
+        
+        // Add any existing actions not in personalized list
+        aiActions.forEach(existingAction => {
+          if (!mergedActions.find(a => a.id === existingAction.id)) {
+            mergedActions.push(existingAction as PersonalizedAIAction)
+          }
+        })
+        
+        setAiActions(mergedActions)
+      } catch (error) {
+        console.error('Failed to load personalized actions:', error)
+      } finally {
+        setIsLoadingActions(false)
+      }
+    }
+
+    loadPersonalizedActions()
+  }, [selectedProfile])
 
   // Enhanced workflow validation and status polling
   useEffect(() => {
@@ -199,6 +240,9 @@ export default function AIActionsScreen({
   }
 
   const handleInspectWorkflow = (actionId: string) => {
+    console.log('Inspect clicked for actionId:', actionId)
+    console.log('Current inspectedWorkflow:', inspectedWorkflow)
+    console.log('Will set inspectedWorkflow to:', inspectedWorkflow === actionId ? null : actionId)
     setInspectedWorkflow(inspectedWorkflow === actionId ? null : actionId)
   }
 
@@ -262,9 +306,10 @@ export default function AIActionsScreen({
     visible: { y: 0, opacity: 1, transition: { type: "spring" } },
   }
 
-  // Enhanced suggested action card with better design
-  const renderActionCard = (action: any, isPendingApproval = false) => {
+  // Enhanced suggested action card with real data integration
+  const renderActionCard = (action: PersonalizedAIAction | AIAction, isPendingApproval = false) => {
     const isExpanded = expandedActions.includes(action.id)
+    const isPersonalized = 'profileSpecific' in action && action.profileSpecific
 
     return (
       <GlassCard key={action.id} className="bg-gradient-to-br from-white/10 to-white/5 border border-white/20 hover:border-white/30 transition-all duration-300 h-auto min-h-[280px] flex flex-col">
@@ -276,7 +321,14 @@ export default function AIActionsScreen({
             </div>
             <div className="flex-1">
               <div className="flex items-start justify-between mb-2">
-                <h3 className="text-lg font-semibold text-white mb-1">{action.title}</h3>
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-1">{action.title}</h3>
+                  {isPersonalized && (
+                    <Badge variant="outline" className="text-xs bg-blue-500/20 text-blue-300 border-blue-500/30">
+                      Personalized for you
+                    </Badge>
+                  )}
+                </div>
                 <div className="text-right">
                   <p className="text-xl font-bold text-green-400">+${action.potentialSaving}/mo</p>
                 </div>
@@ -285,7 +337,7 @@ export default function AIActionsScreen({
             </div>
           </div>
 
-          {/* Key benefits - simplified and cleaner */}
+          {/* Key benefits - with relevance score for personalized actions */}
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="flex items-center gap-2 text-xs text-gray-400">
               <Clock className="h-3 w-3" />
@@ -293,15 +345,15 @@ export default function AIActionsScreen({
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-400">
               <Shield className="h-3 w-3" />
-              <span>Low risk</span>
+              <span>{action.priority === 'high' ? 'Critical' : action.priority === 'medium' ? 'Important' : 'Low risk'}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-400">
               <Target className="h-3 w-3" />
-              <span>Automated</span>
+              <span>{'relevanceScore' in action ? `${action.relevanceScore}% relevant` : 'Automated'}</span>
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-400">
               <TrendingUp className="h-3 w-3" />
-              <span>Immediate impact</span>
+              <span>{'dataSource' in action && action.dataSource === 'real' ? 'AI-verified' : 'Immediate impact'}</span>
             </div>
           </div>
 
@@ -367,6 +419,10 @@ export default function AIActionsScreen({
     const workflowStatus = workflowStatuses[action.executionId] || action
     const isInspected = inspectedWorkflow === action.id
     const validation = workflowValidation[action.id]
+    
+    console.log('renderInProcessCard - action.id:', action.id)
+    console.log('renderInProcessCard - inspectedWorkflow:', inspectedWorkflow)
+    console.log('renderInProcessCard - isInspected:', isInspected)
     
     // Create a simplified automation action for the card
     const automationAction = {
@@ -482,7 +538,7 @@ export default function AIActionsScreen({
               size="sm" 
               variant="outline" 
               onClick={() => handleInspectWorkflow(action.id)} 
-              className="flex-1"
+              className={`flex-1 ${isInspected ? 'bg-blue-500/20 border-blue-500' : ''}`}
             >
               <Eye className="h-3 w-3 mr-1" />
               {isInspected ? "Hide Details" : "Inspect"}
@@ -505,13 +561,13 @@ export default function AIActionsScreen({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden"
+            className="overflow-hidden mt-4"
           >
             <GlassCard className="bg-gray-900/90 border border-gray-700/50">
               <div className="p-4">
                 <h4 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
                   <Bot className="h-4 w-4" />
-                  Workflow Details
+                  Workflow Details for {action.title} (ID: {action.id})
                 </h4>
                 
                 {/* Simplified Steps */}
@@ -707,7 +763,13 @@ export default function AIActionsScreen({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4">
-          {filteredActions.length === 0 ? (
+          {isLoadingActions ? (
+            <div className="text-center py-12">
+              <div className="text-4xl mb-4 animate-pulse">🤖</div>
+              <h3 className="text-lg font-semibold text-white mb-2">Analyzing your finances...</h3>
+              <p className="text-gray-400">Generating personalized recommendations</p>
+            </div>
+          ) : filteredActions.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-4xl mb-4">🤖</div>
               <h3 className="text-lg font-semibold text-white mb-2">
@@ -716,7 +778,9 @@ export default function AIActionsScreen({
                 {activeTab === "completed" && "No completed actions"}
               </h3>
               <p className="text-gray-400">
-                {activeTab === "suggested" && "AI will analyze your finances and suggest optimizations"}
+                {activeTab === "suggested" && selectedProfile ? 
+                  `No AI recommendations for ${selectedProfile.name || 'this profile'} yet` : 
+                  "Select a profile to see personalized recommendations"}
                 {activeTab === "in-process" && "Automations will appear here when they're running"}
                 {activeTab === "completed" && "Completed actions will appear here"}
               </p>

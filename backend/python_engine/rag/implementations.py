@@ -31,14 +31,19 @@ class SimpleRAGQueryExecutor(IRAGQueryExecutor):
     async def execute_query(self, profile_id: int, query: RAGQuery) -> RAGResult:
         """Execute a single RAG query using the existing RAG manager"""
         start_time = time.time()
+        logger.info(f"🔍 SimpleRAGQueryExecutor: profile_id={profile_id}, query_type={query.query_type}")
         
         try:
             # Get the profile system from RAG manager
+            logger.info(f"🔍 Getting profile system for profile {profile_id}")
             profile_system = self.rag_manager.get_profile_system(profile_id)
+            logger.info(f"🔍 Got profile system: {type(profile_system)}")
             
             # Execute the query using the appropriate tool
             tool_name = query.query_type.value if query.query_type else None
+            logger.info(f"🔍 Executing query with tool_name={tool_name}")
             result_text = profile_system.query(query.query_text, tool_name)
+            logger.info(f"🔍 Query result length: {len(result_text)}")
             
             execution_time_ms = (time.time() - start_time) * 1000
             
@@ -52,7 +57,10 @@ class SimpleRAGQueryExecutor(IRAGQueryExecutor):
             
         except Exception as e:
             execution_time_ms = (time.time() - start_time) * 1000
-            logger.error(f"Query execution failed: {e}")
+            logger.error(f"🚨 SimpleRAGQueryExecutor FAILED: {e}")
+            logger.error(f"🚨 Exception type: {type(e)}")
+            import traceback
+            logger.error(f"🚨 Traceback: {traceback.format_exc()}")
             
             return RAGResult(
                 query=query,

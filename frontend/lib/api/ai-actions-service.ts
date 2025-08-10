@@ -7,6 +7,7 @@
 import { workflowService, WorkflowDefinition } from './workflow-service';
 import { AIAction } from '@/hooks/use-app-state';
 import { cacheService } from '../services/cacheService';
+import { personalizedWorkflowService } from './personalized-workflow-service';
 
 export interface WorkflowToAIActionMapping {
   [workflowId: string]: {

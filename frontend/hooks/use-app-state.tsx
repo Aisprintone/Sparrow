@@ -33,7 +33,6 @@ export type Screen =
   | "create-goal"
   | "goal-detail"
   | "bills"
-  | "market-data"
 
 export type Demographic = "genz" | "millennial" | "midcareer"
 
@@ -73,14 +72,18 @@ class DataCache {
   invalidate(pattern?: string): void {
     if (!pattern) {
       this.cache.clear()
+      console.log('[CACHE] Cleared all memory cache entries')
       return
     }
     
+    let clearedCount = 0
     for (const key of this.cache.keys()) {
       if (key.includes(pattern)) {
         this.cache.delete(key)
+        clearedCount++
       }
     }
+    console.log(`[CACHE] Cleared ${clearedCount} memory cache entries for pattern: ${pattern}`)
   }
   
   getMetrics(): { size: number; hitRate: number } {
@@ -242,11 +245,15 @@ export interface AppState {
   // Simulation results state
   simulationResults: any
   setSimulationResults: (results: any) => void
+  // Cache management
+  clearCache: (pattern?: string) => Promise<void>
 }
 
 // ============================================================================
 // API INTEGRATION LAYER - REAL CSV DATA FETCHING
 // ============================================================================
+import { apiErrorHandler } from '@/lib/api/error-handler'
+
 async function fetchProfileData(profileId: number) {
   const cacheKey = `profile-${profileId}`
   const cached = dataCache.get(cacheKey)
@@ -262,15 +269,50 @@ async function fetchProfileData(profileId: number) {
   const startTime = performance.now()
   
   try {
-    const response = await fetch(`/api/profiles/${profileId}`)
-    if (!response.ok) {
-      throw new Error(`Failed to fetch profile ${profileId}: ${response.statusText}`)
-    }
-    
-    const result = await response.json()
-    if (!result.success) {
-      throw new Error(result.error || 'Failed to fetch profile data')
-    }
+    // First try: Direct backend API call
+    const result = await apiErrorHandler.withRetry(async () => {
+      // Try backend directly first
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+      const backendResponse = await fetch(`${backendUrl}/profiles/${profileId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (backendResponse.ok) {
+        const backendData = await backendResponse.json()
+        if (backendData.success) {
+          console.log(`[FETCH] ✅ Profile ${profileId} fetched directly from backend`)
+          return backendData.profile
+        }
+      }
+      
+      // Fallback: Use frontend API route
+      const response = await fetch(`/api/profiles/${profileId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      console.log(`[FETCH] Response status: ${response.status}`)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error(`[FETCH] Response error: ${errorText}`)
+        throw new Error(`Failed to fetch profile ${profileId}: ${response.statusText}`)
+      }
+      
+      const data = await response.json()
+      console.log(`[FETCH] Response data:`, data)
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch profile data')
+      }
+      
+      return data.data
+    })
     
     const fetchTime = performance.now() - startTime
     console.log(`[PERFORMANCE] Profile ${profileId} fetched in ${fetchTime.toFixed(2)}ms`)
@@ -282,12 +324,20 @@ async function fetchProfileData(profileId: number) {
     }
     
     // Cache the transformed data
-    dataCache.set(cacheKey, result.data)
+    dataCache.set(cacheKey, result)
     
-    return result.data
+    return result
   } catch (error) {
-    console.error(`Error fetching profile ${profileId}:`, error)
-    // Return fallback data if API fails
+    console.error(`[FETCH] All attempts failed for profile ${profileId}:`, error)
+    
+    // Handle specific error types
+    const classifiedError = apiErrorHandler.classifyError(error)
+    if (classifiedError.code === 'REDIRECT_LOOP') {
+      apiErrorHandler.handleRedirectLoop()
+    }
+    
+    // Only use fallback data as last resort when backend is completely unavailable
+    console.warn(`[FALLBACK] Using fallback data for profile ${profileId} - backend unavailable`)
     return getFallbackData(profileId)
   }
 }
@@ -305,6 +355,22 @@ async function fetchAllProfiles() {
   const startTime = performance.now()
   
   try {
+    // Try backend directly first
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    const backendResponse = await fetch(`${backendUrl}/profiles`)
+    
+    if (backendResponse.ok) {
+      const backendData = await backendResponse.json()
+      if (backendData.success) {
+        console.log('[FETCH] ✅ All profiles fetched directly from backend')
+        const fetchTime = performance.now() - startTime
+        console.log(`[PERFORMANCE] All profiles fetched in ${fetchTime.toFixed(2)}ms`)
+        dataCache.set(cacheKey, backendData.profiles, 300000) // Cache for 5 minutes
+        return backendData.profiles
+      }
+    }
+    
+    // Fallback: Use frontend API route
     const response = await fetch('/api/profiles')
     if (!response.ok) {
       throw new Error(`Failed to fetch profiles: ${response.statusText}`)
@@ -317,12 +383,14 @@ async function fetchAllProfiles() {
     
     const fetchTime = performance.now() - startTime
     console.log(`[PERFORMANCE] All profiles fetched in ${fetchTime.toFixed(2)}ms`)
+    console.log(`[FETCH] Source: ${result.source || 'unknown'}`)
     
     dataCache.set(cacheKey, result.data, 300000) // Cache for 5 minutes
     
     return result.data
   } catch (error) {
     console.error('Error fetching profiles:', error)
+    // Return empty array instead of hardcoded fallback - let UI handle empty state
     return []
   }
 }
@@ -332,7 +400,7 @@ function demographicToProfileId(demographic: Demographic): number {
   const mapping: Record<Demographic, number> = {
     millennial: 1,
     midcareer: 2,
-    genz: 3
+    genz: 3 // Profile 3 exists and has genz demographic
   }
   return mapping[demographic]
 }
@@ -494,8 +562,203 @@ export default function useAppState(): AppState {
   const [isSimulating, setIsSimulating] = useState(false)
   const [simulationProgress, setSimulationProgress] = useState(0)
   const [activeAutomations, setActiveAutomations] = useState<AutomationAction[]>([])
-  const [goals, setGoals] = useState<Goal[]>(initialGoals)
+  const [goals, setGoals] = useState<Goal[]>([])
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
+
+  // Generate profile-specific goals based on user data
+  const generateProfileSpecificGoals = useCallback((profileData: any, demographic: Demographic): Goal[] => {
+    const generatedGoals: Goal[] = []
+    
+    if (!profileData || !profileData.accounts) {
+      return []
+    }
+
+    const accounts = profileData.accounts
+    const metrics = profileData.metrics || {}
+    const currentDate = new Date()
+
+    // Calculate key financial metrics
+    const liquidAssets = accounts
+      .filter((acc: any) => ['checking', 'savings'].includes(acc.account_type))
+      .reduce((sum: number, acc: any) => sum + Math.max(0, acc.balance), 0)
+    
+    const totalDebt = accounts
+      .filter((acc: any) => acc.balance < 0 || ['credit_card', 'student_loan', 'auto_loan', 'mortgage'].includes(acc.account_type))
+      .reduce((sum: number, acc: any) => sum + Math.abs(Math.min(0, acc.balance)), 0)
+    
+    const monthlyIncome = metrics.monthlyIncome || 0
+    const monthlySpending = metrics.monthlySpending?.total || 0
+    const emergencyFundMonths = monthlySpending > 0 ? liquidAssets / monthlySpending : 0
+
+    // Goal 1: Emergency Fund (if needed)
+    if (emergencyFundMonths < 6) {
+      const targetAmount = monthlySpending * 6
+      const currentAmount = liquidAssets
+      const monthsToTarget = 18 // 1.5 years target
+      const monthlyContribution = Math.max(100, (targetAmount - currentAmount) / monthsToTarget)
+      
+      const deadline = new Date(currentDate)
+      deadline.setMonth(deadline.getMonth() + monthsToTarget)
+      
+      generatedGoals.push({
+        id: 1,
+        title: "Emergency Fund",
+        type: "safety",
+        target: Math.round(targetAmount),
+        current: Math.round(currentAmount),
+        deadline: deadline.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        icon: "Shield",
+        color: "green",
+        monthlyContribution: Math.round(monthlyContribution),
+        priority: "high",
+        status: "active",
+        simulationTags: ["emergency-fund"],
+        milestones: [
+          { name: "3-month expenses", target: Math.round(monthlySpending * 3) },
+          { name: "6-month expenses", target: Math.round(targetAmount) },
+          { name: "Fully funded", target: Math.round(targetAmount) }
+        ],
+        aiInsights: {
+          lastUpdated: new Date().toISOString(),
+          recommendations: [
+            "Consider high-yield savings account for better returns",
+            "Automate monthly transfers to ensure consistency"
+          ],
+          riskAssessment: "Critical for financial stability - highest priority",
+          optimizationOpportunities: [
+            `Increase contribution by $${Math.round(monthlyContribution * 0.25)}/month to reach target ${Math.round(monthsToTarget * 0.2)} months earlier`,
+            "Use windfall income to accelerate progress"
+          ]
+        }
+      })
+    }
+
+    // Goal 2: Debt Payoff (if significant debt exists)
+    if (totalDebt > 1000) {
+      const studentLoans = accounts.filter((acc: any) => acc.account_type === 'student_loan')
+      const creditCards = accounts.filter((acc: any) => acc.account_type === 'credit_card')
+      
+      if (studentLoans.length > 0) {
+        const studentDebt = studentLoans.reduce((sum: number, acc: any) => sum + Math.abs(acc.balance), 0)
+        const monthsToPayoff = Math.min(60, Math.max(24, studentDebt / 500)) // 2-5 years
+        const monthlyPayment = Math.round(studentDebt / monthsToPayoff)
+        
+        const deadline = new Date(currentDate)
+        deadline.setMonth(deadline.getMonth() + monthsToPayoff)
+        
+        generatedGoals.push({
+          id: 2,
+          title: "Student Loan Payoff",
+          type: "debt",
+          target: Math.round(studentDebt),
+          current: Math.round(studentDebt), // Start at full amount, work towards 0
+          deadline: deadline.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+          icon: "GraduationCap",
+          color: "red",
+          monthlyContribution: monthlyPayment,
+          priority: "high",
+          status: "active",
+          simulationTags: ["student-loan", "debt-payoff"],
+          milestones: [
+            { name: "25% paid off", target: Math.round(studentDebt * 0.75) },
+            { name: "50% paid off", target: Math.round(studentDebt * 0.5) },
+            { name: "Debt free!", target: 0 }
+          ],
+          aiInsights: {
+            lastUpdated: new Date().toISOString(),
+            recommendations: [
+              "Run debt avalanche simulation to optimize payoff strategy",
+              "Consider refinancing for lower interest rates"
+            ],
+            riskAssessment: "High priority - reduces monthly obligations and interest costs",
+            optimizationOpportunities: [
+              "Use debt avalanche method to save on interest",
+              "Apply windfall income to highest interest loans first"
+            ]
+          }
+        })
+      }
+    }
+
+    // Goal 3: Investment/Retirement (based on demographic and income)
+    if (monthlyIncome > 0) {
+      let targetAmount: number
+      let timeHorizon: number
+      let goalTitle: string
+      let goalType: "retirement" | "investment" | "home"
+      let simulationTags: string[]
+      
+      if (demographic === "genz") {
+        targetAmount = 100000
+        timeHorizon = 120 // 10 years
+        goalTitle = "Investment Portfolio"
+        goalType = "investment"
+        simulationTags = ["market-crash"] // Gen Z focuses on market volatility awareness
+      } else if (demographic === "midcareer") {
+        targetAmount = 50000
+        timeHorizon = 36 // 3 years
+        goalTitle = "Home Down Payment"
+        goalType = "home"
+        simulationTags = ["home-purchase"]
+      } else { // millennial
+        targetAmount = 500000
+        timeHorizon = 180 // 15 years
+        goalTitle = "Retirement Fund"
+        goalType = "retirement"
+        simulationTags = ["salary-increase", "market-crash"] // Millennials focus on income optimization and portfolio protection
+      }
+      
+      const currentInvestments = accounts
+        .filter((acc: any) => ['investment', '401k', 'ira'].includes(acc.account_type))
+        .reduce((sum: number, acc: any) => sum + Math.max(0, acc.balance), 0)
+      
+      const monthlyContribution = Math.max(200, (targetAmount - currentInvestments) / timeHorizon)
+      
+      const deadline = new Date(currentDate)
+      deadline.setMonth(deadline.getMonth() + timeHorizon)
+      
+      generatedGoals.push({
+        id: 3,
+        title: goalTitle,
+        type: goalType,
+        target: Math.round(targetAmount),
+        current: Math.round(currentInvestments),
+        deadline: deadline.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+        icon: goalType === "home" ? "Home" : goalType === "retirement" ? "TrendingUp" : "BarChart3",
+        color: goalType === "home" ? "purple" : goalType === "retirement" ? "orange" : "teal",
+        monthlyContribution: Math.round(monthlyContribution),
+        priority: "high",
+        status: "active",
+        simulationTags,
+        milestones: [
+          { name: "25% milestone", target: Math.round(targetAmount * 0.25) },
+          { name: "50% milestone", target: Math.round(targetAmount * 0.5) },
+          { name: "Target reached", target: Math.round(targetAmount) }
+        ],
+        aiInsights: {
+          lastUpdated: new Date().toISOString(),
+          recommendations: goalType === "home" 
+            ? ["Run home purchase simulation to optimize timing", "Consider different down payment scenarios"]
+            : goalType === "retirement"
+            ? ["Run 401k maximization simulation", "Consider Roth vs Traditional IRA strategy"]
+            : ["Diversify across different asset classes", "Consider automated investing for consistency"],
+          riskAssessment: goalType === "home" 
+            ? "High impact on long-term wealth building"
+            : goalType === "retirement"
+            ? "Critical for long-term financial security"
+            : "Medium risk with potential for high returns",
+          optimizationOpportunities: [
+            `Increase monthly contribution by $${Math.round(monthlyContribution * 0.3)} for faster progress`,
+            goalType === "retirement" ? "Consider side hustle income for additional savings" : "Consider tax-advantaged investment strategies"
+          ]
+        }
+      })
+    }
+
+    console.log(`[GOALS] Generated ${generatedGoals.length} profile-specific goals for ${demographic}:`, generatedGoals.map(g => g.title))
+    return generatedGoals
+  }, [])
+
   const [isThoughtDetailOpen, setThoughtDetailOpen] = useState(false)
   const [selectedThought, setSelectedThought] = useState<ResultCard | null>(null)
   const [isChatOpen, setChatOpen] = useState(false)
@@ -782,83 +1045,138 @@ export default function useAppState(): AppState {
       })
   }, [profileData, demographic])
 
+  // Update goals when profile data changes
+  useEffect(() => {
+    if (profileData && profileData.accounts) {
+      const profileSpecificGoals = generateProfileSpecificGoals(profileData, demographic)
+      setGoals(profileSpecificGoals)
+      console.log(`[GOALS] Updated goals based on profile data:`, profileSpecificGoals.map(g => `${g.title} (${g.simulationTags?.join(', ')})`))
+    }
+  }, [profileData, demographic])
+
+  // ============================================================================
+  // APP INITIALIZATION - CLEAR CACHE AND LOAD FRESH DATA
+  // ============================================================================
+  useEffect(() => {
+    let cancelled = false
+    
+    async function initializeApp() {
+      console.log('[INIT] Starting app initialization...')
+      
+      try {
+        // Step 0: Wait for Next.js server to be ready
+        console.log('[INIT] Waiting for server to be ready...')
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        if (cancelled) return
+        
+        // Step 1: Clear any old cache residue
+        console.log('[INIT] Clearing old cache...')
+        await clearCache('*')
+        
+        if (cancelled) return
+        
+        // Step 2: Load fresh profile data
+        console.log('[INIT] Loading fresh profile data...')
+        await loadProfileData()
+        
+        console.log('[INIT] App initialization complete')
+      } catch (error) {
+        console.error('[INIT] App initialization failed:', error)
+        // Continue with fallback data
+        await loadProfileData()
+      }
+    }
+    
+    // Only initialize when user is past login screen
+    if (currentScreen !== 'login') {
+      initializeApp()
+    }
+    
+    return () => {
+      cancelled = true
+    }
+  }, [currentScreen]) // Run when screen changes from login
+  
+  // ============================================================================
+  // LOAD PROFILE DATA FUNCTION (shared between initialization and demographic changes)
+  // ============================================================================
+  const loadProfileData = useCallback(async () => {
+    const profileId = demographicToProfileId(demographic)
+    console.log(`[PROFILE LOAD] Loading profile ${profileId} for demographic: ${demographic}`)
+    
+    setIsLoadingProfile(true)
+    const startTime = performance.now()
+    
+    try {
+      const data = await fetchProfileData(profileId)
+      
+      // Update all state with real CSV data
+      setProfileData(data)
+      
+      // Transform and set accounts
+      if (data.accounts) {
+        setAccounts(data.accounts as Account[])
+      }
+      
+      // Set financial metrics
+      if (data.metrics) {
+        setMonthlyIncome(data.metrics.monthlyIncome || 0)
+        setCreditScore(data.metrics.creditScore || 0)
+        setNetWorth(data.metrics.netWorth || 0)
+      }
+      
+      // Set spending data
+      if (data.spending) {
+        setMonthlySpending({
+          total: data.spending.total,
+          topCategory: data.spending.topCategory || { name: 'Unknown', amount: 0 }
+        })
+        setSpendingCategories(data.spending.categories || [])
+      }
+      
+      const loadTime = performance.now() - startTime
+      console.log(`[PERFORMANCE] Profile data loaded in ${loadTime.toFixed(2)}ms`)
+      
+      // Track performance metrics
+      fetchMetrics.current.totalTime += loadTime
+      lastFetchTime.current = loadTime
+      
+      // Removed profile loaded toast notification
+    } catch (error) {
+      console.error('Error loading profile data:', error)
+      
+      // Fall back to hardcoded data
+      const fallbackData = getFallbackData(demographicToProfileId(demographic))
+      const currentData = fallbackData[demographic]
+      setAccounts(currentData.accounts as Account[])
+      setMonthlyIncome(currentData.monthlyIncome)
+      setMonthlySpending(currentData.monthlySpending)
+      setSpendingCategories(currentData.spendingCategories)
+      
+      // Removed cached data notification
+    } finally {
+      setIsLoadingProfile(false)
+    }
+  }, [demographic, setProfileData, setAccounts, setMonthlyIncome, setCreditScore, setNetWorth, setMonthlySpending, setSpendingCategories, setIsLoadingProfile])
+
   // ============================================================================
   // LOAD PROFILE DATA WHEN DEMOGRAPHIC CHANGES
   // ============================================================================
   useEffect(() => {
     let cancelled = false
     
-    async function loadProfileData() {
-      const profileId = demographicToProfileId(demographic)
-      console.log(`[PROFILE SWITCH] Loading profile ${profileId} for demographic: ${demographic}`)
-      
-      setIsLoadingProfile(true)
-      const startTime = performance.now()
-      
-      try {
-        const data = await fetchProfileData(profileId)
-        
-        if (cancelled) return
-        
-        // Update all state with real CSV data
-        setProfileData(data)
-        
-        // Transform and set accounts
-        if (data.accounts) {
-          setAccounts(data.accounts as Account[])
-        }
-        
-        // Set financial metrics
-        if (data.metrics) {
-          setMonthlyIncome(data.metrics.monthlyIncome || 0)
-          setCreditScore(data.metrics.creditScore || 0)
-          setNetWorth(data.metrics.netWorth || 0)
-        }
-        
-        // Set spending data
-        if (data.spending) {
-          setMonthlySpending({
-            total: data.spending.total,
-            topCategory: data.spending.topCategory || { name: 'Unknown', amount: 0 }
-          })
-          setSpendingCategories(data.spending.categories || [])
-        }
-        
-        const loadTime = performance.now() - startTime
-        console.log(`[PERFORMANCE] Profile data loaded in ${loadTime.toFixed(2)}ms`)
-        
-        // Track performance metrics
-        fetchMetrics.current.totalTime += loadTime
-        lastFetchTime.current = loadTime
-        
-        // Removed profile loaded toast notification
-      } catch (error) {
-        console.error('Error loading profile data:', error)
-        
-        if (cancelled) return
-        
-        // Fall back to hardcoded data
-        const fallbackData = getFallbackData(demographicToProfileId(demographic))
-        const currentData = fallbackData[demographic]
-        setAccounts(currentData.accounts as Account[])
-        setMonthlyIncome(currentData.monthlyIncome)
-        setMonthlySpending(currentData.monthlySpending)
-        setSpendingCategories(currentData.spendingCategories)
-        
-        // Removed cached data notification
-      } finally {
-        if (!cancelled) {
-          setIsLoadingProfile(false)
-        }
-      }
+    const loadProfileDataWithCancellation = async () => {
+      await loadProfileData()
+      if (cancelled) return
     }
     
-    loadProfileData()
+    loadProfileDataWithCancellation()
     
     return () => {
       cancelled = true
     }
-  }, [demographic, toast])
+  }, [loadProfileData]) // Run when loadProfileData changes (which depends on demographic)
 
   const toggleSimulation = (sim: Simulation) => {
     if (selectedSimulations.find((s) => s.id === sim.id)) {
@@ -930,22 +1248,38 @@ export default function useAppState(): AppState {
       console.log(`[USE-APP-STATE] 🔗 API Endpoint: ${endpoint}`)
       
       // Call backend API with simulation and explanation generation
+      const requestBody = {
+        profile_id: profileId.toString(), // Backend expects string
+        scenario_type: scenarioType,
+        iterations: 10000,
+        include_advanced_metrics: true,
+        generate_explanations: true
+      }
+      
+      console.log(`[USE-APP-STATE] 📤 API Request:`)
+      console.log(`  URL: https://sparrow-backend-production.up.railway.app${endpoint}`)
+      console.log(`  Body:`, requestBody)
+      
       const response = await fetch(`https://sparrow-backend-production.up.railway.app${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          profile_id: profileId,
-          scenario_type: scenarioType,
-          iterations: 10000,
-          include_advanced_metrics: true,
-          generate_explanations: true
-        })
+        body: JSON.stringify(requestBody)
       })
       
+      console.log(`[USE-APP-STATE] 📥 API Response: ${response.status} ${response.statusText}`)
+      
       if (!response.ok) {
-        throw new Error('Simulation failed')
+        let errorMessage = 'Simulation failed'
+        try {
+          const errorBody = await response.text()
+          console.error(`[USE-APP-STATE] ❌ API Error Response:`, errorBody)
+          errorMessage = `API Error ${response.status}: ${errorBody}`
+        } catch (e) {
+          console.error(`[USE-APP-STATE] ❌ Failed to read error response:`, e)
+        }
+        throw new Error(errorMessage)
       }
       
       const result = await response.json()
@@ -1175,6 +1509,47 @@ export default function useAppState(): AppState {
     // Removed bill paid toast
   }
 
+  const clearCache = useCallback(async (pattern?: string) => {
+    try {
+      console.log(`[CACHE] Clearing cache with pattern: ${pattern || 'all'}`)
+      
+      // Clear memory cache
+      dataCache.invalidate(pattern)
+      
+      // Clear backend cache
+      console.log(`[CACHE] Calling cache clear API...`)
+      const response = await fetch(`/api/cache/clear/${pattern || '*'}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      console.log(`[CACHE] Cache clear response status: ${response.status}`)
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error(`[CACHE] Cache clear error: ${errorText}`)
+        throw new Error(`Failed to clear cache: ${response.statusText}`)
+      }
+      
+      const result = await response.json()
+      console.log('[CACHE] Cache clear result:', result)
+      
+      // Force refresh of current data
+      if (pattern === '*' || !pattern) {
+        // Clear all cached data and refetch
+        setProfileData(null)
+        // Don't clear simulation results during cache clearing - they should persist until explicitly cleared
+        // setSimulationResults(null)
+      }
+      
+    } catch (error) {
+      console.error('[CACHE] Cache clear failed:', error)
+      // Don't throw - allow app to continue with fallback data
+    }
+  }, [])
+
   // Remove the automatic progress simulation since we now handle it in runSimulations
   // The progress is now controlled by actual API calls and stages
 
@@ -1231,6 +1606,7 @@ export default function useAppState(): AppState {
     setProfileData,
     simulationResults,
     setSimulationResults,
+    clearCache,
   }
 }
 

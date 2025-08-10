@@ -25,6 +25,7 @@ import {
   type CardActions,
   type CardData
 } from "@/components/ai-actions/action-card-factory"
+import DeepDiveModal from "@/components/ui/deep-dive-modal"
 
 // ==================== Screen Component ====================
 
@@ -47,6 +48,8 @@ export default function AIActionsScreenRefactored({
   const [workflowStatuses, setWorkflowStatuses] = useState<Record<string, any>>({})
   const [inspectedWorkflow, setInspectedWorkflow] = useState<string | null>(null)
   const [workflowValidations, setWorkflowValidations] = useState<Record<string, any>>({})
+  const [deepDiveAction, setDeepDiveAction] = useState<CardData | null>(null)
+  const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false)
   
   // ==================== Workflow Status Polling ====================
   
@@ -83,73 +86,149 @@ export default function AIActionsScreenRefactored({
   // ==================== Action Handlers ====================
   
   const cardActions: CardActions = useMemo(() => ({
-    onLearnMore: (action: AIAction) => {
-      const resultCard = {
-        id: action.id,
-        type: "individual" as const,
-        content: action.description,
-        emoji: "🤖",
-        title: action.title,
-        detailedExplanation: action.rationale || action.description,
-      }
-      setSelectedThought(resultCard)
-      setThoughtDetailOpen(true)
-    },
-    
-    onAutomate: (action: AIAction) => {
-      setSelectedAction(action)
-      setCurrentScreen("action-detail")
-    },
-    
-    onInspect: (action: AIAction) => {
-      setInspectedWorkflow(inspectedWorkflow === action.id ? null : action.id)
-    },
-    
-    onCancel: (action: AIAction) => {
-      // Remove the action completely
-      setAiActions(aiActions.filter((a: AIAction) => a.id !== action.id))
-      
-      // Clean up state
-      setWorkflowStatuses(prev => {
-        const newStatuses = { ...prev }
-        delete newStatuses[action.id]
-        return newStatuses
-      })
-      
-      setWorkflowValidations(prev => {
-        const newValidations = { ...prev }
-        delete newValidations[action.id]
-        return newValidations
-      })
-      
-      if (inspectedWorkflow === action.id) {
-        setInspectedWorkflow(null)
+    onLearnMore: (action: CardData) => {
+      try {
+        const resultCard = {
+          id: action.id,
+          type: "individual" as const,
+          content: action.description,
+          emoji: "🤖",
+          title: action.title,
+          detailedExplanation: action.rationale || action.description,
+        }
+        setSelectedThought(resultCard)
+        setThoughtDetailOpen(true)
+      } catch (err) {
+        console.error('Error in onLearnMore:', err)
       }
     },
     
-    onAIChat: (action: AIAction) => {
-      setSelectedActionForChat(action)
-      setAIChatOpen(true)
+    onAutomate: (action: CardData) => {
+      try {
+        // Convert CardData back to AIAction for compatibility
+        const aiAction: AIAction = {
+          id: action.id,
+          title: action.title,
+          description: action.description,
+          rationale: action.rationale,
+          type: action.type,
+          potentialSaving: action.potentialSaving,
+          status: action.status,
+          steps: Array.isArray(action.steps) && typeof action.steps[0] === 'string' 
+            ? action.steps as string[]
+            : [],
+          executionId: action.executionId,
+          progress: action.progress,
+          currentStep: action.currentStep,
+          estimatedCompletion: action.estimatedCompletion,
+          simulationTag: action.simulationTag
+        }
+        setSelectedAction(aiAction)
+        setCurrentScreen("action-detail")
+      } catch (err) {
+        console.error('Error in onAutomate:', err)
+      }
     },
     
-    onViewResults: (action: AIAction) => {
-      const resultCard = {
-        id: action.id,
-        type: "individual" as const,
-        content: action.description,
-        emoji: "✅",
-        title: action.title,
-        detailedExplanation: `Successfully completed: ${action.description}. Key achievements include automated process completion, ${action.potentialSaving} monthly savings activated, all security checks passed, and goal progress increased by 15%.`,
+    onInspect: (action: CardData) => {
+      try {
+        console.log('Inspect clicked for action:', action.title, action.id);
+        console.log('Action steps:', action.steps);
+        console.log('Previous inspected workflow:', inspectedWorkflow);
+        
+        // Toggle the inspected workflow state (this is the correct pattern from the original)
+        setInspectedWorkflow(prev => {
+          const newValue = prev === action.id ? null : action.id;
+          console.log('Setting inspected workflow to:', newValue);
+          return newValue;
+        })
+      } catch (err) {
+        console.error('Error in onInspect:', err)
       }
-      setSelectedThought(resultCard)
-      setThoughtDetailOpen(true)
+    },
+    
+    onCancel: (action: CardData) => {
+      try {
+        // Remove the action completely
+        setAiActions(aiActions.filter((a: AIAction) => a.id !== action.id))
+        
+        // Clean up state
+        setWorkflowStatuses(prev => {
+          const newStatuses = { ...prev }
+          delete newStatuses[action.id]
+          return newStatuses
+        })
+        
+        setWorkflowValidations(prev => {
+          const newValidations = { ...prev }
+          delete newValidations[action.id]
+          return newValidations
+        })
+        
+        // Remove from expanded actions
+        setExpandedActions(prev => prev.filter(id => id !== action.id))
+      } catch (err) {
+        console.error('Error in onCancel:', err)
+      }
+    },
+    
+    onAIChat: (action: CardData) => {
+      try {
+        // Convert CardData back to AIAction for compatibility
+        const aiAction: AIAction = {
+          id: action.id,
+          title: action.title,
+          description: action.description,
+          rationale: action.rationale,
+          type: action.type,
+          potentialSaving: action.potentialSaving,
+          status: action.status,
+          steps: Array.isArray(action.steps) && typeof action.steps[0] === 'string' 
+            ? action.steps as string[]
+            : [],
+          executionId: action.executionId,
+          progress: action.progress,
+          currentStep: action.currentStep,
+          estimatedCompletion: action.estimatedCompletion,
+          simulationTag: action.simulationTag
+        }
+        setSelectedActionForChat(aiAction)
+        setAIChatOpen(true)
+      } catch (err) {
+        console.error('Error in onAIChat:', err)
+      }
+    },
+    
+    onViewResults: (action: CardData) => {
+      try {
+        const resultCard = {
+          id: action.id,
+          type: "individual" as const,
+          content: action.description,
+          emoji: "✅",
+          title: action.title,
+          detailedExplanation: `Successfully completed: ${action.description}. Key achievements include automated process completion, ${action.potentialSaving} monthly savings activated, all security checks passed, and goal progress increased by 15%.`,
+        }
+        setSelectedThought(resultCard)
+        setThoughtDetailOpen(true)
+      } catch (err) {
+        console.error('Error in onViewResults:', err)
+      }
+    },
+
+    onDeepDive: (action: CardData) => {
+      try {
+        setDeepDiveAction(action)
+        setIsDeepDiveOpen(true)
+      } catch (err) {
+        console.error('Error in onDeepDive:', err)
+      }
     }
   }), [
     setSelectedThought, 
     setThoughtDetailOpen, 
     setSelectedAction, 
     setCurrentScreen,
-    inspectedWorkflow,
     setAiActions,
     aiActions,
     setSelectedActionForChat,
@@ -159,46 +238,71 @@ export default function AIActionsScreenRefactored({
   // ==================== Data Transformation ====================
   
   const enrichedActions = useMemo(() => {
-    return aiActions.map(action => {
-      const metadata = workflowConfig.getWorkflow(action.id)
-      const validation = workflowValidations[action.id]
-      const workflowStatus = workflowStatuses[action.executionId || '']
+    try {
       
-      const enriched: CardData = {
-        ...action,
-        validation,
-        workflowStatus,
-        benefits: metadata?.benefits,
-        icon: metadata?.icon,
-        steps: inspectedWorkflow === action.id ? metadata?.steps : undefined
-      }
-      
-      // Add workflow status data for in-process actions
-      if (action.status === 'in-process' && workflowStatus) {
-        enriched.progress = workflowStatus.progress || 33
-        enriched.currentStep = workflowStatus.current_step || 'Processing...'
-        enriched.estimatedCompletion = workflowStatus.estimated_completion || '3m remaining'
-      }
-      
-      return enriched
-    })
-  }, [aiActions, workflowValidations, workflowStatuses, inspectedWorkflow])
+      return aiActions.map(action => {
+        const metadata = workflowConfig?.getWorkflow(action.id)
+        const validation = workflowValidations[action.id]
+        const workflowStatus = workflowStatuses[action.executionId || '']
+        
+        
+        // Transform action.steps (strings) into proper WorkflowStep objects if needed
+        let processedSteps = action.steps;
+        if (action.steps && Array.isArray(action.steps) && action.steps.length > 0 && typeof action.steps[0] === 'string') {
+          processedSteps = action.steps.map((step: string, index: number) => ({
+            id: `step-${index + 1}`,
+            name: step,
+            description: `Step ${index + 1} of the workflow process`,
+            duration: 120,
+            status: (index === 0 ? 'in_progress' : 'pending') as 'pending' | 'in_progress' | 'completed' | 'failed'
+          }));
+        }
+
+        const enriched: CardData = {
+          ...action,
+          validation,
+          workflowStatus,
+          benefits: metadata?.benefits,
+          icon: metadata?.icon,
+          steps: processedSteps
+        }
+        
+        
+        // Add workflow status data for in-process actions
+        if (action.status === 'in-process' && workflowStatus) {
+          enriched.progress = workflowStatus.progress || 33
+          enriched.currentStep = workflowStatus.current_step || 'Processing...'
+          enriched.estimatedCompletion = workflowStatus.estimated_completion || '3m remaining'
+        }
+        
+        return enriched
+      })
+    } catch (err) {
+      console.error('Error enriching actions:', err)
+      return aiActions // Fallback to original actions
+    }
+  }, [aiActions, workflowValidations, workflowStatuses, workflowConfig])
   
   // ==================== Filter Actions by Tab ====================
   
   const filteredActions = useMemo(() => {
-    return enrichedActions.filter(action => {
-      switch (activeTab) {
-        case "suggested":
-          return action.status === "suggested"
-        case "in-process":
-          return action.status === "in-process"
-        case "completed":
-          return action.status === "completed"
-        default:
-          return true
-      }
-    })
+    try {
+      return enrichedActions.filter(action => {
+        switch (activeTab) {
+          case "suggested":
+            return action.status === "suggested"
+          case "in-process":
+            return action.status === "in-process"
+          case "completed":
+            return action.status === "completed"
+          default:
+            return true
+        }
+      })
+    } catch (err) {
+      console.error('Error filtering actions:', err)
+      return []
+    }
   }, [enrichedActions, activeTab])
   
   // ==================== Tab Configuration ====================
@@ -224,7 +328,8 @@ export default function AIActionsScreenRefactored({
           variant: 'in-process',
           showProgress: true,
           showValidation: true,
-          showSteps: true
+          showSteps: true,
+          minHeight: 'min-h-[320px]' // Slightly taller for steps
         }
       case 'completed':
         return {
@@ -236,7 +341,7 @@ export default function AIActionsScreenRefactored({
     }
   }
   
-  // ==================== Render ====================
+  // ==================== Error Display ====================
   
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black">
@@ -291,9 +396,19 @@ export default function AIActionsScreenRefactored({
                   : [...prev, id]
               )
             }}
+            inspectedWorkflow={inspectedWorkflow}
           />
         )}
       </div>
+
+      {/* Deep Dive Modal */}
+      {deepDiveAction && (
+        <DeepDiveModal
+          isOpen={isDeepDiveOpen}
+          onClose={() => setIsDeepDiveOpen(false)}
+          action={deepDiveAction}
+        />
+      )}
     </div>
   )
 }

@@ -7,7 +7,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const goalId = parseInt(params.id)
+    const { id } = await params
+    const goalId = parseInt(id)
     const goal = goals.find(g => g.id === goalId)
 
     if (!goal) {
@@ -34,7 +35,8 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const goalId = parseInt(params.id)
+    const { id } = await params
+    const goalId = parseInt(id)
     const body = await request.json()
     
     const goalIndex = goals.findIndex(g => g.id === goalId)
@@ -73,7 +75,8 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const goalId = parseInt(params.id)
+    const { id } = await params
+    const goalId = parseInt(id)
     const goalIndex = goals.findIndex(g => g.id === goalId)
     
     if (goalIndex === -1) {

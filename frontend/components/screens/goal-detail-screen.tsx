@@ -7,6 +7,7 @@ import GlassCard from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { cn } from "@/lib/utils"
+import { GoalProgressCalculator } from '@/lib/utils/goal-progress-calculator'
 
 const goalDetailStyles: Record<string, any> = {
   green: {
@@ -78,8 +79,11 @@ export default function GoalDetailScreen({ selectedGoal, setCurrentScreen }: App
   }
 
   const { title, icon, current, target, monthlyContribution, deadline, color } = selectedGoal
-  const progress = (current / target) * 100
-  const monthsLeft = Math.ceil((target - current) / monthlyContribution)
+  // PATTERN GUARDIAN ENFORCED: Using unified calculator
+  const progressResult = GoalProgressCalculator.calculate({ current, target })
+  const progress = progressResult.percentage
+  const timeToGoal = GoalProgressCalculator.calculateTimeToGoal(current, target, monthlyContribution)
+  const monthsLeft = timeToGoal.months
   const styles = goalDetailStyles[color] || goalDetailStyles.green
 
   return (
@@ -108,7 +112,7 @@ export default function GoalDetailScreen({ selectedGoal, setCurrentScreen }: App
             {icon}
           </div>
           <h1 className="text-2xl font-bold">{title}</h1>
-          <p className={cn(styles.headerText)}>You're {progress.toFixed(0)}% there!</p>
+          <p className={cn(styles.headerText)}>You're {progressResult.displayPercentage} there!</p>
         </div>
       </motion.div>
 

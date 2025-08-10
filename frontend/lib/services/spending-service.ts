@@ -114,12 +114,45 @@ class SpendingService {
     cacheKey: string
   ): Promise<SpendingData> {
     try {
+      // Try backend directly first
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
       const params = new URLSearchParams({
         customerId: customerId.toString(),
         year: year.toString(),
         ...(month !== undefined && { month: month.toString() })
       })
       
+      // First attempt: Direct backend call
+      try {
+        const backendResponse = await fetch(`${backendUrl}/api/spending?${params}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          keepalive: true,
+        })
+        
+        if (backendResponse.ok) {
+          const backendData = await backendResponse.json()
+          if (backendData.success) {
+            console.log('[SPENDING] ✅ Data fetched directly from backend')
+            const transformedData = this.transformApiResponse(backendData.data, customerId)
+            // Cache the result
+            this.cache.set(cacheKey, {
+              data: transformedData,
+              timestamp: Date.now(),
+              customerId,
+              year,
+              month
+            })
+            return transformedData
+          }
+        }
+      } catch (backendError) {
+        console.log('[SPENDING] Backend unavailable, trying frontend API route')
+      }
+      
+      // Fallback: Use frontend API route
       const response = await fetch(`/api/spending?${params}`, {
         method: 'GET',
         headers: {
@@ -157,14 +190,15 @@ class SpendingService {
     } catch (error) {
       console.error('Error fetching spending data:', error)
       
-      // Return fallback data if available
+      // Try stale cache first
       const staleCache = this.cache.get(cacheKey)
       if (staleCache) {
         console.log('[FALLBACK] Using stale cache due to error')
         return staleCache.data
       }
       
-      // Return minimal fallback
+      // Only use hardcoded fallback as absolute last resort
+      console.warn('[FALLBACK] Using hardcoded fallback data - all data sources unavailable')
       return this.getFallbackData(customerId, year, month)
     }
   }

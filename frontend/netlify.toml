@@ -41,11 +41,11 @@
   [headers.values]
     Cache-Control = "public, max-age=300, s-maxage=1800"
 
-# Security headers
+# Enterprise-safe security headers
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://sparrow-backend-production.up.railway.app;"
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://sparrow-backend-production.up.railway.app; object-src 'none'; base-uri 'self'; form-action 'self';"
 
 # Redirects for SPA
 [[redirects]]

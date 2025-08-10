@@ -9,11 +9,11 @@ import os
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from python_engine.core.config import SimulationConfig
-from python_engine.core.engine import MonteCarloEngine
-from python_engine.data.csv_loader import CSVDataLoader
-from python_engine.scenarios.emergency_fund import EmergencyFundScenario
-from python_engine.scenarios.student_loan import StudentLoanPayoffScenario
+from core.config import SimulationConfig
+from core.engine import MonteCarloEngine
+from data.csv_loader import CSVDataLoader
+from scenarios.emergency_fund import EmergencyFundScenario
+from scenarios.student_loan import StudentLoanScenario
 
 
 def test_emergency_fund_simulation():
@@ -73,7 +73,7 @@ def test_student_loan_simulation():
     config.RANDOM_SEED = 42
     engine = MonteCarloEngine(config)
     loader = CSVDataLoader()
-    scenario = StudentLoanPayoffScenario()
+    scenario = StudentLoanScenario()
     
     for profile_id in [1, 2, 3]:
         print(f"\n--- Profile {profile_id} ---")

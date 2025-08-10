@@ -11,6 +11,7 @@ import {
   SpendingCategory,
   UserProfileType,
 } from './types';
+import { GoalProgressCalculator } from '@/lib/utils/goal-progress-calculator';
 
 // ============================================================================
 // CSV Data Types (from backend)
@@ -320,7 +321,12 @@ export class GoalTransformer {
    * Generate milestones based on goal type and amount
    */
   private static generateMilestones(csvGoal: CSVGoal): Goal['milestones'] {
-    const progress = (csvGoal.current_amount / csvGoal.target_amount) * 100;
+    // PATTERN GUARDIAN ENFORCED: Using unified calculator
+    const progressResult = GoalProgressCalculator.calculate({
+      current: csvGoal.current_amount,
+      target: csvGoal.target_amount
+    });
+    const progress = progressResult.percentage;
     const milestones: Goal['milestones'] = [];
     
     // Add percentage-based milestones

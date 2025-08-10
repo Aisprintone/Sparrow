@@ -16,16 +16,16 @@ const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { pattern: string } }
+  { params }: { params: Promise<{ pattern: string }> }
 ) {
   try {
-    const pattern = params.pattern
+    const { pattern } = await params
 
     // Clear from backend cache
     const response = await fetch(
-      `${BACKEND_URL}/cache/clear`,
+      `${BACKEND_URL}/cache/cache/clear`,
       {
-        method: 'POST',
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -49,11 +49,27 @@ export async function DELETE(
 
     const result = await response.json()
     
+    // Clear frontend memory cache if clearing all
+    if (pattern === '*') {
+      // Clear service worker cache
+      if ('serviceWorker' in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.getRegistration()
+          if (registration && registration.active) {
+            registration.active.postMessage({ type: 'CLEAR_CACHE' })
+          }
+        } catch (swError) {
+          console.warn('Service worker cache clear failed:', swError)
+        }
+      }
+    }
+    
     return NextResponse.json({
       success: true,
       pattern: pattern,
       cleared: result.cleared_count || 0,
-      message: `Cache cleared for pattern: ${pattern}`
+      message: `Cache cleared for pattern: ${pattern}`,
+      frontend_cleared: pattern === '*'
     })
 
   } catch (error: any) {
