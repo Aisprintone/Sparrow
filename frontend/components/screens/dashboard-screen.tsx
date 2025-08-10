@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import type { AppState } from "@/hooks/use-app-state"
-import { TrendingUp, TrendingDown, DollarSign, Shield, Target, Zap, BarChart3, CreditCard, PiggyBank, ChevronRight, CheckCircle, AlertTriangle, Loader2, Play, X, Brain } from "lucide-react"
+import { TrendingUp, TrendingDown, DollarSign, Shield, Target, Zap, BarChart3, CreditCard, PiggyBank, ChevronRight, CheckCircle, AlertTriangle, Loader2, Play, X } from "lucide-react"
 import GlassCard from "@/components/ui/glass-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,6 +12,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import { aiActionsService } from "@/lib/api/ai-actions-service"
 import { formatGoalProgress, GoalProgressCalculator } from '@/lib/utils/goal-progress-calculator'
 import DeepDiveModal from "@/components/ui/deep-dive-modal"
+import DeepDiveButton from "@/components/ui/deep-dive-button"
+import { useDeepDive } from "@/hooks/use-deep-dive"
 
 // Interface for AIExplanation to match simulation results
 interface AIExplanation {
@@ -70,8 +72,13 @@ export default function DashboardScreen({
   const [cancelledCards, setCancelledCards] = useState<Set<string>>(new Set())
   const [processingCards, setProcessingCards] = useState<Set<string>>(new Set())
   const [exitingCards, setExitingCards] = useState<Set<string>>(new Set())
-  const [deepDiveAction, setDeepDiveAction] = useState<any>(null)
-  const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false)
+  const {
+    deepDiveAction,
+    isDeepDiveOpen,
+    openDeepDive,
+    closeDeepDive,
+    createAndOpenDashboardDeepDive
+  } = useDeepDive()
 
   // Generate new AI action to replace processed ones
   const generateNewAIAction = (): any => {
@@ -287,24 +294,12 @@ export default function DashboardScreen({
 
   // Handle deep dive for dashboard AI actions
   const handleDashboardDeepDive = (action: any) => {
-    // For dashboard cards, we need to mock detailed_insights since they don't come from the backend
-    const mockAction = {
-      ...action,
-      detailed_insights: {
-        mechanics_explanation: `This ${action.title.toLowerCase()} recommendation is based on analysis of your spending patterns, account balances, and financial goals. The system identified this opportunity by comparing your current financial behavior against optimized patterns.`,
-        key_insights: [
-          `Your current financial profile supports this ${action.title.toLowerCase()} strategy`,
-          `This action aligns with your demographic financial priorities`,
-          `The estimated $${action.potentialSaving}/month saving is conservative and achievable`,
-          `Implementation requires minimal risk and effort on your part`
-        ],
-        scenario_nuances: `This recommendation assumes your current income stability and spending patterns continue. Any major changes to your financial situation may require strategy adjustment.`,
-        decision_context: `This action is prioritized based on your current financial health and goals. Monitor your progress and adjust if your priorities or circumstances change significantly.`
-      }
-    }
-    
-    setDeepDiveAction(mockAction)
-    setIsDeepDiveOpen(true)
+    createAndOpenDashboardDeepDive(
+      action.id,
+      action.title,
+      action.description,
+      action.potentialSaving
+    )
   }
 
   return (
@@ -515,15 +510,10 @@ export default function DashboardScreen({
                             )}
                           </Button>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="ghost"
+                        <DeepDiveButton
                           onClick={() => handleDashboardDeepDive(action)}
-                          className="w-full text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 transition-all duration-200"
-                        >
-                          <Brain className="mr-2 h-3 w-3" />
-                          Deep Dive Analysis
-                        </Button>
+                          className="w-full"
+                        />
                       </div>
                     </GlassCard>
                   </motion.div>
@@ -661,7 +651,7 @@ export default function DashboardScreen({
       {deepDiveAction && (
         <DeepDiveModal
           isOpen={isDeepDiveOpen}
-          onClose={() => setIsDeepDiveOpen(false)}
+          onClose={closeDeepDive}
           action={deepDiveAction}
         />
       )}

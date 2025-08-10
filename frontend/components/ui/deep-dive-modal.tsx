@@ -5,14 +5,19 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Brain, TrendingUp, Scale, Lightbulb } from "lucide-react"
 import type { CardData } from "@/components/ai-actions/action-card-factory"
+import type { DeepDiveData } from "@/lib/services/deep-dive-service"
 
 interface DeepDiveModalProps {
   isOpen: boolean
   onClose: () => void
-  action: CardData
+  action: CardData | DeepDiveData | null
 }
 
 export default function DeepDiveModal({ isOpen, onClose, action }: DeepDiveModalProps) {
+  if (!action) {
+    return null
+  }
+  
   const insights = action.detailed_insights
 
   if (!insights) {
@@ -21,7 +26,7 @@ export default function DeepDiveModal({ isOpen, onClose, action }: DeepDiveModal
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-gradient-to-br from-gray-900 via-gray-800 to-black border border-white/20">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-black border border-white/20">
         <DialogHeader>
           <DialogTitle className="text-white text-lg flex items-center gap-2">
             <Brain className="h-5 w-5 text-purple-400" />
@@ -92,7 +97,7 @@ export default function DeepDiveModal({ isOpen, onClose, action }: DeepDiveModal
           <div className="flex items-center justify-between">
             <div>
               <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                +${action.potentialSaving}/mo potential
+                +${(action as any).potentialSaving || (action as any).potential_saving || 0}/mo potential
               </Badge>
             </div>
             <div className="text-xs text-gray-400">

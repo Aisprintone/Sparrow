@@ -26,6 +26,7 @@ import {
   type CardData
 } from "@/components/ai-actions/action-card-factory"
 import DeepDiveModal from "@/components/ui/deep-dive-modal"
+import { deepDiveService, type DeepDiveData } from "@/lib/services/deep-dive-service"
 
 // ==================== Screen Component ====================
 
@@ -258,13 +259,19 @@ export default function AIActionsScreenRefactored({
           }));
         }
 
+        // Check if this action has detailed insights from simulation deep dives
+        const relatedDeepDives = deepDiveService.getDeepDivesByActionId(action.id)
+        const simulationDeepDive = relatedDeepDives.find(dive => dive.source === 'simulation')
+
         const enriched: CardData = {
           ...action,
           validation,
           workflowStatus,
           benefits: metadata?.benefits,
           icon: metadata?.icon,
-          steps: processedSteps
+          steps: processedSteps,
+          // Add detailed insights from simulation deep dives if available
+          detailed_insights: simulationDeepDive?.detailed_insights || action.detailed_insights
         }
         
         
@@ -344,7 +351,7 @@ export default function AIActionsScreenRefactored({
   // ==================== Error Display ====================
   
   return (
-    <div className="flex flex-col h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="flex flex-col h-full bg-black">
       {/* Tab Navigation */}
       <div className="flex border-b border-white/10">
         <button

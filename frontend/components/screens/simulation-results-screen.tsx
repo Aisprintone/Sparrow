@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { aiActionsService } from "@/lib/api/ai-actions-service"
 import { simulationIntegrationService, UnifiedSimulationResult } from "@/lib/services/simulation-integration-service"
+import DeepDiveButton from "@/components/ui/deep-dive-button"
+import DeepDiveModal from "@/components/ui/deep-dive-modal"
+import { useDeepDive } from "@/hooks/use-deep-dive"
 
 interface SimulationResult {
   scenario_name: string
@@ -50,6 +53,14 @@ export default function SimulationResultsScreen({
   const [automatingCards, setAutomatingCards] = useState<Set<string>>(new Set())
   const [automatedCards, setAutomatedCards] = useState<Set<string>>(new Set())
   const [goalCreatedCards, setGoalCreatedCards] = useState<Set<string>>(new Set())
+
+  const {
+    deepDiveAction,
+    isDeepDiveOpen,
+    openDeepDive,
+    closeDeepDive,
+    createAndOpenSimulationDeepDive
+  } = useDeepDive()
 
   // Determine the single action type for each result (mutually exclusive)
   const getActionType = (result: AIExplanation): 'goal' | 'automate' => {
@@ -630,6 +641,21 @@ export default function SimulationResultsScreen({
                   </Button>
                 )}
               </div>
+              
+              {/* Deep Dive Button */}
+              <div className="pt-3 border-t border-white/10">
+                <DeepDiveButton
+                  onClick={() => createAndOpenSimulationDeepDive(
+                    'simulation-result',
+                    `${result.title}-${result.potential_saving}`,
+                    result.title,
+                    result.description,
+                    result.potential_saving,
+                    simulationResults?.scenario_name
+                  )}
+                  className="w-full"
+                />
+              </div>
             </GlassCard>
           )))}
         </div>
@@ -650,6 +676,15 @@ export default function SimulationResultsScreen({
           </Button>
         </div>
       </div>
+
+      {/* Deep Dive Modal */}
+      {deepDiveAction && (
+        <DeepDiveModal
+          isOpen={isDeepDiveOpen}
+          onClose={closeDeepDive}
+          action={deepDiveAction}
+        />
+      )}
     </div>
   )
 }
