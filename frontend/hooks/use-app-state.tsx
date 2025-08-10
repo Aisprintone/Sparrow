@@ -562,8 +562,20 @@ export default function useAppState(): AppState {
   const [isSimulating, setIsSimulating] = useState(false)
   const [simulationProgress, setSimulationProgress] = useState(0)
   const [activeAutomations, setActiveAutomations] = useState<AutomationAction[]>([])
-  const [goals, setGoals] = useState<Goal[]>([])
+  // Goals with localStorage persistence
+  const [goals, setGoalsInternal] = useState<Goal[]>([])
   const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null)
+
+  // Enhanced setGoals with localStorage persistence
+  const setGoals = useCallback((newGoals: Goal[]) => {
+    setGoalsInternal(newGoals)
+    try {
+      localStorage.setItem('simulation-goals', JSON.stringify(newGoals))
+      console.log(`[GOALS PERSISTENCE] Saved ${newGoals.length} goals to localStorage`)
+    } catch (error) {
+      console.error('[GOALS PERSISTENCE] Failed to save goals to localStorage:', error)
+    }
+  }, [])
 
   // Generate profile-specific goals based on user data
   const generateProfileSpecificGoals = useCallback((profileData: any, demographic: Demographic): Goal[] => {
@@ -1045,14 +1057,63 @@ export default function useAppState(): AppState {
       })
   }, [profileData, demographic])
 
-  // Update goals when profile data changes
+  // Load goals from localStorage on initialization
+  useEffect(() => {
+    try {
+      const storedGoals = localStorage.getItem('simulation-goals')
+      if (storedGoals) {
+        const parsedGoals = JSON.parse(storedGoals)
+        console.log(`[GOALS PERSISTENCE] Loaded ${parsedGoals.length} goals from localStorage:`, parsedGoals.map((g: Goal) => g.title))
+        setGoalsInternal(parsedGoals)
+      }
+    } catch (error) {
+      console.error('[GOALS PERSISTENCE] Failed to load goals from localStorage:', error)
+    }
+  }, [])
+
+  // Update goals when profile data changes (merge with stored goals)
   useEffect(() => {
     if (profileData && profileData.accounts) {
       const profileSpecificGoals = generateProfileSpecificGoals(profileData, demographic)
-      setGoals(profileSpecificGoals)
-      console.log(`[GOALS] Updated goals based on profile data:`, profileSpecificGoals.map(g => `${g.title} (${g.simulationTags?.join(', ')})`))
+      
+      // Load existing goals from localStorage
+      let existingGoals: Goal[] = []
+      try {
+        const storedGoals = localStorage.getItem('simulation-goals')
+        if (storedGoals) {
+          existingGoals = JSON.parse(storedGoals)
+        }
+      } catch (error) {
+        console.error('[GOALS PERSISTENCE] Failed to load existing goals:', error)
+      }
+      
+      // Merge profile-specific goals with simulation-generated goals
+      // Keep simulation goals (identify by title containing "Simulation", sourceActionId/sourceGoalId tags, or recent creation)
+      const simulationGoals = existingGoals.filter(goal => {
+        // Check if goal has simulation-related title
+        if (goal.title.includes('Simulation')) return true
+        
+        // Check if goal has simulation-related tags (goal-*, action-*)
+        if (goal.simulationTags && goal.simulationTags.some(tag => 
+          tag.startsWith('goal-') || tag.startsWith('action-')
+        )) return true
+        
+        // Check if goal was created very recently (within last hour) - likely from simulation
+        if (goal.createdAt) {
+          const goalCreated = new Date(goal.createdAt)
+          const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+          if (goalCreated > oneHourAgo) return true
+        }
+        
+        // Don't include if it matches profile-specific goals by title
+        return !profileSpecificGoals.some(pGoal => pGoal.title === goal.title)
+      })
+      
+      const mergedGoals = [...profileSpecificGoals, ...simulationGoals]
+      setGoals(mergedGoals)
+      console.log(`[GOALS] Updated goals: ${profileSpecificGoals.length} profile + ${simulationGoals.length} simulation = ${mergedGoals.length} total`)
     }
-  }, [profileData, demographic])
+  }, [profileData, demographic, generateProfileSpecificGoals, setGoals])
 
   // ============================================================================
   // APP INITIALIZATION - CLEAR CACHE AND LOAD FRESH DATA
@@ -1454,35 +1515,41 @@ export default function useAppState(): AppState {
     }
   }
 
-  const addGoal = (goal: Omit<Goal, "id">) => {
+  const addGoal = useCallback((goal: Omit<Goal, "id">) => {
     const newGoal = {
       ...goal,
-      id: Math.max(...goals.map(g => g.id)) + 1,
+      id: Math.max(...goals.map(g => g.id), 0) + 1,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: 1,
-      aiInsights: {
+      aiInsights: goal.aiInsights || {
         lastUpdated: new Date().toISOString(),
         recommendations: [],
         riskAssessment: '',
         optimizationOpportunities: []
       },
-      simulationImpact: []
+      simulationImpact: goal.simulationImpact || []
     }
-    setGoals([...goals, newGoal])
-  }
+    
+    const updatedGoals = [...goals, newGoal]
+    setGoals(updatedGoals)
+    console.log(`[GOALS] Added goal "${newGoal.title}" with ID ${newGoal.id}`, newGoal.simulationTags)
+  }, [goals, setGoals])
 
-  const updateGoal = (id: number, updates: Partial<Goal>) => {
-    setGoals(goals.map(goal => 
+  const updateGoal = useCallback((id: number, updates: Partial<Goal>) => {
+    const updatedGoals = goals.map(goal => 
       goal.id === id 
         ? { ...goal, ...updates, updatedAt: new Date().toISOString() }
         : goal
-    ))
-  }
+    )
+    setGoals(updatedGoals)
+  }, [goals, setGoals])
 
-  const deleteGoal = (id: number) => {
-    setGoals(goals.filter(goal => goal.id !== id))
-  }
+  const deleteGoal = useCallback((id: number) => {
+    const updatedGoals = goals.filter(goal => goal.id !== id)
+    setGoals(updatedGoals)
+    console.log(`[GOALS] Deleted goal with ID ${id}`)
+  }, [goals, setGoals])
 
   const payBill = (billId: number) => {
     const bill = bills.find((b) => b.id === billId)

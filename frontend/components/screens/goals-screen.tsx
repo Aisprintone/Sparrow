@@ -386,8 +386,30 @@ export default function GoalsScreen({
     setCurrentScreen('create-goal')
   }
 
-  // Merge real goals with existing goals, preferring real goals
-  const displayGoals = realGoals.length > 0 ? realGoals : goals
+  // Merge real goals with existing goals, combining both sources
+  // Convert app state goals to compatible format and combine with profile goals
+  const appStateGoals = goals.map(goal => ({
+    id: goal.id.toString(),
+    title: goal.title,
+    description: goal.description || `${goal.type} goal`,
+    targetAmount: goal.target,
+    targetDate: goal.deadline,
+    currentAmount: goal.current,
+    progressPercentage: calculateProgress(goal),
+    monthlyContributionNeeded: goal.monthlyContribution,
+    simulationTags: goal.simulationTags,
+    // Add aiInsights from Goal interface for simulation goals
+    aiInsights: goal.aiInsights,
+    // Add basic consistency measures for compatibility
+    consistencyMeasures: {
+      onTrack: true,
+      weeksConsistent: 4,
+      missedContributions: 0,
+      projectedCompletion: goal.deadline
+    }
+  }))
+  
+  const displayGoals = [...realGoals, ...appStateGoals]
   const totalProgress = displayGoals.length > 0 
     ? displayGoals.reduce((sum, goal) => sum + calculateProgress(goal), 0) / displayGoals.length 
     : 0
@@ -646,14 +668,14 @@ export default function GoalsScreen({
                     )}
 
                     {/* AI Insights Section */}
-                    {'aiInsights' in goal && (goal as Goal).aiInsights && (
+                    {(('aiInsights' in goal && goal.aiInsights) || (goal as any).aiInsights) && (
                       <div className="space-y-2 pt-2 border-t border-white/10">
                         <div className="flex items-center gap-2">
                           <AlertCircle className="h-4 w-4 text-blue-400 flex-shrink-0" />
                           <span className="text-sm font-medium text-white">AI Insights</span>
                         </div>
                         <div className="space-y-1.5 pl-6">
-                          {(goal as Goal).aiInsights.recommendations.slice(0, 2).map((rec, index) => (
+                          {((goal as any).aiInsights?.recommendations || []).slice(0, 2).map((rec: string, index: number) => (
                             <div key={index} className="flex items-start gap-2">
                               <span className="text-blue-400 flex-shrink-0 mt-0.5">•</span>
                               <span className="text-sm leading-snug text-white/60">{rec}</span>

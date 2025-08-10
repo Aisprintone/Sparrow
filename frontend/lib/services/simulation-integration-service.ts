@@ -238,7 +238,17 @@ class SimulationIntegrationService {
       color: goalMapping.color,
       monthlyContribution: goalMapping.monthlyContribution,
       simulationTags: result.sourceGoalId ? [`goal-${result.sourceGoalId}`] : 
-                      result.sourceActionId ? [`action-${result.sourceActionId}`] : []
+                      result.sourceActionId ? [`action-${result.sourceActionId}`] : [],
+      // Add AI insights for simulation-generated goals
+      aiInsights: {
+        lastUpdated: new Date().toISOString(),
+        recommendations: result.recommendations.slice(0, 2), // Take first 2 recommendations
+        riskAssessment: result.type === 'aggressive' ? 'High impact strategy - requires commitment' : 'Moderate risk with good potential returns',
+        optimizationOpportunities: [
+          `Monthly savings potential: $${Math.abs(result.impact.monthly)}`,
+          `Total projected impact: $${Math.abs(result.impact.total)}`
+        ]
+      }
     }
 
     addGoal(newGoal)
