@@ -32,8 +32,21 @@ ALLOWED_ORIGINS = [
     f"https://{NETLIFY_DOMAIN}",
     f"https://*.{NETLIFY_DOMAIN}",
     "https://*.netlify.app",
-    "http://localhost:3000",  # Local development
-    "http://localhost:3001",
+    # Development localhost ports (comprehensive range)
+    "http://localhost:3000",   # Next.js default
+    "http://localhost:3001",   # Next.js alternate
+    "http://localhost:3002",   # Next.js alternate
+    "http://localhost:3003",   # Current frontend dev server
+    "http://localhost:4000",   # React/Express common
+    "http://localhost:4001",   # React alternate
+    "http://localhost:5000",   # Python Flask default
+    "http://localhost:5001",   # Flask alternate
+    "http://localhost:5173",   # Vite default
+    "http://localhost:5174",   # Vite alternate
+    "http://localhost:8080",   # Vue.js/Webpack default
+    "http://localhost:8081",   # Vue.js alternate
+    "http://localhost:9000",   # Common dev server port
+    "http://localhost:9001",   # Common dev server port
 ]
 
 if os.getenv("ENVIRONMENT") == "development":
