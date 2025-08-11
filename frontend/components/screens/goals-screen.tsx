@@ -20,13 +20,15 @@ import {
   Trash2,
   Edit,
   Play,
-  AlertCircle
+  AlertCircle,
+  Brain
 } from 'lucide-react'
 import { Goal } from '@/lib/data'
 import { GoalService } from '@/lib/services/goal-service'
 import { profileDataService, ProfileFinancialData, ProfileGoal } from '@/lib/services/profile-data-service'
 import { GoalProgressCalculator, formatGoalProgress } from '@/lib/utils/goal-progress-calculator'
 import { useToast } from '@/hooks/use-toast'
+import { deepDiveService } from '@/lib/services/deep-dive-service'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import type { AppState } from "@/hooks/use-app-state"
 import { 
@@ -187,7 +189,9 @@ export default function GoalsScreen({
   setCurrentScreen,
   setCurrentSimulation,
   runSimulations,
-  selectedProfile
+  selectedProfile,
+  setSelectedThought,
+  setThoughtDetailOpen
 }: AppState) {
   const { toast } = useToast()
   const [goalService] = useState(() => GoalService.getInstance())
@@ -386,6 +390,59 @@ export default function GoalsScreen({
     setCurrentScreen('create-goal')
   }
 
+  const handleDeepDive = (goal: Goal | ProfileGoal) => {
+    // Extract action ID from simulation tags
+    let actionId = null
+    if ('simulationTags' in goal && goal.simulationTags) {
+      const actionTag = goal.simulationTags.find(tag => tag.startsWith('action-'))
+      if (actionTag) {
+        actionId = actionTag.replace('action-', '')
+      }
+    }
+
+    // Try to find existing deep dive data
+    let deepDiveData = null
+    if (actionId) {
+      const deepDives = deepDiveService.getDeepDivesByActionId(actionId)
+      deepDiveData = deepDives.length > 0 ? deepDives[0] : null
+    }
+
+    // If no deep dive data found, create mock data for the goal
+    if (!deepDiveData) {
+      deepDiveData = {
+        id: `goal-deep-dive-${goal.id}`,
+        source: 'simulation' as const,
+        actionId: actionId || `goal-${goal.id}`,
+        title: goal.title,
+        description: goal.description || `${goal.title} analysis`,
+        potentialSaving: 'monthlyContribution' in goal ? goal.monthlyContribution : 
+                        'monthlyContributionNeeded' in goal ? goal.monthlyContributionNeeded : 0,
+        detailed_insights: deepDiveService.generateMockInsights(
+          goal.title,
+          goal.description || `${goal.title} analysis`,
+          'monthlyContribution' in goal ? goal.monthlyContribution : 
+          'monthlyContributionNeeded' in goal ? goal.monthlyContributionNeeded : 0
+        ),
+        createdAt: new Date().toISOString(),
+        simulationTag: 'simulationTags' in goal && goal.simulationTags ? goal.simulationTags[0] : undefined
+      }
+    }
+
+    // Create ResultCard format for the modal
+    const resultCard = {
+      id: deepDiveData.id,
+      type: "individual" as const,
+      content: deepDiveData.description,
+      emoji: "🎯",
+      title: deepDiveData.title,
+      detailedExplanation: deepDiveData.detailed_insights.mechanics_explanation,
+      detailed_insights: deepDiveData.detailed_insights
+    }
+
+    setSelectedThought(resultCard)
+    setThoughtDetailOpen(true)
+  }
+
   // Merge real goals with existing goals, combining both sources
   // Convert app state goals to compatible format and combine with profile goals
   const appStateGoals = goals.map(goal => ({
@@ -546,6 +603,18 @@ export default function GoalsScreen({
                           className="text-white hover:bg-white/10 h-8 w-8 p-0"
                         >
                           <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeepDive(goal)
+                          }}
+                          title="Deep Dive Analysis"
+                          className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/10 h-8 w-8 p-0"
+                        >
+                          <Brain className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>

@@ -5,9 +5,10 @@ import type { AppState, AIAction } from "@/hooks/use-app-state"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import GlassCard from "@/components/ui/glass-card"
-import { ChevronDown, ChevronUp, Check, Clock, AlertCircle, Play, Pause, Eye, Settings, Info, Shield, Zap, TrendingUp, DollarSign, Activity, Target, Star, AlertTriangle, User, Bot, RefreshCw, BarChart3, Timer, Lock, Unlock, Sparkles, ArrowRight, ArrowDown, Users, Globe, Smartphone, Monitor, CreditCard, PiggyBank, Home, Car, Plane, X } from "lucide-react"
+import { ChevronDown, ChevronUp, Check, Clock, AlertCircle, Play, Pause, Eye, Settings, Info, Shield, Zap, TrendingUp, DollarSign, Activity, Target, Star, AlertTriangle, User, Bot, RefreshCw, BarChart3, Timer, Lock, Unlock, Sparkles, ArrowRight, ArrowDown, Users, Globe, Smartphone, Monitor, CreditCard, PiggyBank, Home, Car, Plane, X, Brain } from "lucide-react"
 import { aiActionsService } from "@/lib/api/ai-actions-service"
 import { aiActionsDataService, PersonalizedAIAction } from "@/lib/services/ai-actions-data-service"
+import { deepDiveService } from "@/lib/services/deep-dive-service"
 import AutomationStatusCard from "@/components/ui/automation-status-card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -276,6 +277,60 @@ export default function AIActionsScreen({
     }
   }
 
+  const handleDeepDive = (action: PersonalizedAIAction | AIAction) => {
+    // Try to find existing deep dive data for this action
+    const deepDives = deepDiveService.getDeepDivesByActionId(action.id)
+    let deepDiveData = deepDives.length > 0 ? deepDives[0] : null
+
+    // If no existing deep dive data, create it using the action's detailed_insights
+    if (!deepDiveData && action.detailed_insights) {
+      deepDiveData = {
+        id: `action-deep-dive-${action.id}`,
+        source: 'ai_action' as const,
+        actionId: action.id,
+        title: action.title,
+        description: action.description,
+        potentialSaving: action.potentialSaving,
+        detailed_insights: action.detailed_insights,
+        createdAt: new Date().toISOString()
+      }
+      deepDiveService.saveDeepDive(deepDiveData)
+    }
+
+    // If still no deep dive data, create mock insights
+    if (!deepDiveData) {
+      deepDiveData = {
+        id: `action-deep-dive-${action.id}`,
+        source: 'ai_action' as const,
+        actionId: action.id,
+        title: action.title,
+        description: action.description,
+        potentialSaving: action.potentialSaving,
+        detailed_insights: deepDiveService.generateMockInsights(
+          action.title,
+          action.description,
+          action.potentialSaving
+        ),
+        createdAt: new Date().toISOString()
+      }
+      deepDiveService.saveDeepDive(deepDiveData)
+    }
+
+    // Create ResultCard format for the modal
+    const resultCard = {
+      id: deepDiveData.id,
+      type: "individual" as const,
+      content: deepDiveData.description,
+      emoji: "🧠",
+      title: deepDiveData.title,
+      detailedExplanation: deepDiveData.detailed_insights.mechanics_explanation,
+      detailed_insights: deepDiveData.detailed_insights
+    }
+
+    setSelectedThought(resultCard)
+    setThoughtDetailOpen(true)
+  }
+
   const getValidationIcon = (validation: any) => {
     if (validation.titleMatch && validation.automationValid && validation.stepsComplete) {
       return <Check className="h-4 w-4 text-green-400" />
@@ -379,35 +434,46 @@ export default function AIActionsScreen({
         </div>
 
         {/* Action buttons - simplified */}
-        <div className="flex gap-2 p-6 pt-0">
-          <Button 
-            size="sm" 
-            variant="outline"
-            className="border-gray-600 text-gray-300 hover:bg-gray-700 flex-1"
-            onClick={() => {
-              const resultCard = {
-                id: action.id,
-                type: "individual" as const,
-                content: action.description,
-                emoji: "🤖",
-                title: action.title,
-                detailedExplanation: action.rationale || action.description,
-              }
-              setSelectedThought(resultCard)
-              setThoughtDetailOpen(true)
-            }}
-          >
-            Learn More
-          </Button>
+        <div className="space-y-2 p-6 pt-0">
+          <div className="flex gap-2">
+            <Button 
+              size="sm" 
+              variant="outline"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700 flex-1"
+              onClick={() => {
+                const resultCard = {
+                  id: action.id,
+                  type: "individual" as const,
+                  content: action.description,
+                  emoji: "🤖",
+                  title: action.title,
+                  detailedExplanation: action.rationale || action.description,
+                }
+                setSelectedThought(resultCard)
+                setThoughtDetailOpen(true)
+              }}
+            >
+              Learn More
+            </Button>
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white flex-1"
+              onClick={() => {
+                setSelectedAction(action)
+                setCurrentScreen("action-detail")
+              }}
+            >
+              Automate
+            </Button>
+          </div>
           <Button
             size="sm"
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white flex-1"
-            onClick={() => {
-              setSelectedAction(action)
-              setCurrentScreen("action-detail")
-            }}
+            variant="ghost"
+            className="w-full text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+            onClick={() => handleDeepDive(action)}
           >
-            Automate
+            <Brain className="h-3 w-3 mr-1" />
+            Deep Dive Analysis
           </Button>
         </div>
       </GlassCard>
@@ -711,7 +777,29 @@ export default function AIActionsScreen({
     )
   }
 
-  const filteredActions = aiActions.filter(action => {
+  // Combine regular AI actions with simulation-generated actions
+  const allActions = [
+    ...aiActions,
+    ...deepDiveService.getAllSimulationAIActions().map(simAction => ({
+      id: simAction.id,
+      title: simAction.title,
+      description: simAction.description,
+      rationale: simAction.rationale,
+      type: simAction.type,
+      potentialSaving: simAction.potentialSaving,
+      status: simAction.status,
+      steps: simAction.steps,
+      simulationTag: simAction.simulationTag,
+      detailed_insights: simAction.detailed_insights,
+      // Add default fields to match AIAction interface
+      progress: 0,
+      currentStep: undefined,
+      estimatedCompletion: undefined,
+      executionId: undefined
+    }))
+  ]
+
+  const filteredActions = allActions.filter(action => {
     switch (activeTab) {
       case "suggested":
         return action.status === "suggested"
@@ -726,7 +814,7 @@ export default function AIActionsScreen({
 
   return (
     <TooltipProvider>
-      <div className="flex flex-col h-full bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+      <div className="flex flex-col h-full bg-black">
         {/* Tab Navigation */}
         <div className="flex border-b border-white/10">
           <button
@@ -737,7 +825,7 @@ export default function AIActionsScreen({
                 : "text-gray-400 hover:text-white"
             }`}
           >
-            Suggested ({aiActions.filter(a => a.status === "suggested").length})
+            Suggested ({allActions.filter(a => a.status === "suggested").length})
           </button>
           <button
             onClick={() => setActiveTab("in-process")}
@@ -747,7 +835,7 @@ export default function AIActionsScreen({
                 : "text-gray-400 hover:text-white"
             }`}
           >
-            In Process ({aiActions.filter(a => a.status === "in-process").length})
+            In Process ({allActions.filter(a => a.status === "in-process").length})
           </button>
           <button
             onClick={() => setActiveTab("completed")}
@@ -757,7 +845,7 @@ export default function AIActionsScreen({
                 : "text-gray-400 hover:text-white"
             }`}
           >
-            Completed ({aiActions.filter(a => a.status === "completed").length})
+            Completed ({allActions.filter(a => a.status === "completed").length})
           </button>
         </div>
 

@@ -174,17 +174,15 @@ const ActionButtons: React.FC<{
             Automate
           </Button>
         </div>
-        {action.detailed_insights && (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="w-full text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
-            onClick={() => actions.onDeepDive?.(action)}
-          >
-            <Icons.Brain className="h-3 w-3 mr-1" />
-            Deep Dive Analysis
-          </Button>
-        )}
+        <Button
+          size="sm"
+          variant="ghost"
+          className="w-full text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+          onClick={() => actions.onDeepDive?.(action)}
+        >
+          <Icons.Brain className="h-3 w-3 mr-1" />
+          Deep Dive Analysis
+        </Button>
       </div>
     );
   }
