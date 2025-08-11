@@ -25,7 +25,6 @@ import {
   type CardActions,
   type CardData
 } from "@/components/ai-actions/action-card-factory"
-import DeepDiveModal from "@/components/ui/deep-dive-modal"
 import { deepDiveService, type DeepDiveData } from "@/lib/services/deep-dive-service"
 
 // ==================== Screen Component ====================
@@ -49,8 +48,6 @@ export default function AIActionsScreenRefactored({
   const [workflowStatuses, setWorkflowStatuses] = useState<Record<string, any>>({})
   const [inspectedWorkflow, setInspectedWorkflow] = useState<string | null>(null)
   const [workflowValidations, setWorkflowValidations] = useState<Record<string, any>>({})
-  const [deepDiveAction, setDeepDiveAction] = useState<CardData | null>(null)
-  const [isDeepDiveOpen, setIsDeepDiveOpen] = useState(false)
   
   // ==================== Workflow Status Polling ====================
   
@@ -219,8 +216,42 @@ export default function AIActionsScreenRefactored({
 
     onDeepDive: (action: CardData) => {
       try {
-        setDeepDiveAction(action)
-        setIsDeepDiveOpen(true)
+        // Try to find existing deep dive data first
+        const deepDives = deepDiveService.getDeepDivesByActionId(action.id)
+        let deepDiveData = deepDives.length > 0 ? deepDives[0] : null
+
+        // If no deep dive data found, create mock data for the action
+        if (!deepDiveData) {
+          deepDiveData = {
+            id: `action-deep-dive-${action.id}`,
+            source: 'simulation' as const,
+            actionId: action.id,
+            title: action.title,
+            description: action.description,
+            potentialSaving: action.potentialSaving || 0,
+            detailed_insights: deepDiveService.generateMockInsights(
+              action.title,
+              action.description,
+              action.potentialSaving || 0
+            ),
+            createdAt: new Date().toISOString(),
+            simulationTag: action.simulationTag
+          }
+        }
+
+        // Create ResultCard format for the modal (same as Goals screen)
+        const resultCard = {
+          id: deepDiveData.id,
+          type: "individual" as const,
+          content: deepDiveData.description,
+          emoji: "🤖",
+          title: deepDiveData.title,
+          detailedExplanation: deepDiveData.detailed_insights.mechanics_explanation,
+          detailed_insights: deepDiveData.detailed_insights
+        }
+
+        setSelectedThought(resultCard)
+        setThoughtDetailOpen(true)
       } catch (err) {
         console.error('Error in onDeepDive:', err)
       }
@@ -240,8 +271,29 @@ export default function AIActionsScreenRefactored({
   
   const enrichedActions = useMemo(() => {
     try {
+      // Get simulation-generated AI actions from deep dive service
+      const simulationActions = deepDiveService.getAllSimulationAIActions().map(simAction => ({
+        id: simAction.id,
+        title: simAction.title,
+        description: simAction.description,
+        rationale: simAction.rationale,
+        type: simAction.type,
+        potentialSaving: simAction.potentialSaving,
+        status: simAction.status,
+        steps: simAction.steps,
+        simulationTag: simAction.simulationTag,
+        detailed_insights: simAction.detailed_insights,
+        // Add default fields to match AIAction interface
+        progress: 0,
+        currentStep: undefined,
+        estimatedCompletion: undefined,
+        executionId: undefined
+      }))
       
-      return aiActions.map(action => {
+      // Combine regular AI actions with simulation actions
+      const allActions = [...aiActions, ...simulationActions]
+      
+      return allActions.map(action => {
         const metadata = workflowConfig?.getWorkflow(action.id)
         const validation = workflowValidations[action.id]
         const workflowStatus = workflowStatuses[action.executionId || '']
@@ -408,14 +460,6 @@ export default function AIActionsScreenRefactored({
         )}
       </div>
 
-      {/* Deep Dive Modal */}
-      {deepDiveAction && (
-        <DeepDiveModal
-          isOpen={isDeepDiveOpen}
-          onClose={() => setIsDeepDiveOpen(false)}
-          action={deepDiveAction}
-        />
-      )}
     </div>
   )
 }

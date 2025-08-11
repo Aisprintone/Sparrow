@@ -504,7 +504,7 @@ export default function SimulationResultsScreen({
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col">
+    <div className="flex h-[100dvh] flex-col pb-24">
       {/* Header */}
       <div className="p-4 text-white">
         <div className="flex items-center justify-between">
@@ -660,8 +660,8 @@ export default function SimulationResultsScreen({
           )))}
         </div>
 
-        {/* Action Buttons */}
-        <div className="space-y-3 pt-4">
+        {/* Action Buttons - Fixed above navigation footer */}
+        <div className="space-y-3 pt-4 pb-6">
           <Button
             onClick={() => setCurrentScreen('simulations')}
             className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white py-4 px-6 rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
@@ -669,10 +669,10 @@ export default function SimulationResultsScreen({
             Run Another Simulation
           </Button>
           <Button
-            onClick={() => setCurrentScreen('dashboard')}
+            onClick={() => setCurrentScreen('simulation-setup')}
             className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
           >
-            Back to Dashboard
+            Adjust Parameters
           </Button>
         </div>
       </div>

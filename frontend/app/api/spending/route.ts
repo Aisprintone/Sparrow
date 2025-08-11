@@ -24,134 +24,49 @@ class BackendSpendingDataService {
 
   async getSpendingData(
     profileId: string,
-    startDate?: string,
-    endDate?: string,
+    year?: string,
+    month?: string,
     category?: string
   ) {
-    // Use the profiles endpoint since spending endpoint doesn't exist
-    const response = await fetch(
-      `${this.baseUrl}/profiles/${profileId}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
+    // Use the NEW dedicated spending endpoint
+    const params = new URLSearchParams()
+    if (year) params.append('year', year)
+    if (month) params.append('month', month)
+    
+    const url = `${this.baseUrl}/api/spending/${profileId}${params.toString() ? `?${params.toString()}` : ''}`
+    
+    console.log('[Spending API] Calling backend:', url)
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Add timeout for Railway backend
+      signal: AbortSignal.timeout(10000) // 10 second timeout
+    })
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch profile data: ${response.status}`)
+      throw new Error(`Backend spending API failed: ${response.status} ${response.statusText}`)
     }
 
-    const profileData = await response.json()
+    const backendResponse = await response.json()
     
-    // Transform profile data to spending data format
-    return this.transformProfileToSpendingData(profileData, category)
-  }
-
-  private transformProfileToSpendingData(profileData: any, category?: string) {
-    // Extract spending information from profile data
-    const accounts = profileData.accounts || []
-    const transactions = profileData.transactions || []
+    if (!backendResponse.success) {
+      throw new Error(`Backend spending analysis failed: ${backendResponse.error}`)
+    }
     
-    // Calculate spending by category
-    const spendingByCategory = new Map<string, number>()
-    
-    transactions.forEach((transaction: any) => {
-      const cat = transaction.category || 'Other'
-      if (!category || cat === category) {
-        spendingByCategory.set(cat, (spendingByCategory.get(cat) || 0) + Math.abs(transaction.amount || 0))
-      }
+    console.log('[Spending API] ✅ Backend response received:', {
+      totalSpending: backendResponse.data.total,
+      categoryCount: backendResponse.data.categories.length,
+      source: backendResponse.meta?.data_source
     })
     
-    const categories = Array.from(spendingByCategory.entries()).map(([name, spent], index) => ({
-      id: index + 1,
-      name,
-      spent,
-      budget: this.getBudgetForCategory(name),
-      icon: this.getIconForCategory(name),
-      isRecurring: this.isRecurringCategory(name),
-      isOverBudget: spent > this.getBudgetForCategory(name),
-      percentage: Math.min((spent / this.getBudgetForCategory(name)) * 100, 100)
-    }))
-    
-    const total = categories.reduce((sum, cat) => sum + cat.spent, 0)
-    
-    return {
-      total,
-      categories,
-      recurringTotal: categories.filter(cat => cat.isRecurring).reduce((sum, cat) => sum + cat.spent, 0),
-      nonRecurringTotal: categories.filter(cat => !cat.isRecurring).reduce((sum, cat) => sum + cat.spent, 0),
-      comparison: {
-        lastPeriod: total * 0.95, // Mock data
-        averagePeriod: total,
-        bestPeriod: total * 0.85,
-        difference: total * 0.05,
-        trend: 'up' as const
-      },
-      dailyAverage: total / 30,
-      projectedTotal: total * 1.1,
-      insights: this.generateInsights(categories, total)
-    }
+    // Return the data directly - no transformation needed since backend matches SpendingData interface
+    return backendResponse.data
   }
 
-  private getBudgetForCategory(categoryName: string): number {
-    const budgets: Record<string, number> = {
-      'Housing': 1500,
-      'Food & Dining': 500,
-      'Transportation': 400,
-      'Utilities': 300,
-      'Entertainment': 200,
-      'Healthcare': 300,
-      'Other': 200
-    }
-    return budgets[categoryName] || 200
-  }
-
-  private isRecurringCategory(categoryName: string): boolean {
-    const recurringCategories = ['Housing', 'Utilities', 'Transportation']
-    return recurringCategories.includes(categoryName)
-  }
-
-  private getIconForCategory(categoryName: string): string {
-    const icons: Record<string, string> = {
-      'Housing': '🏠',
-      'Food & Dining': '🍽️',
-      'Transportation': '🚗',
-      'Utilities': '⚡',
-      'Entertainment': '🎬',
-      'Healthcare': '🏥',
-      'Other': '📦'
-    }
-    return icons[categoryName] || '📦'
-  }
-
-  private generateInsights(categories: any[], total: number) {
-    const insights = []
-    
-    // Check for over-budget categories
-    const overBudgetCategories = categories.filter(cat => cat.isOverBudget)
-    if (overBudgetCategories.length > 0) {
-      insights.push({
-        type: 'alert',
-        title: 'Over Budget Categories',
-        description: `${overBudgetCategories.length} categories are over budget`,
-        value: overBudgetCategories.length
-      })
-    }
-    
-    // Check for high spending
-    if (total > 3000) {
-      insights.push({
-        type: 'alert',
-        title: 'High Monthly Spending',
-        description: 'Your spending is above average',
-        value: total
-      })
-    }
-    
-    return insights
-  }
+  // No transformation needed - backend now provides data in correct SpendingData format
 }
 
 /**
@@ -161,33 +76,42 @@ class BackendSpendingDataService {
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
-    const profileId = searchParams.get('profile_id') || '1'
-    const startDate = searchParams.get('start_date')
-    const endDate = searchParams.get('end_date')
-    const category = searchParams.get('category')
+    const customerId = searchParams.get('customerId') || searchParams.get('profile_id') || '1'
+    const year = searchParams.get('year')
+    const month = searchParams.get('month')
+
+    console.log('[Spending API] Processing request for:', { customerId, year, month })
 
     const service = new BackendSpendingDataService(BACKEND_URL)
     
     const data = await service.getSpendingData(
-      profileId,
-      startDate || undefined,
-      endDate || undefined,
-      category || undefined
+      customerId,
+      year || undefined,
+      month || undefined
     )
     
     return NextResponse.json({
       success: true,
       data: data,
-      source: 'backend'
+      source: 'backend',
+      meta: {
+        customerId,
+        year: year ? parseInt(year) : new Date().getFullYear(),
+        month: month ? parseInt(month) : undefined,
+        cached: false
+      }
     })
 
   } catch (error: any) {
     console.error('[Spending API Error]:', error)
+    
+    // Return proper error format that matches expected structure
     return NextResponse.json(
       {
         success: false,
-        error: 'Backend service unavailable',
-        message: 'Unable to connect to the spending backend service'
+        error: 'Backend spending analysis failed',
+        message: error.message || 'Unable to connect to the spending backend service',
+        details: error.stack
       },
       { status: 503 }
     )

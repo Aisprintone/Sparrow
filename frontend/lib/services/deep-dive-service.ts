@@ -20,9 +20,23 @@ export interface DeepDiveData {
   simulationTag?: string
 }
 
+export interface SimulationAIAction {
+  id: string
+  title: string
+  description: string
+  rationale: string
+  type: 'optimization'
+  potentialSaving: number
+  steps: string[]
+  status: 'suggested'
+  simulationTag?: string
+  detailed_insights?: DeepDiveData['detailed_insights']
+}
+
 class DeepDiveService {
   private static instance: DeepDiveService
   private deepDives: Map<string, DeepDiveData> = new Map()
+  private simulationAIActions: Map<string, SimulationAIAction> = new Map()
 
   public static getInstance(): DeepDiveService {
     if (!DeepDiveService.instance) {
@@ -54,6 +68,21 @@ class DeepDiveService {
   // Get deep dives by action ID
   public getDeepDivesByActionId(actionId: string): DeepDiveData[] {
     return this.getAllDeepDives().filter(dive => dive.actionId === actionId)
+  }
+
+  // Add a simulation-generated AI action that can be displayed on AI Actions page
+  public addSimulationAIAction(action: SimulationAIAction): void {
+    this.simulationAIActions.set(action.id, action)
+  }
+
+  // Get all simulation-generated AI actions
+  public getAllSimulationAIActions(): SimulationAIAction[] {
+    return Array.from(this.simulationAIActions.values())
+  }
+
+  // Get simulation AI action by ID
+  public getSimulationAIAction(id: string): SimulationAIAction | undefined {
+    return this.simulationAIActions.get(id)
   }
 
   // Remove deep dive
@@ -102,7 +131,26 @@ class DeepDiveService {
       simulationTag
     }
 
+    // Also create a corresponding AI action that can be displayed on AI Actions page
+    const simulationAIAction: SimulationAIAction = {
+      id: actionId,
+      title,
+      description,
+      rationale: description,
+      type: 'optimization',
+      potentialSaving,
+      steps: [
+        `Analyze ${title.toLowerCase()} opportunity`,
+        'Implement optimization strategy',
+        'Monitor results and adjust'
+      ],
+      status: 'suggested',
+      simulationTag,
+      detailed_insights: deepDive.detailed_insights
+    }
+
     this.saveDeepDive(deepDive)
+    this.addSimulationAIAction(simulationAIAction)
     return deepDive
   }
 

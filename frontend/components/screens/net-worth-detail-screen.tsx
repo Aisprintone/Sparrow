@@ -9,7 +9,7 @@ import GlassCard from "@/components/ui/glass-card"
 import Image from "next/image"
 
 const getAssetDistribution = (accounts: any[], demographic: string) => {
-  const assets = accounts.filter((acc) => acc.type === "asset")
+  const assets = accounts.filter((acc) => acc.balance >= 0)
   const total = assets.reduce((sum, acc) => sum + acc.balance, 0)
 
   if (demographic === "genz") {
@@ -28,7 +28,7 @@ const getAssetDistribution = (accounts: any[], demographic: string) => {
 }
 
 const getLiabilityDistribution = (accounts: any[], demographic: string) => {
-  const liabilities = accounts.filter((acc) => acc.type === "liability")
+  const liabilities = accounts.filter((acc) => acc.balance < 0)
   const total = Math.abs(liabilities.reduce((sum, acc) => sum + acc.balance, 0))
 
   if (demographic === "genz") {
@@ -47,11 +47,26 @@ const getLiabilityDistribution = (accounts: any[], demographic: string) => {
 export default function NetWorthDetailScreen({ setCurrentScreen, accounts, demographic, profileData }: AppState) {
   const [activeTab, setActiveTab] = useState<"assets" | "liabilities">("assets")
 
-  const assets = accounts.filter((acc) => acc.type === "asset")
-  const liabilities = accounts.filter((acc) => acc.type === "liability")
+  // Calculate real financial values using CORRECT method (balance-based, not type-based)
+  // This matches the dashboard calculation method
+  let totalAssets = 0
+  let totalLiabilities = 0
+  
+  const assets: any[] = []
+  const liabilities: any[] = []
 
-  const totalAssets = assets.reduce((sum, acc) => sum + acc.balance, 0)
-  const totalLiabilities = Math.abs(liabilities.reduce((sum, acc) => sum + acc.balance, 0))
+  accounts.forEach((account) => {
+    const balance = account.balance
+    
+    if (balance >= 0) {
+      totalAssets += balance          // Positive balances = assets
+      assets.push(account)
+    } else {
+      totalLiabilities += Math.abs(balance)  // Negative balances = liabilities
+      liabilities.push(account)
+    }
+  })
+
   const netWorth = totalAssets - totalLiabilities
 
   const currentData = activeTab === "assets" ? assets : liabilities
@@ -251,10 +266,10 @@ export default function NetWorthDetailScreen({ setCurrentScreen, accounts, demog
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white p-1">
-                  {acc.icon.startsWith("/") ? (
+                  {acc.icon && acc.icon.startsWith("/") ? (
                     <Image src={acc.icon || "/placeholder.svg"} alt={acc.institution} width={32} height={32} />
                   ) : (
-                    <span className="text-2xl">{acc.icon}</span>
+                    <span className="text-2xl">{acc.icon || "💰"}</span>
                   )}
                 </div>
                 <div>

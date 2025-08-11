@@ -69,7 +69,6 @@ export default function FinanceAppUI() {
   const showNav =
     currentScreen !== "login" && currentScreen !== "profile-selection" &&
     currentScreen !== "simulating" &&
-    currentScreen !== "simulation-results" &&
     !showSimulationsButton
 
   return (

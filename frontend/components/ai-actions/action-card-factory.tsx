@@ -189,26 +189,37 @@ const ActionButtons: React.FC<{
   
   if (variant === 'in-process') {
     return (
-      <div className="flex gap-2 px-4 py-2 border-t border-gray-700/30">
-        <Button 
-          size="sm" 
-          variant="ghost" 
-          onClick={() => {
-            console.log('Inspect button clicked, isInspected:', isInspected);
-            actions.onInspect?.(action);
-          }} 
-          className="flex-1 h-8 text-xs hover:bg-white/10"
+      <div className="space-y-2 p-4 pt-0">
+        <div className="flex gap-2">
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={() => {
+              console.log('Inspect button clicked, isInspected:', isInspected);
+              actions.onInspect?.(action);
+            }} 
+            className="flex-1 h-8 text-xs hover:bg-white/10"
+          >
+            <Icons.Eye className="h-3 w-3 mr-1" />
+            {isInspected ? 'Hide' : 'Inspect'}
+          </Button>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={() => actions.onCancel?.(action)} 
+            className="h-8 text-xs hover:bg-red-500/20 text-red-400"
+          >
+            <Icons.X className="h-3 w-3" />
+          </Button>
+        </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="w-full text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+          onClick={() => actions.onDeepDive?.(action)}
         >
-          <Icons.Eye className="h-3 w-3 mr-1" />
-          {isInspected ? 'Hide' : 'Inspect'}
-        </Button>
-        <Button 
-          size="sm" 
-          variant="ghost" 
-          onClick={() => actions.onCancel?.(action)} 
-          className="h-8 text-xs hover:bg-red-500/20 text-red-400"
-        >
-          <Icons.X className="h-3 w-3" />
+          <Icons.Brain className="h-3 w-3 mr-1" />
+          Deep Dive Analysis
         </Button>
       </div>
     );
@@ -216,14 +227,23 @@ const ActionButtons: React.FC<{
   
   if (variant === 'completed') {
     return (
-      <div className="flex gap-2 p-6 pt-0">
+      <div className="space-y-2 p-6 pt-0">
         <Button 
           size="sm" 
           variant="outline"
-          className="border-gray-600 text-gray-300 hover:bg-gray-700 flex-1"
+          className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full"
           onClick={() => actions.onViewResults?.(action)}
         >
           View Full Results
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="w-full text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
+          onClick={() => actions.onDeepDive?.(action)}
+        >
+          <Icons.Brain className="h-3 w-3 mr-1" />
+          Deep Dive Analysis
         </Button>
       </div>
     );

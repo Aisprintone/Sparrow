@@ -497,29 +497,6 @@ export default function GoalsScreen({
           </Button>
         </div>
 
-        {/* Overall Progress */}
-        <GlassCard className="p-4 sm:p-5 lg:p-6">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-white" />
-              <h2 className="text-lg font-semibold tracking-tight text-white">Overall Progress</h2>
-            </div>
-            <div className="grid grid-cols-[1fr_auto] gap-4 items-center">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-white/60">Average completion</span>
-                  <span className="tabular-nums whitespace-nowrap font-medium text-white">{GoalProgressCalculator.formatPercentage(totalProgress)}</span>
-                </div>
-                <Progress value={totalProgress} className="h-2" />
-              </div>
-            </div>
-            <p className="text-sm text-white/60">
-              <span className="tabular-nums">{displayGoals.length}</span> active goals
-              {profileData && ` • ${profileData.name}`}
-            </p>
-          </div>
-        </GlassCard>
-
         {/* Goals Grid */}
         <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
           {displayGoals.map((goal: Goal | ProfileGoal) => {
@@ -550,30 +527,6 @@ export default function GoalsScreen({
                             {'title' in goal ? goal.title : (goal as Goal).title}
                           </h2>
 
-                          {/* Badges */}
-                          <div className="flex flex-wrap gap-1">
-                            {'priority' in goal ? (
-                              <Badge 
-                                variant={(goal as Goal).priority === 'high' ? 'destructive' : (goal as Goal).priority === 'medium' ? 'default' : 'secondary'} 
-                                className="text-xs px-2 py-0.5"
-                              >
-                                {(goal as Goal).priority}
-                              </Badge>
-                            ) : (
-                              <Badge 
-                                variant={status === 'behind' ? 'destructive' : 'default'} 
-                                className="text-xs px-2 py-0.5"
-                              >
-                                {goal.consistencyMeasures?.onTrack ? 'on-track' : 'needs-attention'}
-                              </Badge>
-                            )}
-                            <Badge 
-                              variant={status === 'behind' ? 'destructive' : 'secondary'} 
-                              className="text-xs px-2 py-0.5"
-                            >
-                              {status}
-                            </Badge>
-                          </div>
                         </div>
                       </div>
                       
