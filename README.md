@@ -2,12 +2,53 @@
 
 A comprehensive financial management application with AI-powered insights, simulations, and personalized recommendations.
 
-## 🚀 Live Application
+## 🚀 One-Command Local Demo
+
+> **TL;DR**: Clone → run one command → both services up at `http://localhost:8000` (backend) + auto-selected frontend port.
+
+### macOS/Linux
+```bash
+chmod +x dev.sh && ./dev.sh
+```
+
+### Windows (PowerShell)
+```powershell
+powershell -ExecutionPolicy Bypass -File .\dev.ps1
+```
+
+The scripts will:
+- ✅ Check Python 3 + Node.js requirements  
+- ✅ Set up Python virtual environment & install backend deps
+- ✅ Start backend on **`http://localhost:8000`**
+- ✅ Install frontend deps & find first available port (3000→3001→3002→3003)
+- ✅ Start frontend with clear URL output
+- ✅ Run smoke test to verify both services
+
+### What You'll See
+```
+🚀 Backend starting on http://localhost:8000
+🎯 Frontend starting on http://localhost:3001 (first available port)
+✅ Both services ready - smoke test passed!
+
+📱 Open your browser: http://localhost:3001
+```
+
+### Manual Testing Checklist
+After services start, quickly verify:
+1. **Login Flow**: Click "Continue with FaceID" → Select a profile
+2. **Navigation**: Test Goals, AI Actions, Simulations tabs  
+3. **Deep Dive**: Click any "Deep Dive Analysis" button
+4. **Simulation**: Start a simulation (Job Loss, Medical Crisis, etc.)
+5. **Backend API**: Visit `http://localhost:8000/health` (should return `{"status": "ok"}`)
+
+---
+
+## 🚀 Live Production Application
 
 - **Frontend**: https://sparrow-finance-app.netlify.app
 - **Backend**: https://feeble-bite-production.up.railway.app
 
-## 📋 Quick Start
+## 📋 Advanced Setup
 
 ### Prerequisites
 - Node.js 18+ and npm

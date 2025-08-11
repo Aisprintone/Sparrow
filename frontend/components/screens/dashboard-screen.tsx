@@ -368,7 +368,7 @@ export default function DashboardScreen({
             </Button>
           </div>
           <div className="space-y-3">
-            <AnimatePresence mode="wait">
+            <AnimatePresence>
               {recentAIActions.length > 0 ? (
                 recentAIActions.map((action, index) => (
                   <motion.div
